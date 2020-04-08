@@ -1,6 +1,5 @@
 #include "ModalDialogManager.h"
 #include "ApplicationManager.h"
-#include "qmlmanager.h"
 #include "Qml/components/Buttons.h"
 
 using namespace Hix::QML;

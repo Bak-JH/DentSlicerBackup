@@ -566,3 +566,19 @@ Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
 {
 	return _transform;
 }
+
+
+void SceneEntity::getChildrenModels(std::unordered_set<const SceneEntity*>& results)const
+{
+
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<SceneEntity*>(child);
+		if (model)
+		{
+			results.insert(model);
+		}
+	}
+	callRecursive(this, &SceneEntity::getChildrenModels, results);
+
+}

@@ -1,7 +1,9 @@
 #pragma once
 #include "Widget.h"
 #include <qtorusmesh.h>
+#include <unordered_set>
 
+class GLModel;
 
 namespace Hix
 {
@@ -11,7 +13,7 @@ namespace Hix
 		class RotateWidget :public Hix::UI::Widget
 		{
 		public:
-			RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent);
+			RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent, const std::unordered_set<GLModel*>& models);
 			virtual ~RotateWidget();
 			bool isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) override;
 			void dragStarted(Hix::Input::MouseEventData&e,const Qt3DRender::QRayCasterHit&hit) override;
@@ -20,7 +22,6 @@ namespace Hix
 			void onEntered()override;
 			void onExited() override;
 			void setHighlight(bool enable) override;
-
 		private:
 			double calculateRot();
 			QPoint _mouseOrigin;
@@ -30,6 +31,7 @@ namespace Hix
 			Qt3DExtras::QTorusMesh _torus;
 			Qt3DCore::QTransform _transform;
 			Qt3DExtras::QPhongMaterial _material;
+			std::unordered_set<GLModel*> _models;
 			//rotation axis
 
 

@@ -9,7 +9,7 @@ Hix.FeatureMenu {
 	
 	Rectangle {
 		id: featureMenuRect
-		width: 1365
+		width: 1390
 		height: 90
 		radius: 45
 		color: "#FFFFFF"

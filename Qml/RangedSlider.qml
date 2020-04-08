@@ -8,7 +8,12 @@ Hix.RangeSlideBarShell {
 		id: root
 		width: 64
 		height: 600
-
+		onLowerValueChanged: {
+			control.first.value = lowerValue;
+		}
+		onUpperValueChanged: {
+			control.second.value = upperValue;
+		}
 	Rectangle {
 		id: shell
 		width: parent.width
@@ -18,7 +23,7 @@ Hix.RangeSlideBarShell {
 		
 		Text {
 			id: modelheight
-			text: "154" //control.to
+			text: control.to
 			font.family: openRegular.name
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.bottom: control.top
@@ -27,7 +32,7 @@ Hix.RangeSlideBarShell {
 		
 		Text {
 			id: zero
-			text: qsTr("0")
+			text: control.from
 			font.family: openRegular.name
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: control.bottom
@@ -36,14 +41,23 @@ Hix.RangeSlideBarShell {
 		
 		RangeSlider {
 			id: control
-			first.value: 0.25
-			second.value: 0.75
+			from: root.min.toFixed(3)
+			to: root.max.toFixed(3)
+			// first.value:(from + to) / 2
+			// second.value: (from + to) / 2
 			orientation: Qt.Vertical
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
 
-			first.onMoved: console.log("first.value changed to " + first.value)
-			second.onMoved: console.log("second.value changed to " + second.value)
+			first.onMoved:
+			{
+				root.lowerValue = first.value
+			}
+			second.onMoved:
+			{
+				//top
+				root.upperValue = second.value
+			}
 
 			background: Rectangle {
 				anchors.horizontalCenter: parent.horizontalCenter
@@ -70,7 +84,7 @@ Hix.RangeSlideBarShell {
 
 			first.handle: Rectangle {
 				x: control.leftPadding
-				y: control.bottomPadding + control.first.visualPosition * (control.availableHeight - height) //control.first.visualPosition * parent.height - implicitHeight / 2
+				y: control.bottomPadding + control.first.visualPosition * (control.availableHeight - height) 
 				implicitWidth: 36
 				implicitHeight: 22
 				radius: 2
@@ -142,8 +156,6 @@ Hix.RangeSlideBarShell {
 				implicitWidth: 36
 				implicitHeight: 22
 				radius: 2
-				//border.color: "red"
-				//color: "transparent"
 				color: control.second.pressed ? "#727d7d" : "#929d9d"
 
 				Rectangle {	//current position

@@ -6,8 +6,10 @@
 
 using namespace ClipperLib;
 
-static constexpr float INT_PT_RES_FLOAT = (float)Hix::Polyclipping::INT_PT_RESOLUTION;
-static constexpr float INT_PT_RES_DITTER_FLOAT = (float)Hix::Polyclipping::INT_PT_RESOLUTION / 2.0f;
+// representable range
+//double constexpr min_value = std::numeric_limits<long>::min() / Hix::Polyclipping::INT_PT_RESOLUTION;
+//double constexpr max_value = std::numeric_limits<long>::max() / Hix::Polyclipping::INT_PT_RESOLUTION;
+
 
 // converts float point to int in microns
 void  Hix::Polyclipping::addPoint(float x, float y, ClipperLib::Path* path)
@@ -16,11 +18,24 @@ void  Hix::Polyclipping::addPoint(float x, float y, ClipperLib::Path* path)
 	//qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
 	path->push_back(toInt2DPt(QVector2D(x,y)));
 }
+
+cInt floatToInt(float v)
+{
+	if (v < 0)
+	{
+		return static_cast<cInt>(v * Hix::Polyclipping::INT_PT_RESOLUTION - 0.5);
+	}
+	else
+	{
+		return static_cast<cInt>(v * Hix::Polyclipping::INT_PT_RESOLUTION + 0.5);
+	}
+}
+
 IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 {
 	IntPoint ip;
-	ip.X = round(pt.x() * Hix::Polyclipping::INT_PT_RESOLUTION);
-	ip.Y = round(pt.y() * Hix::Polyclipping::INT_PT_RESOLUTION);
+	ip.X = floatToInt(pt.x());
+	ip.Y = floatToInt(pt.y());
 	return ip;
 }
 
@@ -44,15 +59,11 @@ IntPoint  Hix::Polyclipping::toInt2DPt(const QVector3D& pt)
 }
 QVector2D Hix::Polyclipping::toFloatPt(const IntPoint& pt)
 {
-	QVector2D fp((float)pt.X/ (float)Hix::Polyclipping::INT_PT_RESOLUTION, (float)pt.Y /(float)Hix::Polyclipping::INT_PT_RESOLUTION);
+	QVector2D fp((float)pt.X/ Hix::Polyclipping::INT_PT_RESOLUTION, (float)pt.Y /Hix::Polyclipping::INT_PT_RESOLUTION);
 	return fp;
 }
 
 
-p2t::Point* Hix::Polyclipping::toDoublePtHeap(const ClipperLib::IntPoint& pt)
-{
-	return new p2t::Point((float)pt.X / (float)Hix::Polyclipping::INT_PT_RESOLUTION, (float)pt.Y / (float)Hix::Polyclipping::INT_PT_RESOLUTION);
-}
 
 Path Hix::Polyclipping::toCLPath(const std::vector<QVector2D>& path)
 {

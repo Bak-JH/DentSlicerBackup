@@ -147,10 +147,12 @@ void GLModel::scaleDone()
 }
 
 
-void GLModel::setZToBed()
+float GLModel::setZToBed()
 {
 	auto listedModel = getRootModel();
-	listedModel->moveModel(QVector3D(0, 0, -listedModel->recursiveAabb().zMin()));
+	auto translate = -listedModel->recursiveAabb().zMin();
+	listedModel->moveModel(QVector3D(0, 0, translate));
+	return translate;
 }
 
 QString GLModel::modelName() const

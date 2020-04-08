@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-#ifndef CDT_lNrmUayWQaIR5fxnsg9B
-#define CDT_lNrmUayWQaIR5fxnsg9B
+#pragma once
 
 #include "CDTUtils.h"
 #ifndef CDT_DONT_USE_BOOST_RTREE
@@ -50,13 +49,13 @@ public:
     void insertVertices(const std::vector<V2d<T> >& vertices);
     /// Add constraints (fixed edges) to triangulation
     void insertEdges(const std::vector<Edge>& edges);
-    // same as above, skip faulty edges
-    void tryInsertEdges(const std::vector<Edge>& edges);
-
     /// Erase triangles adjacent to super triangle
     void eraseSuperTriangle();
     /// Erase triangles outside of constrained boundary using growing
     void eraseOuterTriangles();
+    /// Erase triangles outside of constrained boundary
+    /// and automatically detected holes using growing
+    void eraseOuterTrianglesAndHoles();
 
 private:
     /*____ Detail __*/
@@ -113,6 +112,12 @@ private:
     void makeDummy(const TriInd iT);
     void eraseDummies();
     void eraseSuperTriangleVertices();
+    template <typename TriIndexIter>
+    void eraseTrianglesAtIndices(TriIndexIter first, TriIndexIter last);
+    TriIndUSet growToBoundary(std::stack<TriInd> seeds) const;
+    // return triangles behind boundary as second out parameter
+    std::pair<TriIndUSet, TriIndUSet>
+    growToBoundaryExt(std::stack<TriInd> seeds, TriIndUSet& traversed) const;
 
     std::vector<TriInd> m_dummyTris;
 #ifndef CDT_DONT_USE_BOOST_RTREE
@@ -135,4 +140,3 @@ const static VertInd noVertex =
 #include "CDT.hpp"
 #endif
 
-#endif // header-guard

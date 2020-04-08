@@ -5,6 +5,7 @@
 #include "DentEngine/src/Bounds3D.h"
 #include "interfaces/DialogedMode.h"
 #include <optional>
+#include <unordered_set>
 class GLModel;
 namespace Hix
 {
@@ -42,6 +43,7 @@ namespace Hix
 		class RotateMode : public WidgetMode, public DialogedMode
 		{
 		public:
+			RotateMode(const std::unordered_set<GLModel*>&models);
 			RotateMode();
 			virtual ~RotateMode();
 			void featureStarted()override;
@@ -59,15 +61,6 @@ namespace Hix
 			Hix::QML::Controls::InputSpinBox* _yValue;
 			Hix::QML::Controls::InputSpinBox* _zValue;
 
-		};
-
-		class RotateModeNoUndo : public RotateMode
-		{
-		public:
-			RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels);
-			virtual ~RotateModeNoUndo();
-			void featureStarted()override;
-			void featureEnded()override;
 		};
 
 		

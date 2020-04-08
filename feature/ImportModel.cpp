@@ -73,8 +73,15 @@ void Hix::Features::ImportModel::runImpl()
 		tryRunFeature(*repair);
 		addFeature(repair);
 	}
-	auto arrange = new AutoArrangeAppend(listModel->get());
-	tryRunFeature(*arrange);
-	addFeature(arrange);
+
+	auto bound =  listModel->get()->recursiveAabb();
+	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
+	if (printBound.contains(bound))
+	{
+		auto arrange = new AutoArrangeAppend(listModel->get());
+		tryRunFeature(*arrange);
+		addFeature(arrange);
+	}
+
 
 }

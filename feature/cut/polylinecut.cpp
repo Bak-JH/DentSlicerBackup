@@ -22,6 +22,7 @@
 #include "../repair/meshrepair.h"
 #include "polylinecut.h"
 #include "../CSG/CSG.h"
+#include "../cdt/HixCDT.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -59,8 +60,19 @@ void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVe
 	std::vector<std::vector<QVector3D>> jointContours;
 	Hix::Features::Extrusion::extrudeAlongPath<float>(&out, QVector3D(0, 0, 1), contour3d, path, jointContours);
 	//generate caps
-	Hix::Shapes2D::generateCapZPlane(&out, jointContours.front(), true);
-	Hix::Shapes2D::generateCapZPlane(&out, jointContours.back(), false);
+	if (jointContours.front().size() > 1)
+	{
+		Hix::CDT::MeshCDT cdt(&out, true);
+		cdt.insertSolidContourZAxis(jointContours.front());
+		cdt.triangulateAndAppend();
+	}
+
+	if (jointContours.back().size() > 1)
+	{
+		Hix::CDT::MeshCDT cdt(&out, false);
+		cdt.insertSolidContourZAxis(jointContours.back());
+		cdt.triangulateAndAppend();
+	}
 }
 
 void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Render::SceneEntity* subject, const CorkTriMesh& subtract)
