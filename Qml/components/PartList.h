@@ -31,6 +31,7 @@ namespace Hix
 			void selectAll();
 			//returns if select changed
 			bool setModelSelected(GLModel* model, bool isSelected);
+			bool setModelContiguousSelected(GLModel* model);
 			std::unordered_set<GLModel*> selectedModels()const;
 			Hix::Engine3D::Bounds3D selectedBound()const;
 			void deleteSelectedModels();
@@ -54,7 +55,9 @@ namespace Hix
 			PartListItem(QQuickItem* parent = nullptr);
 			virtual ~PartListItem();
 			void setSelected(bool isSelected);
-			void setModelName(QString name);
+			void setTargetModel(GLModel* model);
+			QString modelName()const;
+			GLModel* targetModel();
 			bool visible()const;
 			Hix::QML::Controls::ToggleSwitch* hideButton();
 			Hix::QML::Controls::Button* selectButton();
@@ -71,6 +74,9 @@ namespace Hix
 			Hix::QML::Controls::Button* _selectButton;
 			QString _modelName;
 			bool _selected = false;
+
+		private:
+			std::unique_ptr<GLModel> _targetModel;
 		};
 	}
 }

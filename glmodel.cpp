@@ -265,7 +265,7 @@ void GLModel::modelSelectionClick()
 	auto isSelected = partManager.isSelected(listed);
 	Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 	//unselect previously selected parts if multi selection is not active.
-	if (!partManager.isMultiSelect())
+	if (!partManager.isMultiSelect() && !partManager.isContiguousSelect())
 	{
 		partManager.unselectAll();
 	}
