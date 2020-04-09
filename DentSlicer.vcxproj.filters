@@ -235,6 +235,9 @@
     <ClCompile Include="feature\interfaces\RangeSliderMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\zip\zip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -952,6 +955,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\zip\zip_file.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\zip\zip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

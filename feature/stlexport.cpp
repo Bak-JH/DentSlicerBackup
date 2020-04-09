@@ -7,15 +7,15 @@
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/PrettyWriter.h"
 #include "../common/rapidjson/ostreamwrapper.h"
-#include "zip/zip_file.hpp"
+#include "zip/zip.h"
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
 using namespace tyti::stl;
 const constexpr auto STL_TEMP_PATH = "hix_temp_stl";
 
-#if defined(_DEBUG)
-//#define SAVE_ASCII
-#endif
+//#if defined(_DEBUG)
+#define SAVE_ASCII
+//#endif
 Hix::Features::STLExportMode::STLExportMode()
 {
 	auto models = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
@@ -55,7 +55,10 @@ void Hix::Features::STLExport::run()
 {
 
 	_tmpPath = std::filesystem::temp_directory_path().append(STL_TEMP_PATH);
-	std::filesystem::remove(_tmpPath);
+	try {
+		std::filesystem::remove(_tmpPath);
+	}
+	catch (...) {}
 	std::filesystem::create_directory(_tmpPath);
 
 	exportModels();
@@ -98,13 +101,14 @@ void Hix::Features::STLExport::exportModels()
 			//add to zip archive
 			auto modelPath = _tmpPath;
 			modelPath /= getNthModelName(i);
-			file.write(modelPath.string());
+			file.write(modelPath.string(), modelPath.filename().string());
 		}
 		std::ofstream of(jsonPath, std::ios_base::trunc);
 		rapidjson::OStreamWrapper osw{ of };
 		rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
 		doc.Accept(writer);
-
+		file.write(jsonPath.string(), jsonPath.filename().string());
+		file.comment = "hix scene file";
 		file.save(_path.string());
 
 	}
@@ -119,14 +123,13 @@ void Hix::Features::STLExport::exportModels()
 
 tyti::stl::vec3 toExportVec(const QVector3D& vec)
 {
-	return { vec.x(), vec.y(), vec.z() };
+	return vec3(vec.x(), vec.y(), vec.z());
 }
 
 void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const GLModel*>& childs, size_t idx)
 {
 	auto path = _tmpPath;
 	path /= getNthModelName(idx);
-	std::filesystem::create_directory(path);
 	std::ofstream ofs(path, std::ios_base::trunc);
 	for (auto& c : childs)
 	{
@@ -162,7 +165,6 @@ void STLExport::exportSTLAscii(const std::unordered_set<const GLModel*>& childs,
 {
 	auto path = _tmpPath;
 	path /= getNthModelName(idx);
-	std::filesystem::create_directory(path);
 	std::ofstream ofs(path, std::ios_base::trunc);
     writeHeader(ofs);
 	for (auto& c : childs)

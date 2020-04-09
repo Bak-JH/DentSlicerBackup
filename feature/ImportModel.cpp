@@ -5,18 +5,20 @@
 #include "repair/meshrepair.h"
 #include "arrange/autoarrange.h"
 #include "../application/ApplicationManager.h"
-#include "zip/zip_file.hpp"
+#include "zip/zip.h"
 #include "../common/rapidjson/writer.h"
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/filereadstream.h"
 #include "stlexport.h"
 #include <fstream>
+#include <boost/algorithm/string.hpp>
+
 namespace fs = std::filesystem;
 
 Hix::Features::ImportModelMode::ImportModelMode()
 {
 
-	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models", QUrl(), "3D files(*.stl *.obj)");
+	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or zipped export", QUrl(), "3D files(*.stl *.obj, *.zip)");
 	for (auto& u : fileUrls)
 	{
 		if (!u.isEmpty())
@@ -60,10 +62,9 @@ void Hix::Features::ImportModel::runImpl()
 	auto filename = _fileUrl.fileName();
 	fs::path filePath(_fileUrl.toLocalFile().toStdWString());
 
-	if (fs::equivalent(filePath.extension(), ".zip"))
+	if (boost::iequals(filePath.extension().string(), ".zip"))
 	{
-		std::fstream f(filePath);
-		miniz_cpp::zip_file zf(f);
+		miniz_cpp::zip_file zf(filePath.string());
 		if (!zf.has_file(Hix::Features::STL_EXPORT_JSON))
 			return;
 		//get info json
@@ -79,10 +80,12 @@ void Hix::Features::ImportModel::runImpl()
 		//read each models
 		for (auto& p : modelNameMap)
 		{
-			auto modelStr = zf.read(p.first);
-			std::stringstream strStrm(modelStr, std::ios_base::in | std::ios_base::binary);
 			auto mesh = new Mesh();
-			FileLoader::loadMeshSTL_binary(mesh, strStrm);
+			auto modelStr = zf.read(p.first);
+			std::stringstream strStrm(modelStr);
+			//std::stringstream strStrm(modelStr, std::ios_base::in | std::ios_base::binary);
+			//FileLoader::loadMeshSTL_binary(mesh, strStrm);
+			FileLoader::loadMeshSTL(mesh, strStrm);
 			createModel(mesh, p.second);
 		}
 	}
@@ -100,15 +103,15 @@ void Hix::Features::ImportModel::importSingle(const std::string& name, const std
 	if (!file.is_open())
 		return;
 
-	if (fs::equivalent(path.extension(), ".stl")) {
+	if (boost::iequals(path.extension().string(), ".stl")) {
 
-		if (FileLoader::loadMeshSTL(mesh, file))
+		if (!FileLoader::loadMeshSTL(mesh, file))
 		{
 			std::fstream fileBinary(path, std::ios_base::in | std::ios_base::binary);
 			FileLoader::loadMeshSTL_binary(mesh, fileBinary);
 		}
 	}
-	else if (fs::equivalent(path.extension(), ".obj")) {
+	else if (boost::iequals(path.extension().string(), ".obj")) {
 		FileLoader::loadMeshOBJ(mesh, file);
 	}
 	file.close();

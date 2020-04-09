@@ -102,11 +102,11 @@ void Hix::Features::FeaturesLoader::loadFeatureButtons()
 	addDivider();
 
 	addButton<Hix::Features::ModelCut>("cut" ,this);
-	addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
+	//addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
 	addButton<Hix::Features::ExtendMode>("extend" ,this);
 	addButton<Hix::Features::LabellingMode>("label" ,this);
 	addButton<Hix::Features::LayFlatMode>("layflat" ,this);
-	addButton<Hix::Features::AutoOrientateMode>("orient" ,this);
+	//addButton<Hix::Features::AutoOrientateMode>("orient" ,this);
 	addButton<Hix::Features::AutoArrangeMode>("arrange" ,this);
 	addButton<Hix::Features::SupportMode>("support" ,this);
 	addDivider();
