@@ -273,6 +273,7 @@
     <ClCompile Include="feature\interfaces\DialogedMode.cpp" />
     <ClCompile Include="feature\interfaces\Progress.cpp" />
     <ClCompile Include="feature\stlexport.cpp" />
+    <ClCompile Include="feature\zip\zip.cpp" />
     <ClCompile Include="input\KeyboardController.cpp" />
     <ClCompile Include="application\PartManager.cpp" />
     <ClCompile Include="Qml\components\ControlOwner.cpp" />
@@ -906,6 +907,7 @@
     </ClInclude>
     <ClInclude Include="feature\stlexport.h" />
     <ClInclude Include="feature\STL\stlio.hpp" />
+    <ClInclude Include="feature\zip\zip.h" />
     <ClInclude Include="feature\zip\zip_file.hpp" />
     <ClInclude Include="input\KeyboardController.h" />
     <ClInclude Include="Qml\components\ControlForwardInclude.h" />

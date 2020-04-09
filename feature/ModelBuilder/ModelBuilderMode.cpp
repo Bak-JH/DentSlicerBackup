@@ -9,6 +9,8 @@
 #include "application/ApplicationManager.h"
 #include "../widget/RotateWidget.h"
 #include <fstream>
+#include <boost/algorithm/string.hpp>
+
 constexpr float ZMARGIN = 3;
 
 const QUrl MB_POPUP = QUrl("qrc:/Qml/FeaturePopup/PopupModelBuild.qml");
@@ -97,15 +99,15 @@ void Hix::Features::MBPrep::run()
 	std::filesystem::path filePath(_fileUrl.toLocalFile().toStdWString());
 	std::fstream file(filePath);
 	auto mesh = new Mesh();
-	if (std::filesystem::equivalent(filePath.extension(), ".stl")) {
+	if (boost::iequals(filePath.extension().string(), ".stl")) {
 
-		if (FileLoader::loadMeshSTL(mesh, file))
+		if (!FileLoader::loadMeshSTL(mesh, file))
 		{
 			std::fstream fileBinary(filePath, std::ios_base::in | std::ios_base::binary);
 			FileLoader::loadMeshSTL_binary(mesh, fileBinary);
 		}
 	}
-	else if (std::filesystem::equivalent(filePath.extension(), ".obj")) {
+	else if (boost::iequals(filePath.extension().string(), ".obj")) {
 		FileLoader::loadMeshOBJ(mesh, file);
 	}
 	fileName = GLModel::filenameToModelName(fileName.toStdString());
