@@ -76,7 +76,9 @@ Qt3DRender::QCamera* Hix::Application::SceneManager::camera()
 void Hix::Application::SceneManager::fileDropped(QUrl fileUrl)
 {
 	auto filename = fileUrl.fileName();
-	if (filename.contains(".stl") || filename.contains(".STL") || filename.contains(".obj") || filename.contains(".OBJ")) {
+	if (filename.contains(".stl", Qt::CaseSensitivity::CaseInsensitive) ||
+		filename.contains(".obj", Qt::CaseSensitivity::CaseInsensitive) ||
+		filename.contains(".zip", Qt::CaseSensitivity::CaseInsensitive)) {
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::ImportModel(fileUrl));
 	}
 }

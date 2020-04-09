@@ -234,10 +234,12 @@ void Mesh::vertexMove(const QVector3D& direction) {
 
 }
 
-void Mesh::centerMesh(){
+QVector3D Mesh::centerMesh(){
 	Bounds3D bound;
 	bound.localBoundUpdate(*this);
-    vertexMove(-bound.centre());
+	QVector3D movement = -bound.centre();
+	vertexMove(movement);
+	return movement;
 }
 
 
