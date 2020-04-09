@@ -12,6 +12,7 @@ namespace Hix
 
 	namespace Features
 	{
+		constexpr auto STL_EXPORT_JSON = "export.json";
 		class STLExportMode : public Hix::Features::InstantMode
 		{
 		public:
@@ -37,7 +38,7 @@ namespace Hix
 			std::unordered_map<size_t, GLModel*> _modelsMap;
 			std::filesystem::path _tmpPath;
 			std::filesystem::path _path;
-
+			std::string getNthModelName(size_t);
 
 		};
 	}

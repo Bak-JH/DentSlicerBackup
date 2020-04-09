@@ -83,7 +83,7 @@ void Hix::Features::STLExport::exportModels()
 	{
 		//write json
 		auto jsonPath = _tmpPath;
-		jsonPath /= "export.json";
+		jsonPath /= STL_EXPORT_JSON;
 		rapidjson::Document doc;
 		doc.SetObject();
 
@@ -91,12 +91,13 @@ void Hix::Features::STLExport::exportModels()
 		miniz_cpp::zip_file file;
 		for (size_t i = 0; i != _currIdx; ++i)
 		{
-			rapidjson::Value n(std::to_string(i).c_str(), doc.GetAllocator());
-			doc.AddMember(n, _modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
+			rapidjson::Value k(getNthModelName(i), doc.GetAllocator());
+			rapidjson::Value v(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
+			doc.AddMember(k, v, doc.GetAllocator());
 
 			//add to zip archive
 			auto modelPath = _tmpPath;
-			modelPath /= std::to_string(i);
+			modelPath /= getNthModelName(i);
 			file.write(modelPath.string());
 		}
 		std::ofstream of(jsonPath, std::ios_base::trunc);
@@ -110,7 +111,7 @@ void Hix::Features::STLExport::exportModels()
 	else
 	{
 		auto tmpFile = _tmpPath;
-		_tmpPath /= std::to_string(0);
+		_tmpPath /= getNthModelName(0);
 		std::filesystem::copy_file(_tmpPath, _path);
 	}
 
@@ -124,7 +125,7 @@ tyti::stl::vec3 toExportVec(const QVector3D& vec)
 void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const GLModel*>& childs, size_t idx)
 {
 	auto path = _tmpPath;
-	path /= std::to_string(idx);
+	path /= getNthModelName(idx);
 	std::filesystem::create_directory(path);
 	std::ofstream ofs(path, std::ios_base::trunc);
 	for (auto& c : childs)
@@ -160,7 +161,7 @@ void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const GLMod
 void STLExport::exportSTLAscii(const std::unordered_set<const GLModel*>& childs, size_t idx)
 {
 	auto path = _tmpPath;
-	path /= std::to_string(idx);
+	path /= getNthModelName(idx);
 	std::filesystem::create_directory(path);
 	std::ofstream ofs(path, std::ios_base::trunc);
     writeHeader(ofs);
@@ -202,4 +203,9 @@ void STLExport::writeHeader(std::ostream& content){
 
 void STLExport::writeFooter(std::ostream& content){
     content << "endsolid hixsolid";
+}
+
+std::string Hix::Features::STLExport::getNthModelName(size_t idx)
+{
+	return std::to_string(idx) + ".stl";
 }
