@@ -13,9 +13,9 @@ using namespace Hix::Features;
 using namespace tyti::stl;
 const constexpr auto STL_TEMP_PATH = "hix_temp_stl";
 
-//#if defined(_DEBUG)
-#define SAVE_ASCII
-//#endif
+#if defined(_DEBUG)
+//#define SAVE_ASCII
+#endif
 Hix::Features::STLExportMode::STLExportMode()
 {
 	auto models = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
@@ -130,7 +130,7 @@ void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const GLMod
 {
 	auto path = _tmpPath;
 	path /= getNthModelName(idx);
-	std::ofstream ofs(path, std::ios_base::trunc);
+	std::ofstream ofs(path, std::ios_base::trunc|std::ios::binary);
 	for (auto& c : childs)
 	{
 		auto mesh = c->getMesh();
