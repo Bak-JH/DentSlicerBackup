@@ -83,9 +83,11 @@ void Hix::Features::ImportModel::runImpl()
 			auto mesh = new Mesh();
 			auto modelStr = zf.read(p.first);
 			std::stringstream strStrm(modelStr);
-			//std::stringstream strStrm(modelStr, std::ios_base::in | std::ios_base::binary);
-			//FileLoader::loadMeshSTL_binary(mesh, strStrm);
-			FileLoader::loadMeshSTL(mesh, strStrm);
+			if (!FileLoader::loadMeshSTL(mesh, strStrm))
+			{
+				std::stringstream strStrmBin(modelStr, std::ios_base::in | std::ios_base::binary);
+				FileLoader::loadMeshSTL_binary(mesh, strStrmBin);
+			}
 			createModel(mesh, p.second);
 		}
 	}
