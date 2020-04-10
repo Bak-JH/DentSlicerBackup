@@ -35,9 +35,21 @@
 
 #include <cassert>
 #include <stdexcept>
-
+#include <unordered_set>
+#define _DEGENERATE_THROW
 namespace p2t {
 
+bool isDegenerate(const Node& node)
+{
+  std::unordered_set<const Point*> ptSet{ node.prev->point, node.point, node.next->point };
+#ifdef _DEGENERATE_THROW
+  if (ptSet.size() != 3)
+  {
+      std::runtime_error("isDegenerate");
+  }
+#endif
+  return ptSet.size() != 3;
+}
 // Triangulate simple polygon with holes
 void Sweep::Triangulate(SweepContext& tcx)
 {
@@ -54,8 +66,11 @@ void Sweep::SweepPoints(SweepContext& tcx)
   for (size_t i = 1; i < tcx.point_count(); i++) {
     Point& point = *tcx.GetPoint(i);
     Node* node = &PointEvent(tcx, point);
-    for (unsigned int i = 0; i < point.edge_list.size(); i++) {
-      EdgeEvent(tcx, point.edge_list[i], node);
+    if (node->triangle)
+    {
+        for (unsigned int i = 0; i < point.edge_list.size(); i++) {
+            EdgeEvent(tcx, point.edge_list[i], node);
+        }
     }
   }
 }
@@ -65,12 +80,14 @@ void Sweep::FinalizationPolygon(SweepContext& tcx)
   // Get an Internal triangle to start with
   Triangle* t = tcx.front()->head()->next->triangle;
   Point* p = tcx.front()->head()->next->point;
-  while (!t->GetConstrainedEdgeCW(*p)) {
+  auto oldT = t;
+  while (t && !t->GetConstrainedEdgeCW(*p)) {
+    oldT = t;
     t = t->NeighborCCW(*p);
   }
 
   // Collect interior triangles constrained by edges
-  tcx.MeshClean(*t);
+  tcx.MeshClean(*oldT);
 }
 
 Node& Sweep::PointEvent(SweepContext& tcx, Point& point)
@@ -80,7 +97,7 @@ Node& Sweep::PointEvent(SweepContext& tcx, Point& point)
 
   // Only need to check +epsilon since point never have smaller
   // x value than node due to how we fetch nodes from the front
-  if (point.x <= node.point->x + EPSILON) {
+  if (point.x <= node.point->x + EPSILON && !isDegenerate(node)) {
     Fill(tcx, node);
   }
 
@@ -120,11 +137,12 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       // We are modifying the constraint maybe it would be better to
       // not change the given constraint and just keep a variable for the new constraint
       tcx.edge_event.constrained_edge->q = p1;
-      triangle = &triangle->NeighborAcross(point);
+      triangle = triangle->NeighborAcross(point);
+      if (!triangle)
+          return;
       EdgeEvent( tcx, ep, *p1, triangle, *p1 );
     } else {
       std::runtime_error("EdgeEvent - collinear points not supported");
-      assert(0);
     }
     return;
   }
@@ -137,11 +155,12 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       // We are modifying the constraint maybe it would be better to
       // not change the given constraint and just keep a variable for the new constraint
       tcx.edge_event.constrained_edge->q = p2;
-      triangle = &triangle->NeighborAcross(point);
+      triangle = triangle->NeighborAcross(point);
+      if (!triangle)
+          return;
       EdgeEvent( tcx, ep, *p2, triangle, *p2 );
     } else {
       std::runtime_error("EdgeEvent - collinear points not supported");
-      assert(0);
     }
     return;
   }
@@ -154,6 +173,8 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
     }       else{
       triangle = triangle->NeighborCW(point);
     }
+    if (!triangle)
+        return;
     EdgeEvent(tcx, ep, eq, triangle, point);
   } else {
     // This triangle crosses constraint so lets flippin start!
@@ -228,7 +249,7 @@ void Sweep::FillAdvancingFront(SweepContext& tcx, Node& n)
 
   while (node->next) {
     // if HoleAngle exceeds 90 degrees then break.
-    if (LargeHole_DontFill(node)) break;
+    if (LargeHole_DontFill(node) || isDegenerate(*node)) break;
     Fill(tcx, *node);
     node = node->next;
   }
@@ -238,7 +259,7 @@ void Sweep::FillAdvancingFront(SweepContext& tcx, Node& n)
 
   while (node->prev) {
     // if HoleAngle exceeds 90 degrees then break.
-    if (LargeHole_DontFill(node)) break;
+    if (LargeHole_DontFill(node) || isDegenerate(*node)) break;
     Fill(tcx, *node);
     node = node->prev;
   }
@@ -512,7 +533,7 @@ void Sweep::FillBasin(SweepContext& tcx, Node& node)
 void Sweep::FillBasinReq(SweepContext& tcx, Node* node)
 {
   // if shallow stop filling
-  if (IsShallow(tcx, *node)) {
+  if (IsShallow(tcx, *node) || isDegenerate(*node)) {
     return;
   }
 
@@ -698,32 +719,34 @@ void Sweep::FillLeftConcaveEdgeEvent(SweepContext& tcx, Edge* edge, Node& node)
 
 void Sweep::FlipEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* t, Point& p)
 {
-  Triangle& ot = t->NeighborAcross(p);
-  Point& op = *ot.OppositePoint(*t, p);
+  Triangle* ot = t->NeighborAcross(p);
+  if (!ot)
+      throw std::runtime_error("FlipEdgeEvent");
+  Point& op = *ot->OppositePoint(*t, p);
 
   if (InScanArea(p, *t->PointCCW(p), *t->PointCW(p), op)) {
     // Lets rotate shared edge one vertex CW
-    RotateTrianglePair(*t, p, ot, op);
+    RotateTrianglePair(*t, p, *ot, op);
     tcx.MapTriangleToNodes(*t);
-    tcx.MapTriangleToNodes(ot);
+    tcx.MapTriangleToNodes(*ot);
 
     if (p == eq && op == ep) {
       if (eq == *tcx.edge_event.constrained_edge->q && ep == *tcx.edge_event.constrained_edge->p) {
         t->MarkConstrainedEdge(&ep, &eq);
-        ot.MarkConstrainedEdge(&ep, &eq);
+        ot->MarkConstrainedEdge(&ep, &eq);
         Legalize(tcx, *t);
-        Legalize(tcx, ot);
+        Legalize(tcx, *ot);
       } else {
         // XXX: I think one of the triangles should be legalized here?
       }
     } else {
       Orientation o = Orient2d(eq, op, ep);
-      t = &NextFlipTriangle(tcx, (int)o, *t, ot, p, op);
+      t = &NextFlipTriangle(tcx, (int)o, *t, *ot, p, op);
       FlipEdgeEvent(tcx, ep, eq, t, p);
     }
   } else {
-    Point& newP = NextFlipPoint(ep, eq, ot, op);
-    FlipScanEdgeEvent(tcx, ep, eq, *t, ot, newP);
+    Point& newP = NextFlipPoint(ep, eq, *ot, op);
+    FlipScanEdgeEvent(tcx, ep, eq, *t, *ot, newP);
     EdgeEvent(tcx, ep, eq, t, p);
   }
 }
@@ -764,12 +787,14 @@ Point& Sweep::NextFlipPoint(Point& ep, Point& eq, Triangle& ot, Point& op)
 void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle& flip_triangle,
                               Triangle& t, Point& p)
 {
-  Triangle& ot = t.NeighborAcross(p);
-  Point& op = *ot.OppositePoint(t, p);
+  Triangle* ot = t.NeighborAcross(p);
+  if (!ot)
+      throw std::runtime_error("FlipScanEdgeEvent");
+  Point& op = *ot->OppositePoint(t, p);
 
   if (InScanArea(eq, *flip_triangle.PointCCW(eq), *flip_triangle.PointCW(eq), op)) {
     // flip with new edge op->eq
-    FlipEdgeEvent(tcx, eq, op, &ot, op);
+    FlipEdgeEvent(tcx, eq, op, ot, op);
     // TODO: Actually I just figured out that it should be possible to
     //       improve this by getting the next ot and op before the the above
     //       flip and continue the flipScanEdgeEvent here
@@ -778,8 +803,8 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
     // Turns out at first glance that this is somewhat complicated
     // so it will have to wait.
   } else{
-    Point& newP = NextFlipPoint(ep, eq, ot, op);
-    FlipScanEdgeEvent(tcx, ep, eq, flip_triangle, ot, newP);
+    Point& newP = NextFlipPoint(ep, eq, *ot, op);
+    FlipScanEdgeEvent(tcx, ep, eq, flip_triangle, *ot, newP);
   }
 }
 

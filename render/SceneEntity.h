@@ -87,8 +87,7 @@ namespace Hix
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
 			Qt3DCore::QTransform& transform();
-
-
+			void getChildrenModels(std::unordered_set<const SceneEntity*>& results)const;
 
 
 

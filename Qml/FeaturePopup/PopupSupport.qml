@@ -81,8 +81,8 @@ FeaturePopup {
 	SidePopup {
 		id: supportsettingpopup
 		width: 296
-		height: 224
-		anchors.topMargin: 37
+		height: 240
+		anchors.topMargin: 42
 		anchors.left: generatesupports.right
 		anchors.leftMargin: 30
 
@@ -114,6 +114,8 @@ FeaturePopup {
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			increment: 5
+			fromNum: 5
+			toNum: 100
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: rafttype.bottom
@@ -124,7 +126,9 @@ FeaturePopup {
 			label.text: "Max.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
-			increment: 0.1
+			increment: 0.05
+			fromNum: 0.1
+			toNum: 5
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: supportdensity.bottom
@@ -135,7 +139,9 @@ FeaturePopup {
 			label.text: "Min.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
-			increment: 0.1
+			increment: 0.05
+			fromNum: 0.1
+			toNum: 5
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: maxradius.bottom

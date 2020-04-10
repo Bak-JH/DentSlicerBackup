@@ -51,6 +51,9 @@ namespace Hix
 			double getMax()const;
 			double lowerValue()const;
 			double upperValue()const;
+			void setLowerValue(double value);
+			void setUpperValue(double value);
+
 
 
 		signals:

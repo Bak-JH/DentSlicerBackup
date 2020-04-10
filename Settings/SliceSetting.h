@@ -10,8 +10,8 @@ namespace Hix
 		public:
 			enum class SlicingMode : uint8_t
 			{
-				Uniform,
-				Adaptive
+				Uniform
+				//,Adaptive
 			};
 
 			SliceSetting(std::filesystem::path settingsPath);

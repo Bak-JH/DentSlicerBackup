@@ -9,6 +9,7 @@
 #include <pcl/point_types.h>
 #include "../render/LineMeshEntity.h"
 #include "../application/ApplicationManager.h"
+#include "../feature/cdt/HixCDT.h"
 constexpr float RAFT_JOINT_CNT = 2;
 
 using namespace Qt3DCore;
@@ -68,8 +69,19 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 	Hix::Features::Extrusion::extrudeAlongPath(
 		mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &thicknessScaler);
 	//generate caps
-	Hix::Shapes2D::generateCapZPlane(mesh, jointContours.front(), true);
-	Hix::Shapes2D::generateCapZPlane(mesh, jointContours.back(), false);
+	if (jointContours.front().size() > 1)
+	{
+		Hix::CDT::MeshCDT cdt(mesh, true);
+		cdt.insertSolidContourZAxis(jointContours.front());
+		cdt.triangulateAndAppend();
+	}
+
+	if (jointContours.back().size() > 1)
+	{
+		Hix::CDT::MeshCDT cdt(mesh, false);
+		cdt.insertSolidContourZAxis(jointContours.back());
+		cdt.triangulateAndAppend();
+	}
 
 
 }

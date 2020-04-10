@@ -1,11 +1,9 @@
 #include "svgexporter.h"
-#include "slicer.h"
 
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/writer.h"
 #include "../common/rapidjson/ostreamwrapper.h"
 #include "../common/rapidjson/prettywriter.h"
-#include "../../application/ApplicationManager.h"
 
 #include <fstream>
 
@@ -14,46 +12,34 @@ using namespace Hix::Slicer;
 #define _DEBUG_SVG
 #endif
 
-namespace SVGexporterPrivate
-{
-	void writeVittroOptions(QString outfoldername, int max_slices);
 
+SVGexporter::SVGexporter(float layerH, float ppmmX, float ppmmY, float resX, float resY, QVector2D offsetXY, bool isInvertX, 
+    QString outfoldername, Hix::Settings::SliceSetting::SlicingMode sm):
+    _layerHeight(layerH), _ppmmX(ppmmX), _ppmmY(ppmmY), _resX(resX), _resY(resY), _offsetXY(offsetXY), _invertX(isInvertX), _outfoldername(outfoldername), _slicingMode(sm)
+{
 }
 
+void SVGexporter::exportSVG(std::vector<LayerGroup>& layerGroup){
 
-void SVGexporter::exportSVG(std::vector<Slice>& shellSlices,QString outfoldername, bool isTemp){
-    auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
-    if (isTemp || setting.invertX)
-        _invert = true;
-    else
-        _invert = false;
-	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
-
-	_ppmmX = printerSetting.pixelPerMMX();
-	_ppmmY = printerSetting.pixelPerMMY();
-	_resX = printerSetting.sliceImageResolutionX;
-	_resY = printerSetting.sliceImageResolutionY;
-	_offsetXY = QVector2D(printerSetting.bedOffsetX, printerSetting.bedOffsetY);
-    qDebug() << "export svg at "<< outfoldername;
-	qDebug() << "shellSlices : " << shellSlices.size();
+    qDebug() << "export svg at "<< _outfoldername;
+	qDebug() << "shellSlices : " << layerGroup.size();
     //qDebug() << jsonBytes;
     int currentSlice_idx = 0;
-    for (int i=0; i<shellSlices.size(); i++){
-        QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
+    for (int i=0; i< layerGroup.size(); i++){
+        QString outfilename = _outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         QFile outfile(outfilename);
         std::stringstream contentStream;
-		PolyTree& shellSlice_polytree = *shellSlices[i].polytree;
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
-        if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)
-            writeGroupHeader(currentSlice_idx, Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*(currentSlice_idx+1), contentStream);
-        else
-            writeGroupHeader(currentSlice_idx, Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*(currentSlice_idx+1), contentStream);
-        
-        for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
+        //if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)
+        writeGroupHeader(currentSlice_idx, _layerHeight *(currentSlice_idx+1), contentStream);
+        for (auto& s : layerGroup[i].slices)
+        {
+            PolyTree& shellSlice_polytree = *s.polytree;
+            for (int j = 0; j < shellSlice_polytree.ChildCount(); j++) {
+                parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
+            }
         }
-
 		writeGroupFooter(contentStream);
         writeFooter(contentStream);
         outfile.write(QByteArray::fromStdString(contentStream.str()));
@@ -67,54 +53,34 @@ void SVGexporter::exportSVG(std::vector<Slice>& shellSlices,QString outfoldernam
     qDebug() << "slicing done";
 
 
-	QString infofilename = outfoldername + "/" + "info.json";
-	QFile infofile(infofilename);
-	infofile.open(QFile::WriteOnly);
-
-	//std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
-	QJsonObject jsonObject;
-
-	QJsonDocument jsonDocument(jsonObject);
-	QByteArray jsonBytes = jsonDocument.toJson();
-	infofile.write(jsonBytes);
-	infofile.close();
 
 
-	char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
-	rapidjson::Document doc(&allocator, 256);
-	doc.SetObject();
-	doc.AddMember("layer_height", round(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight * 100) / 100, allocator);
-	doc.AddMember("total_layer", currentSlice_idx, allocator);
-	auto& printerConst = printerSetting.printerConstants;
-	if (printerConst)
-	{
-		auto obj = printerConst.value().GetObjectW();
-		for (auto itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr)
-		{
-			rapidjson::Value val, key;
-			key.CopyFrom(itr->name, allocator);;
-			val.CopyFrom(itr->value, allocator);;
-			doc.AddMember(std::move(key), std::move(val), allocator);
-		}
-	}
-	std::ofstream of(infofilename.toStdString(), std::ios_base::trunc);
-	rapidjson::OStreamWrapper osw{ of };
-	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
-	doc.Accept(writer);
 
-	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
-	{
-		SVGexporterPrivate::writeVittroOptions(outfoldername, currentSlice_idx);
-	}
+
 
 
 }
 
+void Hix::Slicer::SVGexporter::writeBasicInfo()
+{
+    _infoJsonName = _outfoldername + "/" + "info.json";
+    QFile infofile(_infoJsonName);
+    infofile.open(QFile::WriteOnly);
 
-void SVGexporterPrivate::writeVittroOptions(QString outfoldername, int max_slices){
+    //std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
+    QJsonObject jsonObject;
+
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray jsonBytes = jsonDocument.toJson();
+    infofile.write(jsonBytes);
+    infofile.close();
+}
+
+
+void SVGexporter::writeVittroOptions(int max_slices, const Hix::Engine3D::Bounds3D& bound){
 
     // write buildscript.ini file
-    QString buildscriptfilename = outfoldername + "/" + "buildscript.ini";
+    QString buildscriptfilename = _outfoldername + "/" + "buildscript.ini";
     QFile buildscriptfile(buildscriptfilename);
     buildscriptfile.open(QFile::WriteOnly);
     buildscriptfile.write(QString("Machine = Vittro Plus 6\r\n\
@@ -124,27 +90,26 @@ illumination time = 6\r\n\
 number of override slices = 0\r\n\
 override illumination time = 10\r\n\
 build time estimation = 2718\r\n\
-material consumption estimation = 29.9781\r\n").arg(QString::number((int)(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*1000)), QString::number(max_slices)).toStdString().data());
+material consumption estimation = 29.9781\r\n").arg(QString::number((int)(_layerHeight *1000)), QString::number(max_slices)).toStdString().data());
 
 
     // do run svg 2 png
-	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 	for (int i=0; i<max_slices; i++){
-        QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
+        QString svgfilename = _outfoldername + "/" + QString::number(i) + ".svg";
         QSvgRenderer renderer(svgfilename);
-        QImage image(printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, QImage::Format_RGB32);
+        QImage image(_resX, _resY, QImage::Format_RGB32);
         image.fill(0x000000);
         QPainter painter(&image);
         renderer.render(&painter);
         QString savesvgfilename = "S" + QString::number(i).rightJustified(6,'0') + "_P1.png";
-        image.save(outfoldername + "/" + savesvgfilename);
-        buildscriptfile.write(QString("%1, %2, %3\r\n").arg(QString::number(i*Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight), savesvgfilename, "6.0").toStdString().data());
+        image.save(_outfoldername + "/" + savesvgfilename);
+        buildscriptfile.write(QString("%1, %2, %3\r\n").arg(QString::number(i*_layerHeight), savesvgfilename, "6.0").toStdString().data());
     }
     buildscriptfile.close();
 
 
     // write  parameters.ini file
-    QString parametersfilename = outfoldername + "/" + "parameters.ini";
+    QString parametersfilename = _outfoldername + "/" + "parameters.ini";
     QFile parametersfile(parametersfilename);
     parametersfile.open(QFile::WriteOnly);
     parametersfile.write(QString("[SELECTED PROFILES]\r\n\
@@ -195,13 +160,38 @@ Edge width = 1\r\n\
 Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
-Grid Base Plate Type = None").arg(QString::number((int)(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*1000)),
-            QString::number(printerSetting.bedBound.lengthX()), QString::number(printerSetting.bedBound.lengthY()),
-            QString::number(printerSetting.sliceImageResolutionX), QString::number(printerSetting.sliceImageResolutionY),
-            QString::number(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight)).toStdString().data());
+Grid Base Plate Type = None").arg(QString::number((int)(_layerHeight*1000)),
+            QString::number(bound.lengthX()), QString::number(bound.lengthY()),
+            QString::number(_resX), QString::number(_resY),
+            QString::number(_layerHeight)).toStdString().data());
     parametersfile.close();
 
 }
+
+void Hix::Slicer::SVGexporter::writePrinterConstants(int sliceCnt, const rapidjson::Value& value)
+{
+     char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
+    rapidjson::Document doc(&allocator, 256);
+    doc.SetObject();
+    doc.AddMember("layer_height", _layerHeight, allocator);
+    doc.AddMember("total_layer", sliceCnt, allocator);
+
+    auto obj = value.GetObjectW();
+    for (auto itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr)
+    {
+        rapidjson::Value val, key;
+        key.CopyFrom(itr->name, allocator);;
+        val.CopyFrom(itr->value, allocator);;
+        doc.AddMember(std::move(key), std::move(val), allocator);
+    }
+
+    std::ofstream of(_infoJsonName.toStdString(), std::ios_base::trunc);
+    rapidjson::OStreamWrapper osw{ of };
+    rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
+    doc.Accept(writer);
+
+}
+
 
 
 
@@ -223,7 +213,7 @@ void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, std::stringstream& c
 void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
-		if (_invert)
+		if (_invertX)
 		{
 			point.X = -1 * point.X;
 		}
@@ -235,8 +225,6 @@ void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& conte
 			_resY/2
 			- fp.y()*_ppmmY<< " "; // doesn't need 100 actually// TODO fix this
 
-        // just fit to origin
-        //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     if (! contour->IsHole()){
         content << "\" style=\"fill: white\" />\n";
@@ -248,7 +236,7 @@ void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& conte
 void SVGexporter::writePolygon(ClipperLib::Path& contour, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-		if (_invert)
+		if (_invertX)
 		{
 			point.X = -1 * point.X;
 		}
@@ -260,8 +248,6 @@ void SVGexporter::writePolygon(ClipperLib::Path& contour, std::stringstream& con
 			_resY/2
 			- fp.y() * _ppmmY << " "; // doesn't need 100 actually
 
-        // just fit to origin
-        //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     content << "\" style=\"fill: white\" />\n";
 }

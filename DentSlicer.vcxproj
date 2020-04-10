@@ -253,6 +253,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="feature\cdt\HixCDT.cpp" />
     <ClCompile Include="cork\src\cork.cpp" />
     <ClCompile Include="cork\src\file_formats\files.cpp" />
     <ClCompile Include="cork\src\file_formats\ifs.cpp" />
@@ -262,7 +263,9 @@
     <ClCompile Include="cork\src\isct\CDTtriangle.c" />
     <ClCompile Include="cork\src\util\log.cpp" />
     <ClCompile Include="cork\src\util\timer.cpp" />
+    <ClCompile Include="feature\interfaces\RangeSliderMode.cpp" />
     <ClCompile Include="feature\interfaces\SliderMode.cpp" />
+    <ClCompile Include="feature\sendError.cpp" />
     <ClCompile Include="feature\settingMode.cpp" />
     <ClCompile Include="feature\CopyPaste.cpp" />
     <ClCompile Include="feature\FeaturesLoader.cpp" />
@@ -298,7 +301,6 @@
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
     <ClCompile Include="feature\addModel.cpp" />
@@ -864,6 +866,8 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="DentEngine\src\mesh.h" />
+    <ClInclude Include="feature\cdt\HixCDT.h" />
     <ClInclude Include="cork\src\accel\aabvh.h" />
     <ClInclude Include="cork\src\cork.h" />
     <ClInclude Include="cork\src\file_formats\files.h" />
@@ -887,7 +891,9 @@
     <ClInclude Include="cork\src\util\prelude.h" />
     <ClInclude Include="cork\src\util\shortVec.h" />
     <ClInclude Include="cork\src\util\unionFind.h" />
+    <ClInclude Include="feature\interfaces\RangeSliderMode.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h" />
+    <ClInclude Include="feature\sendError.h" />
     <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
     <ClInclude Include="feature\FeaturesLoader.h" />
@@ -973,7 +979,6 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="DentEngine\src\SlicerDebug.h" />
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
     <ClInclude Include="feature\addModel.h" />
@@ -1204,7 +1209,9 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrTextButton.qml" />
+    <None Include="Qml\Controls\CtrToggleButton.qml" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />
+    <None Include="Qml\FeaturePopup\PopupSlice.qml" />
     <None Include="Qml\FeaturePopup\PrintSettingPopup.qml" />
     <None Include="Qml\PartListFullnameBox.qml" />
     <None Include="Qml\ProgressItem.qml" />
@@ -1486,6 +1493,8 @@
     <Image Include="Resource\menu_cut_select_1.png" />
     <Image Include="Resource\menu_extend.png" />
     <Image Include="Resource\menu_extend_select_1.png" />
+    <Image Include="Resource\menu_modelbuilder.png" />
+    <Image Include="Resource\menu_modelbuilder_select_1.png" />
     <Image Include="Resource\menu_slice.png" />
     <Image Include="Resource\menu_slice_select_1.png" />
     <Image Include="Resource\menu_label.png" />

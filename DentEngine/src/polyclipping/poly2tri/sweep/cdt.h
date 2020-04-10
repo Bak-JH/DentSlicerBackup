@@ -48,11 +48,15 @@ class CDT
 {
 public:
 
+
+  CDT();
   /**
    * Constructor - add polyline with non repeating points
    *
    * @param polyline
    */
+
+  void initPolyline(const std::vector<Point*>& polyline);
   CDT(const std::vector<Point*>& polyline);
 
    /**
@@ -89,14 +93,15 @@ public:
    */
   std::list<Triangle*> GetMap();
 
+  void resetPoints();
   private:
 
   /**
    * Internals
    */
 
-  SweepContext* sweep_context_;
-  Sweep* sweep_;
+  SweepContext* sweep_context_ = nullptr;
+  Sweep* sweep_ = nullptr;
 
 };
 

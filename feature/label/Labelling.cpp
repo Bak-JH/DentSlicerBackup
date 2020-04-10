@@ -11,6 +11,7 @@
 #include "../repair/meshrepair.h"
 //engrave CSG
 #include "../CSG/CSG.h"
+#include "../cdt/HixCDT.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
@@ -87,7 +88,7 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 
 
 	// triangulate
-	PolytreeCDT polycdt(&polytree);
+	Hix::CDT::PolytreeCDT polycdt(&polytree);
 	auto trigMap = polycdt.triangulate();
 
 	//generate front & back mesh

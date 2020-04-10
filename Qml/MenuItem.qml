@@ -1,8 +1,9 @@
 import QtQuick 2.6
 import hix.qml 1.0 as Hix
+import "Controls"
 
 //MenuBtnShell {
-Hix.ToggleSwitch {
+CtrToggleButton {
 	id: menuButton
 	property string iconBasic
 	property string iconSelected
@@ -13,7 +14,7 @@ Hix.ToggleSwitch {
 	property string defaultColor: "#ffffff"
 	property bool isActive: false
 
-	width: 85
+	width: 81
 	height: 90
 	color: "#FFFFFF"
 	
@@ -46,15 +47,16 @@ Hix.ToggleSwitch {
 		iconImg.source = iconBasic;
 	}
 
-	/// mouseArea ///
-	onEntered: {
-		if (nameColor == activeNameColor) {}	// hover on already selected button
-		else color = hoverColor	// hover on unselected button
+	mouseArea {
+		onEntered: {
+			if (nameColor == activeNameColor) {}	// hover on already selected button
+			else color = hoverColor	// hover on unselected button
+		}
+		onExited: {
+			if (nameColor == activeNameColor) {}	// exit from already selected button
+			else color = defaultColor	// exit from unselected button
+		}
 	}
-	onExited: {
-		if (nameColor == activeNameColor) {}	// exit from already selected button
-		else color = defaultColor	// exit from unselected button
-	}		
 
 
 }

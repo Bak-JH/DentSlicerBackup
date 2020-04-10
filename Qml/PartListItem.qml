@@ -3,7 +3,7 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1 //1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
-
+import "Controls"
 Hix.PartListItem {
 	id: root
 	width: 224
@@ -84,7 +84,7 @@ Hix.PartListItem {
 			}
 		}
 	}
-	Hix.ToggleSwitch{
+	CtrToggleButton{
 		id: hideButton
 		width: 16
 		height: width

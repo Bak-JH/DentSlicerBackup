@@ -86,3 +86,15 @@ double Hix::QML::RangeSlideBarShell::upperValue() const
 {
 	return _upperValue;
 }
+
+void Hix::QML::RangeSlideBarShell::setLowerValue(double value)
+{
+	_lowerValue = value;
+	emit lowerValueChanged();
+}
+
+void Hix::QML::RangeSlideBarShell::setUpperValue(double value)
+{
+	_upperValue = value;
+	emit upperValueChanged();
+}
