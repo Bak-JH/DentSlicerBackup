@@ -1,9 +1,9 @@
 ﻿#include "ZAxialCut.h"
 #include "../../glmodel.h"
-
-#include "../../common/GTEngine/Include/Mathematics/GteSplitMeshByPlane.h"
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"
+#include "../cdt/HixCDT.h"
+
 using namespace Hix;
 using namespace Hix::Features::Cut;
 using namespace Hix::Engine3D;
@@ -209,7 +209,7 @@ void Hix::Features::Cut::ZAxialCutImp::generateCaps()
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
 
 	//triangulate
-	Hix::Polyclipping::PolytreeCDT cdt(&fIntPtMap, &polytree);
+	Hix::CDT::PolytreeCDT cdt(&fIntPtMap, &polytree);
 	auto triangulationResult = cdt.triangulate();
 
 	//add triangles

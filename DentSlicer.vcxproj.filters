@@ -67,7 +67,6 @@
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
     <ClCompile Include="feature\addModel.cpp" />
@@ -200,6 +199,9 @@
     <ClCompile Include="feature\Shapes2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\sendError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="cork\src\file_formats\files.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -225,6 +227,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cork\src\isct\CDTtriangle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cdt\HixCDT.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\RangeSliderMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -726,7 +734,6 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="DentEngine\src\SlicerDebug.h" />
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
     <ClInclude Include="feature\addModel.h" />
@@ -860,6 +867,12 @@
     </ClInclude>
     <ClInclude Include="common\RandomGen.h" />
     <ClInclude Include="feature\layerview\CrossSectionPlane.h" />
+    <ClInclude Include="DentEngine\src\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\sendError.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="cork\src\accel\aabvh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -927,6 +940,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cork\src\isct\CDTtriangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cdt\HixCDT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\RangeSliderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1030,6 +1049,8 @@
     <Image Include="Resource\vs_icon.png" />
     <Image Include="Resource\menu_slice.png" />
     <Image Include="Resource\menu_slice_select_1.png" />
+    <Image Include="Resource\menu_modelbuilder.png" />
+    <Image Include="Resource\menu_modelbuilder_select_1.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Qml\components\FeatureMenu.h" />
@@ -1296,6 +1317,8 @@
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PartListItem.qml" />
     <None Include="Qml\PartListFullnameBox.qml" />
+    <None Include="Qml\FeaturePopup\PopupSlice.qml" />
+    <None Include="Qml\Controls\CtrToggleButton.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

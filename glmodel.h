@@ -66,7 +66,7 @@ public:
 	void moveDone();
 	void rotateDone();
 	void scaleDone();
-	void setZToBed();
+	float setZToBed();
 	void setHitTestable(bool isEnable);
 	//tmp
 	int ID()const;

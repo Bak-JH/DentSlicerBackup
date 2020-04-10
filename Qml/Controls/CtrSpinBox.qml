@@ -31,13 +31,12 @@ Hix.InputSpinBox {
 		}
 	}
 
-	
 	SpinBox {
 		id: control
 		font.family: openRegular.name
 		value: parent.value
-		from: fromNum
-		to: toNum
+		from: -2147483647
+		to: 2147483647
 		width: parent.width * 0.46//0.5
 		height: 26
 		anchors.right: parent.right

@@ -101,7 +101,7 @@ Item{
 				height: 100
 				anchors.top: parent.top
 				anchors.left: partList.right
-				anchors.leftMargin: 72
+				anchors.leftMargin: 50
 				anchors.topMargin: sidePadding
 			}
 

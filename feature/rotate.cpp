@@ -4,23 +4,27 @@
 #include "../glmodel.h"
 #include "../Qml/components/Inputs.h"
 const QUrl ROTATE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
-Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(ROTATE_POPUP_URL)
+Hix::Features::RotateMode::RotateMode(const std::unordered_set<GLModel*>& models):
+	_targetModels(models), DialogedMode(ROTATE_POPUP_URL)
+{
+	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget, models));
+	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget, models));
+	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget, models));
+	_widget.setVisible(true);
+	auto& co = controlOwner();
+	co.getControl(_xValue, "rotateX");
+	co.getControl(_yValue, "rotateY");
+	co.getControl(_zValue, "rotateZ");
+	updatePosition();
+}
+Hix::Features::RotateMode::RotateMode(): RotateMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
 {
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
 		return;
 	}
-	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
-	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
-	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
-	_widget.setVisible(true);
 
-	auto& co = controlOwner();
-	co.getControl(_xValue, "rotateX");
-	co.getControl(_yValue, "rotateY");
-	co.getControl(_zValue, "rotateZ");
-	updatePosition();
 
 }
 
@@ -128,25 +132,4 @@ const GLModel* Hix::Features::Rotate::model() const
 	return _model;
 }
 
-Hix::Features::RotateModeNoUndo::RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels):RotateMode()
-{
-	_targetModels = targetModels;
-}
-
-Hix::Features::RotateModeNoUndo::~RotateModeNoUndo()
-{
-}
-
-void Hix::Features::RotateModeNoUndo::featureStarted()
-{
-}
-
-void Hix::Features::RotateModeNoUndo::featureEnded()
-{
-	for (auto& each : _targetModels)
-	{
-		each->updateRecursiveAabb();
-	}
-	updatePosition();
-}
 

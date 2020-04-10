@@ -219,13 +219,22 @@ Hix::Features::SupportMode::SupportMode()
 		});
 
 
-	// bind dropbox
+	// bind inputs
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
 	QObject::connect(_suppTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
 		_suppTypeDrop->getSelected(modSettings.supportType);
 		});
 	QObject::connect(_raftTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
 		_raftTypeDrop->getSelected(modSettings.raftType);
+		});
+	QObject::connect(_suppDensitySpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.supportDensity = _suppDensitySpin->getValue();
+		});
+	QObject::connect(_maxRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.supportRadiusMax = _maxRadSpin->getValue();
+		});
+	QObject::connect(_minRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.supportRadiusMin = _minRadSpin->getValue();
 		});
 }
 

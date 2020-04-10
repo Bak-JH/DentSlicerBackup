@@ -64,9 +64,17 @@ struct V2d
 {
     T x; ///< X-coordinate
     T y; ///< Y-coordinate
-	friend inline bool operator== (const V2d& a, const V2d& b) {
-		return a.x == b.x && a.y == b.y;
-	}
+
+    friend inline bool operator== (const V2d& a, const V2d& b) {
+        return a.x == b.x && a.y == b.y;
+        
+    }
+    friend inline bool operator!= (const V2d& a, const V2d& b) {
+        return !operator==(a, b);
+        
+    }
+
+
     /// Raw address getter to use as plain array T[3]
     const T* raw() const;
     /// Create vector from X and Y coordinates

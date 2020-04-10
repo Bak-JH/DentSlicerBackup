@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
-
+#include "../feature/sendError.h"
 #include "application/ApplicationManager.h"
 using namespace Hix::Tasking;
 
@@ -13,9 +13,11 @@ TaskManager::TaskManager(): _taskThread(&TaskManager::run, this), _progressManag
 
 void TaskManager::run()
 {
+	auto& engine = Hix::Application::ApplicationManager::getInstance().engine();
 	TaskVariant taskVariant = nullptr;
 	while (true)
 	{
+		bool isError = false;
 		_queue.wait_dequeue(taskVariant);
 		if (_end)
 			return;
@@ -33,21 +35,31 @@ void TaskManager::run()
 			}
 		}, taskVariant);
 
-		_progressManager.generatePopup();
+		//temp
+		if (!dynamic_cast<Hix::Features::SendError*>(rTask))
+		{
+			QMetaObject::invokeMethod(&engine, [this]() {
+				_progressManager.generatePopup();
+				}, Qt::BlockingQueuedConnection);
+		}
+
 
 		auto container = dynamic_cast<Hix::Features::FeatureContainer*>(rTask);
 		if (container && container->progress()->getDisplayText() == "")
 		{
 			for (auto& each : container->getContainer())
 			{
-				_progressManager.addProgress(each->progress());
+				QMetaObject::invokeMethod(&engine, [this, &each]() {
+					_progressManager.addProgress(each->progress());
+					}, Qt::BlockingQueuedConnection);
 			}
 		}
 		else
 		{
-			_progressManager.addProgress(rTask->progress());
+			QMetaObject::invokeMethod(&engine, [this, &rTask]() {
+				_progressManager.addProgress(rTask->progress());
+				}, Qt::BlockingQueuedConnection);
 		}
-
 		try
 		{
 			rTask->run();
@@ -56,30 +68,33 @@ void TaskManager::run()
 		{
 			qDebug() << e.what();
 			//popup, log, send error report
-			auto generateError = [this]() {Hix::Application::ApplicationManager::getInstance().modalDialogManager().openOkCancelDialog(
+
+			QMetaObject::invokeMethod(&engine, [this]() {Hix::Application::ApplicationManager::getInstance().modalDialogManager().openOkCancelDialog(
 				"Error has occured. Do you report this error?", "Report Error", "Ignore",
 				[this]() {
 					//report error pressed
 					Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
 					_progressManager.generateErrorPopup("Reporting Error");
-					
+					Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::SendError("title", "details"));
 				},
 				[this]() {
 					Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
 				}
 				);
-			};
+				}, Qt::BlockingQueuedConnection);
 
-			QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), generateError, Qt::BlockingQueuedConnection);
-			Sleep(3000);
-			_progressManager.deletePopup();
+			isError = true;
 		}
 		catch (...)
 		{
 			//incase of custom unknown exception, gracefully exit
 		}
-
-		_progressManager.deletePopup();
+		if (!isError)
+		{
+			QMetaObject::invokeMethod(&engine, [this, &rTask]() {
+				_progressManager.deletePopup();
+				}, Qt::BlockingQueuedConnection);
+		}
 	}
 }
 
@@ -95,6 +110,11 @@ void TaskManager::enqueTask(Hix::Tasking::Task* task)
 void Hix::Tasking::TaskManager::enqueTask(std::unique_ptr<Hix::Tasking::Task> task)
 {
 	_queue.enqueue(std::move(task));
+}
+
+Hix::ProgressManager& Hix::Tasking::TaskManager::progressManager()
+{
+	return _progressManager;
 }
 
 TaskManager::~TaskManager()
