@@ -138,7 +138,8 @@ namespace Hix
 			void vertexOffset(float factor);
 			void vertexRotate(const QQuaternion& rot);
 
-			void centerMesh();
+			//returns amount moved
+			QVector3D centerMesh();
 			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
 			void clear();

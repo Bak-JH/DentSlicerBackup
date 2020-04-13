@@ -10,7 +10,7 @@
 
 using namespace Hix::Engine3D;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
-void* FileLoader::fgets_(char* ptr, size_t len, std::fstream& f)
+void* FileLoader::fgets_(char* ptr, size_t len, std::istream& f)
 {
     while(len && f.read(ptr, 1))
     {
@@ -60,9 +60,8 @@ inline int stringcasecompare(const char* a, const char* b)
     return *a - *b;
 }
 
-bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, std::filesystem::path filepath)
+bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, std::istream& f)
 {
-	std::fstream f(filepath);
     char buffer[1024];
     QVector3D vertex;
     int n = 0;
@@ -98,13 +97,11 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, std::filesystem::path filepath)
         }
 
     }
-	f.close();
 
     return true;
 }
 
-bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
-	std::fstream f(filepath, std::ios_base::in |std::ios_base::binary);
+bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::istream& f){
 	constexpr size_t HEADER_SIZE =  80;
 	constexpr size_t TRI_CNT_SIZE = 4;
 	constexpr size_t TRI_SIZE = 50;
@@ -118,7 +115,6 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
 		char buffer[TRI_SIZE];
         if (!f.read(buffer, TRI_SIZE))
         {
-			f.close();
             return false;
         }
 
@@ -129,22 +125,12 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
         QVector3D v2(v[6], v[7], v[8]);
         mesh->addFace(v0, v1, v2);
     }
-	f.close();
-
     return true;
 }
 
-bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
+bool FileLoader::loadMeshSTL(Mesh* mesh, std::istream& f)
 {
-	std::filesystem::path filePath(fileUrl.toLocalFile().toStdWString());
-	auto tmp = fileUrl.toLocalFile().toStdString();
-	std::fstream f(filePath);
 
-	//FILE* f = fopen(tmp.c_str(), "r");
-    if (!f.is_open())
-    {
-        return false;
-    }
 
     //Skip any whitespace at the beginning of the file.
     unsigned long long num_whitespace = 0; //Number of whitespace characters.
@@ -152,8 +138,6 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
 
     if (!f.read(whitespace, 1))
     {
-		f.close();
-		//fclose(f);
         return false;
     }
 
@@ -162,8 +146,6 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
         num_whitespace++;
 		if (!f.read(whitespace, 1))
         {
-			f.close();
-			//fclose(f);
             return false;
         }
     }
@@ -173,65 +155,43 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
 	//qDebug() << "asdf" << fread(buffer, 5, 1, f);
 	if (!f.read(buffer, 5))
     {
-		f.close();
-		//fclose(f);
+
         return false;
     }
-	//fclose(f);
-	f.close();
 
     buffer[5] = '\0';
     if (stringcasecompare(buffer, "solid") == 0)
     {
-        bool load_success = loadMeshSTL_ascii(mesh, filePath);
-        if (!load_success)
-            return false;
+        f.seekg(0, std::ios::beg);
+        bool load_success = loadMeshSTL_ascii(mesh, f);
 
-        // This logic is used to handle the case where the file starts with
-        // "solid" but is a binary file.
-        if (mesh->getFaces().size() < 1)
+        if (load_success && mesh->getFaces().empty())
         {
-            //mesh->clear();
-            return loadMeshSTL_binary(mesh, filePath);
+            return false;
         }
-        return true;
+        return load_success;
     }
-    return loadMeshSTL_binary(mesh, filePath);
+    return false;
 }
 
-bool FileLoader::loadMeshOBJ(Mesh* mesh, QUrl fileUrl){
+bool FileLoader::loadMeshOBJ(Mesh* mesh, std::istream& f){
     char c;
-    int lines = 0;
-	std::filesystem::path filePath(fileUrl.toLocalFile().toStdWString());
-	std::fstream f(filePath);
+    int lines = std::count(std::istreambuf_iterator<char>(f),
+        std::istreambuf_iterator<char>(), '\n');
+    //in case last line doesn't have \n
+    ++lines;
+
 	constexpr size_t HEADER_SIZE = 145;
-
-    if(!f.is_open())
-        return 0;
-
-    while(f.get(c))
-        if(c == '\n')
-            lines++;
-
-	f.close();
-
-    if(c != '\n')
-        lines++;
-
-	std::fstream file(filePath);
-    if( !file.is_open() )
-        return false;
-
     std::vector<QVector3D> temp_vertices;
     temp_vertices.reserve(lines);
 
-	file.seekg(HEADER_SIZE, std::ios_base::cur);
-    while(file.tellg() != -1){
+	f.seekg(HEADER_SIZE, std::ios_base::cur);
+    while(f.tellg() != -1){
 		std::stringstream lineHeader;
 
         // read the first word of the line
 		std::string readLine, type;
-		getline(file, readLine);
+		getline(f, readLine);
 		lineHeader << readLine;
 
 		lineHeader >> type;
@@ -280,7 +240,5 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, QUrl fileUrl){
         }
 
     }
-	file.close();
-
     return true;
 }
