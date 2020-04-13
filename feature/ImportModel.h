@@ -5,7 +5,7 @@
 #include <qurl.h>
 #include <filesystem>
 class GLModel;
-
+class QString;
 namespace Hix
 {
 
@@ -23,8 +23,8 @@ namespace Hix
 			void runImpl()override;
 		private:
 			QUrl _fileUrl;
-			void importSingle(const std::string& name, const std::filesystem::path& path);
-			void createModel(Hix::Engine3D::Mesh* mesh, const std::string& name);
+			void importSingle(const QString& name, const std::filesystem::path& path);
+			void createModel(Hix::Engine3D::Mesh* mesh, const QString& name);
 		};
 		class ImportModelMode : public Hix::Features::InstantMode
 		{
