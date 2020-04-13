@@ -8,6 +8,8 @@
 #include "../repair/meshrepair.h"
 #include "application/ApplicationManager.h"
 #include "../widget/RotateWidget.h"
+#include <fstream>
+#include <boost/algorithm/string.hpp>
 
 constexpr float ZMARGIN = 3;
 
@@ -94,13 +96,19 @@ Hix::Features::MBPrep::~MBPrep()
 void Hix::Features::MBPrep::run()
 {
 	auto fileName = _fileUrl.fileName();
-
+	std::filesystem::path filePath(_fileUrl.toLocalFile().toStdWString());
+	std::fstream file(filePath);
 	auto mesh = new Mesh();
-	if (fileName != "" && (fileName.contains(".stl") || fileName.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, _fileUrl);
+	if (boost::iequals(filePath.extension().string(), ".stl")) {
+
+		if (!FileLoader::loadMeshSTL(mesh, file))
+		{
+			std::fstream fileBinary(filePath, std::ios_base::in | std::ios_base::binary);
+			FileLoader::loadMeshSTL_binary(mesh, fileBinary);
+		}
 	}
-	else if (fileName != "" && (fileName.contains(".obj") || fileName.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, _fileUrl);
+	else if (boost::iequals(filePath.extension().string(), ".obj")) {
+		FileLoader::loadMeshOBJ(mesh, file);
 	}
 	fileName = GLModel::filenameToModelName(fileName.toStdString());
 	mesh->centerMesh();

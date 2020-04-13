@@ -5,11 +5,20 @@
 #include "repair/meshrepair.h"
 #include "arrange/autoarrange.h"
 #include "../application/ApplicationManager.h"
+#include "zip/zip.h"
+#include "../common/rapidjson/writer.h"
+#include "../common/rapidjson/stringbuffer.h"
+#include "../common/rapidjson/filereadstream.h"
+#include "stlexport.h"
+#include <fstream>
+#include <boost/algorithm/string.hpp>
+
+namespace fs = std::filesystem;
 
 Hix::Features::ImportModelMode::ImportModelMode()
 {
 
-	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models", QUrl(), "3D files(*.stl *.obj)");
+	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or zipped export", QUrl(), "3D files(*.stl *.obj, *.zip)");
 	for (auto& u : fileUrls)
 	{
 		if (!u.isEmpty())
@@ -50,19 +59,73 @@ GLModel* Hix::Features::ImportModel::get()
 
 void Hix::Features::ImportModel::runImpl()
 {
-	auto mesh = new Mesh();
 	auto filename = _fileUrl.fileName();
+	fs::path filePath(_fileUrl.toLocalFile().toStdWString());
 
-	if (filename.contains(".stl") || filename.contains(".STL")) {
-		FileLoader::loadMeshSTL(mesh, _fileUrl);
+	if (boost::iequals(filePath.extension().string(), ".zip"))
+	{
+		miniz_cpp::zip_file zf(filePath.string());
+		if (!zf.has_file(Hix::Features::STL_EXPORT_JSON))
+			return;
+		//get info json
+		auto jsonStr = zf.read(Hix::Features::STL_EXPORT_JSON);
+		rapidjson::Document document;
+		document.Parse(jsonStr);
+		std::unordered_map<std::string, std::string> modelNameMap;
+		for (auto& m : document.GetObject())
+		{
+			modelNameMap[m.name.GetString()] = m.value.GetString();
+		}
+
+		//read each models
+		for (auto& p : modelNameMap)
+		{
+			auto mesh = new Mesh();
+			auto modelStr = zf.read(p.first);
+			std::stringstream strStrm(modelStr);
+			if (!FileLoader::loadMeshSTL(mesh, strStrm))
+			{
+				std::stringstream strStrmBin(modelStr, std::ios_base::in | std::ios_base::binary);
+				FileLoader::loadMeshSTL_binary(mesh, strStrmBin);
+			}
+			createModel(mesh, p.second);
+		}
 	}
-	else if (filename.contains(".obj") || filename.contains(".OBJ")) {
-		FileLoader::loadMeshOBJ(mesh, _fileUrl);
+	else
+	{
+		importSingle(filePath.stem().string(), filePath);
 	}
-	GLModel::filenameToModelName(filename.toStdString());
+}
+
+void Hix::Features::ImportModel::importSingle(const std::string& name, const std::filesystem::path& path)
+{
+
+	auto mesh = new Mesh();
+	std::fstream file(path);
+	if (!file.is_open())
+		return;
+
+	if (boost::iequals(path.extension().string(), ".stl")) {
+
+		if (!FileLoader::loadMeshSTL(mesh, file))
+		{
+			std::fstream fileBinary(path, std::ios_base::in | std::ios_base::binary);
+			FileLoader::loadMeshSTL_binary(mesh, fileBinary);
+		}
+	}
+	else if (boost::iequals(path.extension().string(), ".obj")) {
+		FileLoader::loadMeshOBJ(mesh, file);
+	}
+	file.close();
+	createModel(mesh, name);
+}
+
+void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const std::string& name)
+{
+	GLModel::filenameToModelName(name);
 	mesh->centerMesh();
 
-	auto listModel = new ListModel(mesh, filename, nullptr);
+	auto listModel = new ListModel(mesh, QString::fromStdString(name), nullptr);
 	tryRunFeature(*listModel);
 	addFeature(listModel);
 	//repair mode
@@ -74,7 +137,7 @@ void Hix::Features::ImportModel::runImpl()
 		addFeature(repair);
 	}
 
-	auto bound =  listModel->get()->recursiveAabb();
+	auto bound = listModel->get()->recursiveAabb();
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	if (printBound.contains(bound))
 	{
@@ -82,6 +145,4 @@ void Hix::Features::ImportModel::runImpl()
 		tryRunFeature(*arrange);
 		addFeature(arrange);
 	}
-
-
 }
