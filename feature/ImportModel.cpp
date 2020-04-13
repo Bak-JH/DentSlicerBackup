@@ -60,11 +60,12 @@ GLModel* Hix::Features::ImportModel::get()
 void Hix::Features::ImportModel::runImpl()
 {
 	auto filename = _fileUrl.fileName();
-	fs::path filePath(_fileUrl.toLocalFile().toStdWString());
+	fs::path filePath(_fileUrl.toLocalFile().toStdU16String());
 
 	if (boost::iequals(filePath.extension().string(), ".zip"))
 	{
-		miniz_cpp::zip_file zf(filePath.string());
+		std::ifstream zipStrm(filePath, std::ios_base::binary);
+		miniz_cpp::zip_file zf(zipStrm);
 		if (!zf.has_file(Hix::Features::STL_EXPORT_JSON))
 			return;
 		//get info json
@@ -88,16 +89,18 @@ void Hix::Features::ImportModel::runImpl()
 				std::stringstream strStrmBin(modelStr, std::ios_base::in | std::ios_base::binary);
 				FileLoader::loadMeshSTL_binary(mesh, strStrmBin);
 			}
-			createModel(mesh, p.second);
+			createModel(mesh, QString::fromStdString(p.second));
 		}
 	}
 	else
 	{
-		importSingle(filePath.stem().string(), filePath);
+		auto stem = filePath.stem();
+		QString name = name.fromStdWString(stem.wstring());
+		importSingle(name, filePath);
 	}
 }
 
-void Hix::Features::ImportModel::importSingle(const std::string& name, const std::filesystem::path& path)
+void Hix::Features::ImportModel::importSingle(const QString& name, const std::filesystem::path& path)
 {
 
 	auto mesh = new Mesh();
@@ -120,12 +123,11 @@ void Hix::Features::ImportModel::importSingle(const std::string& name, const std
 	createModel(mesh, name);
 }
 
-void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const std::string& name)
+void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QString& name)
 {
-	GLModel::filenameToModelName(name);
 	mesh->centerMesh();
 
-	auto listModel = new ListModel(mesh, QString::fromStdString(name), nullptr);
+	auto listModel = new ListModel(mesh,name, nullptr);
 	tryRunFeature(*listModel);
 	addFeature(listModel);
 	//repair mode
