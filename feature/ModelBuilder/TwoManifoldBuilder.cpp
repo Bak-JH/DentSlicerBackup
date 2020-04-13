@@ -771,7 +771,7 @@ void Hix::Features::guessOrientation(Hix::Engine3D::Mesh& model, float& cuttingP
 	Qt3DCore::QTransform transform;
 	transform.setRotation(rotation);
 	auto rotatedPlanePos = transform.matrix() * entireFitPlane.point;
-	constexpr float Z_OFFSET = 2.0f;
+	constexpr float Z_OFFSET = 7.0f;
 	cuttingPlane = rotatedPlanePos.z();
 	bottomPlane = cuttingPlane - Z_OFFSET;
 }
