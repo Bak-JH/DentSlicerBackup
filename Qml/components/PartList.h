@@ -75,7 +75,7 @@ namespace Hix
 			bool _selected = false;
 
 		private:
-			std::unique_ptr<GLModel> _targetModel;
+			GLModel* _targetModel;
 		};
 	}
 }
