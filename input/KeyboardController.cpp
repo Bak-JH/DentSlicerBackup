@@ -22,12 +22,13 @@ void Hix::Input::KeyboardController::keyPressed(QKeyEvent* e)
 	case Qt::Key_Shift:
 	{
 		_shiftPressed = true;
-		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(true);
+		Hix::Application::ApplicationManager::getInstance().partManager().setContiguousSelect(true);
 		break;
 	}
 	case Qt::Key_Control:
 	{
 		_ctrlPressed = true;
+		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(true);
 		break;
 	}
 	default:
@@ -42,12 +43,13 @@ void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
 	case Qt::Key_Shift:
 	{
 		_shiftPressed = false;
-		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(false);
+		Hix::Application::ApplicationManager::getInstance().partManager().setContiguousSelect(false);
 		break;
 	}
 	case Qt::Key_Control:
 	{
 		_ctrlPressed = false;
+		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(false);
 		break;
 	}
 	default:

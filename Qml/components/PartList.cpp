@@ -27,7 +27,7 @@ Hix::QML::PartList::~PartList()
 void Hix::QML::PartList::listModel(GLModel* model)
 {
 	auto item = dynamic_cast<Hix::QML::PartListItem*>(_component.create(qmlContext(this)));
-	item->setModelName(model->modelName());
+	item->setTargetModel(model);
 	item->setParentItem(_itemContainer);
 	_items.emplace(model, item);
 	//event handler
@@ -44,7 +44,12 @@ void Hix::QML::PartList::listModel(GLModel* model)
 	//	});
 
 	QObject::connect(item->selectButton(), &Hix::QML::Controls::Button::clicked, [this, model]() {
-		model->modelSelectionClick();
+		if (Hix::Application::ApplicationManager::getInstance().partManager().isContiguousSelect()) {
+			setContiguousSelected(model);
+		}
+		else {
+			model->modelSelectionClick();
+		}
 		});
 	QObject::connect(item->hideButton(), &Hix::QML::Controls::ToggleSwitch::checked, [this, model]() {
 		model->setEnabled(false);
@@ -118,6 +123,20 @@ bool Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
 	return false;
 }
 
+bool Hix::QML::PartList::setContiguousSelected(GLModel* model)
+{
+	auto lastSelectedIdx = _itemContainer->childItems().indexOf(_items.find(*--_selectedModels.end())->second.get());
+	auto clickedIdx = _itemContainer->childItems().indexOf(_items.find(model)->second.get());
+
+	for (auto idx = std::max(lastSelectedIdx, clickedIdx); idx >= std::min(lastSelectedIdx, clickedIdx); --idx)
+	{
+		auto target = dynamic_cast<PartListItem*>(_itemContainer->childItems().at(idx))->targetModel();
+		setModelSelected(target, true);
+	}
+
+	return true;
+}
+
 
 std::unordered_set<GLModel*> Hix::QML::PartList::selectedModels() const
 {
@@ -180,13 +199,17 @@ void Hix::QML::PartListItem::setSelected(bool selected)
 
 }
 
-void Hix::QML::PartListItem::setModelName(QString name)
+void Hix::QML::PartListItem::setTargetModel(GLModel* model)
 {
-	_modelName = name;
+	_targetModel = model;
+	_modelName = model->modelName();
 	emit nameChanged();
 }
 
-
+GLModel* Hix::QML::PartListItem::targetModel()
+{
+	return _targetModel;
+}
 
 bool Hix::QML::PartListItem::visible() const
 {
