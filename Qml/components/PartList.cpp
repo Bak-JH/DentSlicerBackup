@@ -201,14 +201,14 @@ void Hix::QML::PartListItem::setSelected(bool selected)
 
 void Hix::QML::PartListItem::setTargetModel(GLModel* model)
 {
-	_targetModel = std::unique_ptr<GLModel>(model);
+	_targetModel = model;
 	_modelName = model->modelName();
 	emit nameChanged();
 }
 
 GLModel* Hix::QML::PartListItem::targetModel()
 {
-	return _targetModel.get();
+	return _targetModel;
 }
 
 bool Hix::QML::PartListItem::visible() const
