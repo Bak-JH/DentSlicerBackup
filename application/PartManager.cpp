@@ -116,9 +116,19 @@ void Hix::Application::PartManager::setMultiSelect(bool isMulti)
 	_isMulti = isMulti;
 }
 
+void Hix::Application::PartManager::setContiguousSelect(bool isContiguous)
+{
+	_isContiguous = isContiguous;
+}
+
 bool Hix::Application::PartManager::isMultiSelect() const
 {
 	return _isMulti;
+}
+
+bool Hix::Application::PartManager::isContiguousSelect() const
+{
+	return _isContiguous;
 }
 
 void Hix::Application::PartManagerLoader::init(PartManager& manager, QObject* root)
