@@ -197,14 +197,15 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 		if (_pressedButton == Qt3DInput::QMouseEvent::Buttons::MiddleButton) {//mouse wheel drag
 			camera->translateWorld(QVector3D((-1.0) * (_cameraCurrPt.x() - _cameraPrevPt.x()) / 1000.0, 0, 0), Qt3DRender::QCamera::TranslateViewCenter);
 			camera->translateWorld(QVector3D(0, (1.0) * (_cameraCurrPt.y() - _cameraPrevPt.y()) / 1000.0, 0), Qt3DRender::QCamera::TranslateViewCenter);
+			scene.onCameraChanged();
 		}
 		else if(_pressedButton == Qt3DInput::QMouseEvent::Buttons::RightButton)
 		{
 			systemTransform->setRotationZ(systemTransform->rotationZ() + rotationSpeed * (_cameraCurrPt.x() - _cameraPrevPt.x()));
 			systemTransform->setRotationX(systemTransform->rotationX() + rotationSpeed * (_cameraCurrPt.y() - _cameraPrevPt.y()));
+			scene.onCameraChanged();
 		}
 		_cameraPrevPt = _cameraCurrPt;
-		scene.onCameraChanged();
 
 		if (_hoverEnabled && !_hoverRaycastBusy)
 		{
