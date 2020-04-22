@@ -224,9 +224,11 @@ void Hix::Features::Labelling::redoImpl()
 
 void Hix::Features::Labelling::runImpl()
 {
-	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
-	_targetModel->setHitTestable(true);
-	_targetModel->updateMesh(true);
+	postUIthread([this]() {
+		_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
+		_targetModel->setHitTestable(true);
+		_targetModel->updateMesh(true);
+		});
 }
 
 Hix::Features::LabellingEngrave::LabellingEngrave(GLModel* parentModel, GLModel* previewModel):FlushSupport(parentModel), _target(parentModel), _label(previewModel)
