@@ -43,7 +43,7 @@ Hix::Features::STLExportMode::~STLExportMode()
 }
 
 
-STLExport::STLExport(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path.toStdString())
+STLExport::STLExport(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path.toStdU16String())
 {
 }
 
@@ -109,7 +109,8 @@ void Hix::Features::STLExport::exportModels()
 		doc.Accept(writer);
 		file.write(jsonPath.string(), jsonPath.filename().string());
 		file.comment = "hix scene file";
-		file.save(_path.string());
+		std::ofstream zipOut(_path, std::ios_base::trunc | std::ios::binary);
+		file.save(zipOut);
 
 	}
 	else
