@@ -261,12 +261,9 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 
 void Hix::Features::LabellingEngrave::runImpl()
 {
-	if (Hix::Features::isRepairNeeded(_label->getMesh()))
-	{
-		//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
-		auto repair = new MeshRepair(_label.get());
-		tryRunFeature(*repair);
-	}
+	//change label to cork mesh, change coordinate system to that of subjcect model
+	auto subtractee = toCorkMesh(*_label->getMesh(), _label->transform().matrix());
+	cutCSG(_target, subtractee);
 
 	if (Hix::Features::isRepairNeeded(_target->getMesh()))
 	{
@@ -274,10 +271,6 @@ void Hix::Features::LabellingEngrave::runImpl()
 		auto repair = new MeshRepair(_target);
 		tryRunFeature(*repair);
 	}
-
-	//change label to cork mesh, change coordinate system to that of subjcect model
-	auto subtractee = toCorkMesh(*_label->getMesh(), _label->transform().matrix());
-	cutCSG(_target, subtractee);
 }
 
 void Hix::Features::LabellingEngrave::undoImpl()
