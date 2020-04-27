@@ -397,7 +397,7 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 		if (entity)
 		{
 			auto childName = modelName + "_child" + QString::number(childIdx);
-			repairImpl(subject, childName);
+			repairImpl(entity, childName);
 			++childIdx;
 		}
 	}
