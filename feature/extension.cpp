@@ -131,6 +131,10 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 
 Hix::Features::Extend::~Extend()
 {
+	_model = nullptr;
+	_prevMesh = nullptr;
+	_nextMesh = nullptr;
+
 	delete _model;
 	delete _prevMesh;
 	delete _nextMesh;
