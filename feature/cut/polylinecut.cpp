@@ -44,6 +44,12 @@ void Hix::Features::Cut::PolylineCut::runImpl()
 	auto cylinderWallCork = toCorkMesh(polylineWall);
 	cutCSG(_target->modelName(), _target, cylinderWallCork);
 	freeCorkTriMesh(&cylinderWallCork);
+
+	if (isRepairNeeded(_target->getMesh()))
+	{
+		auto repair = new MeshRepair(_target);
+		tryRunFeature(*repair);
+	}
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)

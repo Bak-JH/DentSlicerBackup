@@ -224,9 +224,11 @@ void Hix::Features::Labelling::redoImpl()
 
 void Hix::Features::Labelling::runImpl()
 {
-	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
-	_targetModel->setHitTestable(true);
-	_targetModel->updateMesh(true);
+	postUIthread([this]() {
+		_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
+		_targetModel->setHitTestable(true);
+		_targetModel->updateMesh(true);
+		});
 }
 
 Hix::Features::LabellingEngrave::LabellingEngrave(GLModel* parentModel, GLModel* previewModel):FlushSupport(parentModel), _target(parentModel), _label(previewModel)
@@ -246,6 +248,8 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 	//manual free cork memory, TODO RAII
 	freeCorkTriMesh(&subjectCork);
 	freeCorkTriMesh(&output);
+
+
 	postUIthread([result, subject, this]() {
 		_prevMesh.reset(subject->getMeshModd());
 		subject->setMesh(result);
@@ -260,6 +264,13 @@ void Hix::Features::LabellingEngrave::runImpl()
 	//change label to cork mesh, change coordinate system to that of subjcect model
 	auto subtractee = toCorkMesh(*_label->getMesh(), _label->transform().matrix());
 	cutCSG(_target, subtractee);
+
+	if (Hix::Features::isRepairNeeded(_target->getMesh()))
+	{
+		//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
+		auto repair = new MeshRepair(_target);
+		tryRunFeature(*repair);
+	}
 }
 
 void Hix::Features::LabellingEngrave::undoImpl()
