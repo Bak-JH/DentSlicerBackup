@@ -131,10 +131,6 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 
 Hix::Features::Extend::~Extend()
 {
-	_model = nullptr;
-	_prevMesh = nullptr;
-	_nextMesh = nullptr;
-
 	delete _model;
 	delete _prevMesh;
 	delete _nextMesh;
@@ -142,38 +138,45 @@ Hix::Features::Extend::~Extend()
 
 void Hix::Features::Extend::undoImpl()
 {
-	_model->setMesh(_prevMesh);
-	_model->unselectMeshFaces();
-	_model->updateMesh(true);
-	_model->setZToBed();
+	postUIthread([this]() {
+		_nextMesh = _model->getMeshModd();
+		_model->setMesh(_prevMesh);
+		_model->unselectMeshFaces();
+		_model->updateMesh(true);
+		_model->setZToBed();
+	});
 }
 
 void Hix::Features::Extend::redoImpl()
 {
-	_model->setMesh(_nextMesh);
-	_model->unselectMeshFaces();
-	_model->updateMesh(true);
-	_model->setZToBed();
+	postUIthread([this]() {
+		_prevMesh = _model->getMeshModd();
+		_model->setMesh(_nextMesh);
+		_model->unselectMeshFaces();
+		_model->updateMesh(true);
+		_model->setZToBed();
+	});
 }
 
 void Hix::Features::Extend::runImpl()
 {
 	_prevMesh = new Mesh(*_model->getMeshModd());
-	_model->unselectMeshFaces();
-	auto paths = boundaryPath(_extensionFaces);
-	for (auto& path : paths)
-	{
-		extendAlongOutline(_model->getMeshModd(), _normal, _distance, path);
-	}
-	coverCap(_model, _normal, _extensionFaces, _distance);
+	postUIthread([this]() {
+		_model->unselectMeshFaces();
+		auto paths = boundaryPath(_extensionFaces);
+		for (auto& path : paths)
+		{
+			extendAlongOutline(_model->getMeshModd(), _normal, _distance, path);
+		}
+		coverCap(_model, _normal, _extensionFaces, _distance);
 
-	_model->getMeshModd()->removeFaces(_extensionFaces);
-	_model->unselectMeshFaces();
-	_model->updateMesh();
+		_model->getMeshModd()->removeFaces(_extensionFaces);
+		_model->unselectMeshFaces();
+		_model->updateMesh();
 
-	_nextMesh = _model->getMeshModd();
-
-	_model->setZToBed();
+		_nextMesh = _model->getMeshModd();
+		_model->setZToBed();
+	});
 	_extensionFaces.clear();
 }
 
