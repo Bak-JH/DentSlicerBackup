@@ -45,8 +45,7 @@ namespace Hix
 			QVector3D _normal;
 			std::unordered_set<FaceConstItr> _extensionFaces;
 			double _distance;
-			Mesh* _prevMesh;
-			Mesh* _nextMesh;
+			std::unique_ptr<Hix::Engine3D::Mesh> _prevMesh;
 		};
 
 
