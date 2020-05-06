@@ -159,16 +159,16 @@ void Hix::Features::Extend::redoImpl()
 
 void Hix::Features::Extend::runImpl()
 {
-	postUIthread([this]() {
-		auto *mesh = new Mesh(*_model->getMeshModd());
-		_model->unselectMeshFaces();
-		_prevMesh.reset(_model->getMeshModd());
+	auto *mesh = new Mesh(*_model->getMeshModd());
+	_model->unselectMeshFaces();
+	_prevMesh.reset(_model->getMeshModd());
 
-		auto paths = boundaryPath(_extensionFaces);
-		for (auto& path : paths)
-		{
-			extendAlongOutline(mesh, _normal, _distance, path);
-		}
+	auto paths = boundaryPath(_extensionFaces);
+	for (auto& path : paths)
+	{
+		extendAlongOutline(mesh, _normal, _distance, path);
+	}
+	postUIthread([this, &mesh]() {
 		_model->setMesh(mesh);
 		coverCap(_model, _normal, _extensionFaces, _distance);
 
