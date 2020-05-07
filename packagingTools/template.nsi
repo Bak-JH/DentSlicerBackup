@@ -116,6 +116,8 @@ SectionEnd
 
 Section -AdditionalIcons
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
+  SetOutPath "$INSTDIR"
+  CreateShortcut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.exe" "" "$INSTDIR\DentSlicer.exe"
   CreateShortCut "$SMPROGRAMS\DentSlicer\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
   CreateShortCut "$SMPROGRAMS\DentSlicer\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
