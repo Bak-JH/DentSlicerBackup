@@ -1,14 +1,14 @@
 #include "DeployInfo.h"
 #include <QDebug>
+#include <QCoreApplication>
 using namespace Hix::Settings::JSON;
 using namespace Hix::Settings;
 
 Hix::Settings::DeployInfo::DeployInfo()
 {
-	auto deployInfoPath = std::filesystem::current_path();
+	auto deployInfoPath = QCoreApplication::applicationDirPath();
 	deployInfoPath.append("deploy.json");
-	parseJSON(deployInfoPath);
-
+	parseJSON(deployInfoPath.toStdString());
 }
 
 std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
