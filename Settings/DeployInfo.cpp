@@ -19,7 +19,7 @@ std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
 
 void Hix::Settings::DeployInfo::initialize()
 {
-	settingsDir = std::filesystem::current_path();
+	settingsDir = QCoreApplication::applicationDirPath().toStdString();
 }
 
 void Hix::Settings::DeployInfo::parseJSONImpl(const rapidjson::Document& doc)
