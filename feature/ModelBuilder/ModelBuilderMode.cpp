@@ -47,6 +47,7 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 	auto fileName = fileUrl.fileName();
 	if (fileName.isEmpty())
 	{
+		scheduleForDelete();
 		return;
 	}
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<MBPrep>(this, fileUrl));
