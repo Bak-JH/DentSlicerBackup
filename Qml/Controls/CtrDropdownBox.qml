@@ -108,10 +108,7 @@ DropdownBox {
 
 				ScrollIndicator.vertical: ScrollIndicator {
 					id: verticalIndicator
-					//active: MouseArea.pressed
 					orientation: Qt.Vertical
-					size: frame.height / content.height
-					position: -content.y / content.height
 					anchors { top: parent.top; right: parent.right; bottom: parent.bottom }
 					contentItem: Rectangle {
 						implicitWidth: 6

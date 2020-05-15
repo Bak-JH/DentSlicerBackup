@@ -62,8 +62,8 @@ namespace Hix
 			class DropdownBox : public QQuickRectangle, public InputControl
 			{
 				Q_OBJECT
-					Q_PROPERTY(QStringList dropList MEMBER _dropList NOTIFY listChanged)
-					Q_PROPERTY(int index MEMBER _index NOTIFY indexChanged)
+				Q_PROPERTY(QStringList dropList MEMBER _dropList NOTIFY listChanged)
+				Q_PROPERTY(int index MEMBER _index NOTIFY indexChanged)
 
 			public:
 				DropdownBox(QQuickItem* parent = nullptr);

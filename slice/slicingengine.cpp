@@ -100,16 +100,18 @@ std::vector<Hix::Slicer::LayerGroup> SlicingEngine::sliceEntities(const std::uno
 	layers.erase(layers.begin(), layers.begin() + forwardPopCnt);
 	size_t backPopCnt = 0;
 	auto backItr = layers.rbegin();
-	while (backItr->empty() == 0)
+
+	while (backItr->empty())
 	{
 		++backPopCnt;
 		++backItr;
 	}
+
 	for (size_t i = 0; i < backPopCnt; ++i)
 	{
 		layers.pop_back();
 	}
 	qDebug() << "removed empty slices count bott: " << forwardPopCnt << "top :" << backPopCnt;
-
+	qDebug() << "after remove: " << layers.size();
 	return layers;
 }
