@@ -23,9 +23,9 @@ namespace Hix
 		public:
 			SVGexporter(float layerH, float ppmmX, float ppmmY, float resX, float resY, QVector2D offsetXY, bool invertX, QString outfoldername, Hix::Settings::SliceSetting::SlicingMode sm);
 			void exportSVG(std::vector<Hix::Slicer::LayerGroup>& shellSlices);
-			void writeBasicInfo();
+			void createInfoFile();
 			void writeVittroOptions(int max_slices, const Hix::Engine3D::Bounds3D& bound);
-			void writePrinterConstants(int sliceCnt,const rapidjson::Value& value);
+			void writeBasicInfo(int sliceCnt,const std::optional<rapidjson::Value>& optionalVal);
 		private:
 			void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, std::stringstream& content);
 			void writePolygon(const ClipperLib::PolyNode* contour, std::stringstream& content);

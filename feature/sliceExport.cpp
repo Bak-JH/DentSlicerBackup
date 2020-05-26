@@ -111,11 +111,9 @@ void Hix::Features::SliceExport::run()
 
 
 	//write info files
-	exp.writeBasicInfo();
-	if (printerSetting.printerConstants)
-	{
-		exp.writePrinterConstants(layerGroups.size(), printerSetting.printerConstants.value());
-	}
+	exp.createInfoFile();
+	exp.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
+
 	
 	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
