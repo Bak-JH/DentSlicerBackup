@@ -61,7 +61,7 @@ void SVGexporter::exportSVG(std::vector<LayerGroup>& layerGroup){
 
 }
 
-void Hix::Slicer::SVGexporter::writeBasicInfo()
+void Hix::Slicer::SVGexporter::createInfoFile()
 {
     _infoJsonName = _outfoldername + "/" + "info.json";
     QFile infofile(_infoJsonName);
@@ -168,28 +168,29 @@ Grid Base Plate Type = None").arg(QString::number((int)(_layerHeight*1000)),
 
 }
 
-void Hix::Slicer::SVGexporter::writePrinterConstants(int sliceCnt, const rapidjson::Value& value)
+void Hix::Slicer::SVGexporter::writeBasicInfo(int sliceCnt, const std::optional<rapidjson::Value>& optionalVal)
 {
-     char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
+    char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
     rapidjson::Document doc(&allocator, 256);
     doc.SetObject();
     doc.AddMember("layer_height", _layerHeight, allocator);
     doc.AddMember("total_layer", sliceCnt, allocator);
-
-    auto obj = value.GetObjectW();
-    for (auto itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr)
+    if (optionalVal)
     {
-        rapidjson::Value val, key;
-        key.CopyFrom(itr->name, allocator);;
-        val.CopyFrom(itr->value, allocator);;
-        doc.AddMember(std::move(key), std::move(val), allocator);
+        auto obj = optionalVal.value().GetObjectW();
+        for (auto itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr)
+        {
+            rapidjson::Value val, key;
+            key.CopyFrom(itr->name, allocator);;
+            val.CopyFrom(itr->value, allocator);;
+            doc.AddMember(std::move(key), std::move(val), allocator);
+        }
     }
 
     std::ofstream of(_infoJsonName.toStdString(), std::ios_base::trunc);
     rapidjson::OStreamWrapper osw{ of };
     rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
     doc.Accept(writer);
-
 }
 
 
