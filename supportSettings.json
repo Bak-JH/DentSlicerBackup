@@ -1,6 +1,6 @@
 {
     "supportRadiusMax": 1.0,
-    "supportRadiusMin": 0.25,
+    "supportRadiusMin": 0.5,
     "supportDensity": 50.0,
     "supportBaseHeight": 2.0,
     "raftThickness": 1.0,
