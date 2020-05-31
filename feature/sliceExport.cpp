@@ -1,3 +1,11 @@
+#include <GL/glew.h> // Before any gl headers
+#include <GL/gl.h>
+
+
+#include <GL/glu.h> // Always after gl.h
+#include <GLFW/glfw3.h> // When all gl-headers have been included
+
+
 #include "sliceExport.h"
 #include <QFileDialog>
 
@@ -10,6 +18,8 @@
 #include "../Qml/components/Buttons.h"
 
 #include <unordered_set>
+
+
 constexpr float ZMARGIN = 5;
 using namespace Hix::Settings;
 
@@ -137,5 +147,41 @@ void Hix::Features::SliceExport::run()
 	////                            QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
 	////                            "");
 	//return { time , layer, size, volume };
+
+
+	if (!glfwInit())
+	{
+		throw std::runtime_error("GLFW Init failed");
+	}
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//for headless slicing
+	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
+#endif
+	//enable debug if needed
+#ifdef _DEBUG
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
+	// set the window's display mode
+	auto window = glfwCreateWindow(500,500, "STL viewer", NULL, NULL);
+
+	if (!window)
+	{
+		glfwTerminate();
+		throw std::runtime_error("create window failed");
+	}
+
+	// make the windows context current
+	glfwMakeContextCurrent(window);
+	//std::cout << "gl version: " << glGetString(GL_VERSION) << std::endl;
+
+
+
 }
 
