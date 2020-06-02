@@ -23,6 +23,9 @@ namespace Hix
 			//UI slicing options
 			Hix::QML::Controls::DropdownBox* _sliceTypeDrop;
 			Hix::QML::Controls::InputSpinBox* _layerHeightSpin;
+			Hix::QML::Controls::InputSpinBox* _aaxySpin;
+			Hix::QML::Controls::InputSpinBox* _aazSpin;
+
 			Hix::QML::Controls::ToggleSwitch* _invertXSwtch;
 
 		};

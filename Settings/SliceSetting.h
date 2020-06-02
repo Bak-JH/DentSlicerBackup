@@ -20,6 +20,11 @@ namespace Hix
 			float layerHeight;
 			SlicingMode slicingMode;
 			bool invertX;
+			bool useGPU;
+			size_t AAXY;
+			size_t AAZ;
+
+
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
