@@ -1210,6 +1210,12 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="cork\src\mesh\mesh.bool.tpp" />
+    <None Include="cork\src\mesh\mesh.isct.tpp" />
+    <None Include="cork\src\mesh\mesh.remesh.tpp" />
+    <None Include="cork\src\mesh\mesh.topoCache.tpp" />
+    <None Include="cork\src\mesh\mesh.tpp" />
+    <None Include="cork\src\rawmesh\rawMesh.tpp" />
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrTextButton.qml" />

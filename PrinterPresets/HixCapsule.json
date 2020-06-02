@@ -8,22 +8,7 @@
     "screenY": 68.04,
     "bedShape": "Circle",
     "bedRadius": 16.0,
-    "bedOffsetX": 1.5,
-    "bedOffsetY": 0.6,
-    "bedHeight": 120.0,
-    "printerConstants":{
-        "bed_curing_time": 8000,
-        "bed_curing_layer": 3,
-        "curing_time": 2500,
-        "mirror_rot_time": 2000,
-        "move_down_feedrate": 80, 
-        "move_up_feedrate": 500,
-        "up_accel_speed" : 30, 
-        "up_decel_speed" : 30, 
-        "down_accel_speed" : 50, 
-        "down_decel_speed" : 50,
-        "z_hop_height": 2,
-        "relative_height": 650,
-        "layer_delay": 1000
-    }
+    "bedOffsetX": 6.5,
+    "bedOffsetY": 1.0,
+    "bedHeight": 120.0
 }
