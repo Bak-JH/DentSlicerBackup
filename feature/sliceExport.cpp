@@ -1,11 +1,3 @@
-#include <GL/glew.h> // Before any gl headers
-#include <GL/gl.h>
-
-
-#include <GL/glu.h> // Always after gl.h
-#include <GLFW/glfw3.h> // When all gl-headers have been included
-
-
 #include "sliceExport.h"
 #include <QFileDialog>
 
@@ -16,10 +8,8 @@
 #include "DentEngine/src/svgexporter.h"
 #include "../Qml/components/Inputs.h"
 #include "../Qml/components/Buttons.h"
-
+#include "../slice/InfoWriter.h"
 #include <unordered_set>
-
-
 constexpr float ZMARGIN = 5;
 using namespace Hix::Settings;
 
@@ -50,6 +40,13 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	QObject::connect(_layerHeightSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.layerHeight = _layerHeightSpin->getValue();
 		});
+	QObject::connect(_aaxySpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.AAXY = _aaxySpin->getValue();
+		});
+	QObject::connect(_aazSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.AAZ = _aazSpin->getValue();
+		});
+	
 	QObject::connect(_invertXSwtch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this, &modSettings]() {
 		modSettings.invertX = _invertXSwtch->isChecked();
 		});
@@ -121,13 +118,13 @@ void Hix::Features::SliceExport::run()
 
 
 	//write info files
-	exp.createInfoFile();
-	exp.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
-
+	Hix::Slicer::InfoWriter iw(filename, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
+	iw.createInfoFile();
+	iw.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
 	
 	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
-		exp.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
+		iw.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
 	}
 
 
@@ -147,41 +144,5 @@ void Hix::Features::SliceExport::run()
 	////                            QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
 	////                            "");
 	//return { time , layer, size, volume };
-
-
-	if (!glfwInit())
-	{
-		throw std::runtime_error("GLFW Init failed");
-	}
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	//for headless slicing
-	glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
-
-#ifdef __APPLE__
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
-#endif
-	//enable debug if needed
-#ifdef _DEBUG
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif
-
-	// set the window's display mode
-	auto window = glfwCreateWindow(500,500, "STL viewer", NULL, NULL);
-
-	if (!window)
-	{
-		glfwTerminate();
-		throw std::runtime_error("create window failed");
-	}
-
-	// make the windows context current
-	glfwMakeContextCurrent(window);
-	//std::cout << "gl version: " << glGetString(GL_VERSION) << std::endl;
-
-
-
 }
 

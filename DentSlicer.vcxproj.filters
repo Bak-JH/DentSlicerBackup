@@ -238,6 +238,18 @@
     <ClCompile Include="feature\zip\zip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="slice\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\gpuSlicer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\sliceExportGPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\InfoWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -958,6 +970,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\zip\zip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\gpuSlicer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GLApp0\GLApp0\OpenGLIncludes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\OpenGLIncludes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\include\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\include\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\include\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\sliceExportGPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\InfoWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
