@@ -1,5 +1,5 @@
 {
-    "layerHeight": 0.1,
-    "slicingMode": "Uniform",
-    "invertX": true
+    "layerHeight": 0.10000000149011612,
+    "invertX": true,
+    "slicingMode": "Uniform"
 }

@@ -61,7 +61,7 @@ FeaturePopup {
 	CtrToggleSwitch {
 		id: editsupports
 		sizeMult: 1.2
-		isChecked: false
+		isChecked: true
 		anchors.top: clearsupports.bottom
 		anchors.topMargin: 16
 		anchors.left: parent.left
