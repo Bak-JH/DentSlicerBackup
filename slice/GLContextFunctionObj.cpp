@@ -1,7 +1,7 @@
-#include "GLContextFunctionObj.h"
-
-
-#include <QOpenGLFunctions>
-#include <QOpenGLExtraFunctions>
-
-using namespace Hix::Rendering;
+//#include "GLContextFunctionObj.h"
+//
+//
+//#include <QOpenGLFunctions>
+//#include <QOpenGLExtraFunctions>
+//
+//using namespace Hix::Rendering;

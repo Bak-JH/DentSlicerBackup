@@ -10,8 +10,7 @@
 struct GLFWwindow;
 class Shader;
 class GLModel;
-class QOpenGLFunctions;
-class QOpenGLExtraFunctions;
+
 namespace Hix
 {
 	namespace Render
@@ -30,8 +29,9 @@ namespace Hix
 		public:
 			SlicerGL(float delta, std::filesystem::path outPath, size_t sampleXY, size_t sampleZ);
 			~SlicerGL();
-			void addSubject(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float xOffset, float yOffset, bool xInverted);
+			void addVtcs(const std::vector<float>& vtcs);
 			void setScreen(float pixelWidth, size_t imgX, size_t imgY);
+			void setBounds(const Hix::Engine3D::Bounds3D& bound);
 			size_t run();
 		private:
 			void prepareSlice();
@@ -61,8 +61,6 @@ namespace Hix
 			std::vector <std::vector<uint8_t>> _finalBuffers;
 			std::vector<std::future<void>> _pendingWrites;
 			std::filesystem::path _outPath;
-			//std::unique_ptr<QOpenGLFunctions> _ogl;
-			std::unique_ptr<QOpenGLExtraFunctions> _oglExt;
 
 		};
 	}

@@ -9,6 +9,7 @@
 #include "../Qml/components/Inputs.h"
 #include "../Qml/components/Buttons.h"
 #include "../slice/InfoWriter.h"
+#include "sliceExportGPU.h"
 #include <unordered_set>
 constexpr float ZMARGIN = 5;
 using namespace Hix::Settings;
@@ -23,6 +24,9 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	auto& co = controlOwner();
 	co.getControl(_sliceTypeDrop, "sliceType");
 	co.getControl(_layerHeightSpin, "layerHeight");
+	co.getControl(_aaxySpin, "aaxy");
+	co.getControl(_aazSpin, "aaz");
+
 	co.getControl(_invertXSwtch, "invertX");
 
 
@@ -65,8 +69,10 @@ void Hix::Features::SliceExportMode::applyButtonClicked()
 	{
 		return;
 	}
-	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
-	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<SliceExport>(se));
+	//auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
+	auto se = new SliceExportGPU(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
+
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<SliceExportGPU>(se));
 }
 
 void Hix::Features::SliceExportMode::applyAndClose()

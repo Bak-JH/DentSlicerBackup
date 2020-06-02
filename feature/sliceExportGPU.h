@@ -9,6 +9,10 @@
 class GLModel;
 namespace Hix
 {
+	namespace Engine3D
+	{
+		class Bounds3D;
+	}
 
 	namespace Features
 	{
@@ -18,6 +22,7 @@ namespace Hix
 		public:
 			SliceExportGPU(const std::unordered_set<GLModel*>& selected, QString path);
 			void run()override;
+			std::vector<float> toVtxBuffer(Hix::Engine3D::Bounds3D& bounds);
 
 		private:
 			std::unordered_set<GLModel*> _models;

@@ -18,22 +18,16 @@
 #include <algorithm>
 #include <execution>
 #include <thread>
-
+#include <qurl.h>
+#include <qfile.h>
 #include "include/shader.h"
 //#include "vertex.h"
 //#include "util.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "include/stb_image_write.h"
-#include "slicingengine.h"
-#include "../DentEngine/src/mesh.h"
-#include "../render/SceneEntity.h"
-#include "../glmodel.h"
 
 
-using namespace Hix;
-using namespace Hix::Engine3D;
-using namespace Hix::Render;
-using namespace Hix::Slicer;
+
 using GLlimit =  std::numeric_limits<GLfloat>;
 
 
@@ -87,51 +81,12 @@ void Hix::Slicer::SlicerGL::writeToFile(const std::vector<uint8_t>& data, size_t
     stbi_write_png(filename.str().c_str(), _resX, _resY, 1, data.data(), _resX);
     _fileWriteSem.notify();
 }
-void genVertexBuffer(float xOffset, float yOffset, bool xInverted, std::vector<float>& buffer, const Hix::Engine3D::Mesh& mesh, Hix::Engine3D::Bounds3D& bound)
-{
-    auto& faces = mesh.getFaces();
-    if (xInverted)
-    {
-        for (auto itr = faces.cbegin(); itr != faces.cend(); ++itr)
-        {
-
-            auto mvs = itr.meshVertices();
-
-            for (int j = 2; j >= 0; --j)
-            {
-                auto mv = mvs[j].worldPosition();
-                QVector3D pt{ -mv.x() + xOffset, mv.y() + yOffset, mv.z() };
-                bound.update(pt);
-                buffer.emplace_back(pt.x());
-                buffer.emplace_back(pt.y());
-                buffer.emplace_back(pt.z());
-            }
-        }
-    }
-    else
-    {
-        for (auto itr = faces.cbegin(); itr != faces.cend(); ++itr)
-        {
-
-            auto mvs = itr.meshVertices();
-            for (int j = 0; j < 3; ++j)
-            {
-                auto pt = mvs[j].worldPosition();
-                bound.update(pt);
-                buffer.emplace_back(pt.x() + xOffset);
-                buffer.emplace_back(pt.y() + yOffset);
-                buffer.emplace_back(pt.z());
-            }
-        }
-    }
-}
-
 
 void Hix::Slicer::SlicerGL::prepareSlice()
 {
-    _oglExt->glGenFramebuffers(1, &_sliceFBO);
+    glGenFramebuffers(1, &_sliceFBO);
     glGenTextures(1, &_sliceTex);
-    _oglExt->glGenRenderbuffers(1, &_sliceBuf);
+    glGenRenderbuffers(1, &_sliceBuf);
 
     glBindTexture(GL_TEXTURE_2D, _sliceTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _resX, _resY, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -165,7 +120,7 @@ void Hix::Slicer::SlicerGL::glfwSlice(Shader& shader, float height, size_t index
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        _oglExt->glBindVertexArray(_VAO);
+        glBindVertexArray(_VAO);
         shader.use();
         setUniforms(shader, currentAAZ, brightnessPerSample);
 
@@ -181,7 +136,7 @@ void Hix::Slicer::SlicerGL::glfwSlice(Shader& shader, float height, size_t index
         glDisable(GL_CULL_FACE);
 
         glClear(GL_COLOR_BUFFER_BIT);
-        _oglExt->glBindVertexArray(_maskVAO);
+        glBindVertexArray(_maskVAO);
         glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -206,59 +161,6 @@ Hix::Slicer::SlicerGL::SlicerGL(float delta, std::filesystem::path outPath, size
     _outPath(outPath),
     _layer(delta)
 {
-
-}
-
-void Hix::Slicer::SlicerGL::addSubject(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float xOffset, float yOffset, bool xInverted)
-{
-    std::unordered_set<const SceneEntity*> entities = SlicingEngine::selectedToEntities(models, suppRaft);
-    std::unordered_set<const SceneEntity*> modelsAndChildren;
-    for (auto m : models)
-    {
-        m->SceneEntity::getChildrenModels(modelsAndChildren);
-        modelsAndChildren.insert(m);
-    }
-    for (auto& m : models)
-    {
-        _vertCnt += m->getMesh()->getVertices().size();
-    }
-
-    std::vector<float> vtcs;
-    vtcs.reserve(_vertCnt);
-    for (auto& m : models)
-    {
-        genVertexBuffer(xOffset, yOffset, xInverted, vtcs, *m->getMesh(), _bounds);
-    }
-
-
-    _oglExt->glGenVertexArrays(1, &_VAO);
-    _oglExt->glGenBuffers(1, &_vertVBO);
-    _oglExt->glBindVertexArray(_VAO);
-    _oglExt->glBindBuffer(GL_ARRAY_BUFFER, _vertVBO);
-    _oglExt->glBufferData(GL_ARRAY_BUFFER, _vertCnt * 3 * sizeof(GLfloat), vtcs.data(), GL_STATIC_DRAW);
-    _oglExt->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-    _oglExt->glEnableVertexAttribArray(0);
-    _oglExt->glBindVertexArray(0);
-
-    GLfloat maskVert[] = {
-    -_imgX, -_imgY, 0.0f,
-    _imgX, -_imgY, 0.0f,
-    _imgX, _imgY, 0.0f,
-
-    -_imgX, -_imgY, 0.0f,
-    _imgX, _imgY, 0.0f,
-    -_imgX, _imgY, 0.0f,
-    };
-
-
-    _oglExt->glGenVertexArrays(1, &_maskVAO);
-    _oglExt->glGenBuffers(1, &_maskVBO);
-    _oglExt->glBindVertexArray(_maskVAO);
-    _oglExt->glBindBuffer(GL_ARRAY_BUFFER, _maskVBO);
-    _oglExt->glBufferData(GL_ARRAY_BUFFER, sizeof(maskVert), &maskVert, GL_STATIC_DRAW);
-    _oglExt->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-    _oglExt->glEnableVertexAttribArray(0);
-    _oglExt->glBindVertexArray(0);
 
 }
 
@@ -305,10 +207,14 @@ void Hix::Slicer::SlicerGL::setScreen(float pixelWidth, size_t imgX, size_t imgY
     // make the windows context current
     glfwMakeContextCurrent(_window);
     glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
-    std::cout << "gl version: " << glGetString(GL_VERSION) << std::endl;
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        throw std::runtime_error("glad failed");
+    }
+    //std::cout << "gl version: " << glGetString(GL_VERSION) << std::endl;
 
     //_ogl.reset(new QOpenGLFunctions());
-    _oglExt.reset(new QOpenGLExtraFunctions());
 
     //glewExperimental = GL_TRUE;
     //GLenum err = glewInit();
@@ -317,7 +223,7 @@ void Hix::Slicer::SlicerGL::setScreen(float pixelWidth, size_t imgX, size_t imgY
     //    throw std::runtime_error("glew failed");
     //}
 #ifdef _DEBUG
-    _oglExt->glDebugMessageCallback(glMessageCallback, NULL);
+    //glDebugMessageCallback(glMessageCallback, NULL);
 #endif
 
     glViewport(0, 0, _resX, _resY);
@@ -332,15 +238,66 @@ void Hix::Slicer::SlicerGL::setScreen(float pixelWidth, size_t imgX, size_t imgY
     }
 }
 
+void Hix::Slicer::SlicerGL::setBounds(const Hix::Engine3D::Bounds3D& bound)
+{
+    _bounds = bound;
+}
+
 
 
 Hix::Slicer::SlicerGL::~SlicerGL()
 {
 }
 
+void Hix::Slicer::SlicerGL::addVtcs(const std::vector<float>& vtcs)
+{
+    _vertCnt = vtcs.size();
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_vertVBO);
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertVBO);
+    glBufferData(GL_ARRAY_BUFFER, _vertCnt * 3 * sizeof(GLfloat), vtcs.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+    GLfloat maskVert[] = {
+    -_imgX, -_imgY, 0.0f,
+    _imgX, -_imgY, 0.0f,
+    _imgX, _imgY, 0.0f,
+
+    -_imgX, -_imgY, 0.0f,
+    _imgX, _imgY, 0.0f,
+    -_imgX, _imgY, 0.0f,
+    };
+
+
+    glGenVertexArrays(1, &_maskVAO);
+    glGenBuffers(1, &_maskVBO);
+    glBindVertexArray(_maskVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _maskVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(maskVert), &maskVert, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+}
+
+
 size_t Hix::Slicer::SlicerGL::run()
 {
-    Shader sliceShader("resources//shaders//slice.vert", "resources//shaders//slice.frag");
+    //shitty qt code below
+    QFile vertFile(":/shaders/slice.vert");
+    QFile fragFile(":/shaders/slice.frag");
+
+    if (!vertFile.open(QIODevice::ReadOnly)|| !fragFile.open(QIODevice::ReadOnly)) {
+        throw std::runtime_error("failed to load shader files");
+    }
+    auto vertStr = vertFile.readAll().toStdString();
+    auto fragStr = fragFile.readAll().toStdString();
+
+    //auto test = FRAG.toLocalFile();
+    Shader sliceShader(vertStr, fragStr, std::string());
 
     prepareSlice();
 
@@ -357,10 +314,10 @@ size_t Hix::Slicer::SlicerGL::run()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    _oglExt->glDeleteVertexArrays(1, &_VAO);
-    _oglExt->glDeleteBuffers(1, &_vertVBO);
-    _oglExt->glDeleteVertexArrays(1, &_maskVAO);
-    _oglExt->glDeleteBuffers(1, &_maskVBO);
+    glDeleteVertexArrays(1, &_VAO);
+    glDeleteBuffers(1, &_vertVBO);
+    glDeleteVertexArrays(1, &_maskVAO);
+    glDeleteBuffers(1, &_maskVBO);
 
     glfwTerminate();
     return i;

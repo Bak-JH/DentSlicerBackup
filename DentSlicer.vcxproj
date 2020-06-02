@@ -78,10 +78,10 @@
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(IncludePath);$(ProjectDir)common\</IncludePath>
+    <IncludePath>$(IncludePath);$(ProjectDir)common\;$(ProjectDir)slice\glad\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)common\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);;$(ProjectDir)common\;$(ProjectDir)slice\glad\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -256,6 +256,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="common\Semaphore.cpp" />
     <ClCompile Include="feature\cdt\HixCDT.cpp" />
     <ClCompile Include="cork\src\cork.cpp" />
     <ClCompile Include="cork\src\file_formats\files.cpp" />
@@ -293,7 +294,7 @@
     <ClCompile Include="Settings\JSONWriteSetting.cpp" />
     <ClCompile Include="Settings\SliceSetting.cpp" />
     <ClCompile Include="Settings\SupportSetting.cpp" />
-    <ClCompile Include="slice\glad.c" />
+    <ClCompile Include="slice\glad\src\glad.c" />
     <ClCompile Include="slice\GLContextFunctionObj.cpp" />
     <ClCompile Include="slice\gpuSlicer.cpp" />
     <ClCompile Include="slice\InfoWriter.cpp" />
@@ -436,7 +437,6 @@
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\GLApp0\GLApp0\OpenGLIncludes.h" />
     <ClInclude Include="application\ApplicationManager.h" />
     <ClInclude Include="application\FeatureManager.h" />
     <ClInclude Include="application\ModalDialogManager.h" />
@@ -834,6 +834,7 @@
     <ClInclude Include="common\magic_enum.hpp" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
+    <ClInclude Include="common\Semaphore.h" />
     <ClInclude Include="common\Tree\BVHBuilder.h" />
     <ClInclude Include="common\Tree\NTree.h" />
     <ClInclude Include="common\Tree\NTreeDeque.h" />
@@ -948,6 +949,8 @@
     <ClInclude Include="Settings\JSONWriteSetting.h" />
     <ClInclude Include="Settings\SliceSetting.h" />
     <ClInclude Include="Settings\SupportSetting.h" />
+    <ClInclude Include="slice\glad\include\glad\glad.h" />
+    <ClInclude Include="slice\glad\include\KHR\khrplatform.h" />
     <ClInclude Include="slice\GLContextFunctionObj.h" />
     <ClInclude Include="slice\gpuSlicer.h" />
     <ClInclude Include="slice\include\camera.h" />
@@ -1385,6 +1388,8 @@
     <None Include="shaders\light.inc.frag" />
     <None Include="shaders\perPrimitive.geom" />
     <None Include="shaders\singleColor.geom" />
+    <None Include="shaders\slice.frag" />
+    <None Include="shaders\slice.vert" />
     <QtRcc Include="qml.qrc">
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">qml</InitFuncName>
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">qml</InitFuncName>
