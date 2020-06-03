@@ -13,6 +13,7 @@
 #include "../DentEngine/src/mesh.h"
 #include "../render/SceneEntity.h"
 #include "../glmodel.h"
+#include "../Qt/QtUtils.h"
 
 #include <unordered_set>
 constexpr float ZMARGIN = 5;
@@ -22,6 +23,7 @@ using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Render;
 using namespace Hix::Slicer;
+using namespace Hix::QtUtils;
 
 Hix::Features::SliceExportGPU::SliceExportGPU(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path)
 {
@@ -49,7 +51,7 @@ void Hix::Features::SliceExportGPU::run()
 
 
 	// Export to SVG
-	Hix::Slicer::SlicerGL slicer(setting.layerHeight, filename.toStdString(), setting.AAXY, setting.AAZ);
+	Hix::Slicer::SlicerGL slicer(setting.layerHeight, toStdPath(filename), setting.AAXY, setting.AAZ);
 	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
     Hix::Engine3D::Bounds3D bounds;
     auto vtcs = toVtxBuffer(bounds);
@@ -114,7 +116,6 @@ void genVertexBuffer(float xOffset, float yOffset, bool xInverted, std::vector<f
 std::vector<float> Hix::Features::SliceExportGPU::toVtxBuffer(Hix::Engine3D::Bounds3D& bounds)
 {
     std::vector<float> vtcs;
-    //slicer.addSubject(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager(), printerSetting.bedOffsetX, printerSetting.bedOffsetY, setting.invertX);
 
     std::unordered_set<const SceneEntity*> entities = SlicingEngine::selectedToEntities(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager());
     std::unordered_set<const SceneEntity*> modelsAndChildren;

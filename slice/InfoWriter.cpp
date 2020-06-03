@@ -20,7 +20,7 @@
 using namespace Hix::Slicer;
 
 
-Hix::Slicer::InfoWriter::InfoWriter(QString outFolder, size_t resX, size_t resY, size_t layerHeight):_outfoldername(outFolder), _resX(resX), _resY(resY), _layerHeight(layerHeight)
+Hix::Slicer::InfoWriter::InfoWriter(QString outFolder, size_t resX, size_t resY, float layerHeight):_outfoldername(outFolder), _resX(resX), _resY(resY), _layerHeight(layerHeight)
 {
 }
 
@@ -150,7 +150,7 @@ void Hix::Slicer::InfoWriter::writeBasicInfo(int sliceCnt, const std::optional<r
         }
     }
 
-    std::ofstream of(_infoJsonName.toStdString(), std::ios_base::trunc);
+    std::ofstream of(_infoJsonName.toStdU16String(), std::ios_base::trunc);
     rapidjson::OStreamWrapper osw{ of };
     rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
     doc.Accept(writer);

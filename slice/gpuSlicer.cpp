@@ -23,9 +23,10 @@
 #include "include/shader.h"
 //#include "vertex.h"
 //#include "util.h"
+
+#define STBI_WINDOWS_UTF16
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "include/stb_image_write.h"
-
 
 
 using GLlimit =  std::numeric_limits<GLfloat>;
@@ -72,9 +73,11 @@ void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxB
 
 void Hix::Slicer::SlicerGL::writeToFile(const std::vector<uint8_t>& data, size_t index)
 {
-    std::ostringstream filename;
-    filename << _outPath.string() << "/slice" << std::setw(4) << std::setfill('0') << index << ".png";
-    stbi_write_png(filename.str().c_str(), _resX, _resY, 1, data.data(), _resX);
+    std::stringstream idxStream;
+    idxStream << std::setw(4) << std::setfill('0') << index;
+    auto idxStr = "slice" + idxStream.str() + ".png";
+    std::filesystem::path file = _outPath/(idxStr);
+    stbi_write_png(file.c_str(), _resX, _resY, 1, data.data(), _resX);
     _fileWriteSem.notify();
 }
 
