@@ -30,7 +30,7 @@
 
 using GLlimit =  std::numeric_limits<GLfloat>;
 
-
+using namespace Hix::Slicer;
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -56,19 +56,15 @@ void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxB
 
     //glm::mat4 proj = glm::ortho(-_imgX, _imgX, -_imgY, _imgY, -total_thickness, total_thickness);
     glm::mat4 proj = glm::ortho(-(float)_imgX, (float)_imgX, -(float)_imgY, (float)_imgY,(float) -GLlimit::epsilon(), (float)(_bounds.zMax() + GLlimit::epsilon()));
-
-    shader.setMat4("proj", proj);
-
     glm::mat4 view = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, -1.0f),
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
-    shader.setMat4("view", view);
-
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -height));
-    shader.setMat4("model", model);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, std::min(0.0f, -height)));
+    glm::mat4 mvp = proj * view * model; // Remember, matrix multiplication is the other way around
+    shader.setMat4("mvp", mvp);
     shader.setFloat("maxBright", maxBright);
 
 
@@ -77,10 +73,12 @@ void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxB
 void Hix::Slicer::SlicerGL::writeToFile(const std::vector<uint8_t>& data, size_t index)
 {
     std::ostringstream filename;
-    filename << _outPath.string() << "slice" << std::setw(4) << std::setfill('0') << index << ".png";
+    filename << _outPath.string() << "/slice" << std::setw(4) << std::setfill('0') << index << ".png";
     stbi_write_png(filename.str().c_str(), _resX, _resY, 1, data.data(), _resX);
     _fileWriteSem.notify();
 }
+
+
 
 void Hix::Slicer::SlicerGL::prepareSlice()
 {
@@ -159,7 +157,9 @@ Hix::Slicer::SlicerGL::SlicerGL(float delta, std::filesystem::path outPath, size
     _concurrentWriteMax(std::thread::hardware_concurrency()),
     _fileWriteSem(_concurrentWriteMax),
     _outPath(outPath),
-    _layer(delta)
+    _layer(delta),
+    _sampleXY(sampleXY),
+    _sampleZ(sampleZ)
 {
 
 }
@@ -256,7 +256,7 @@ void Hix::Slicer::SlicerGL::addVtcs(const std::vector<float>& vtcs)
     glGenBuffers(1, &_vertVBO);
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _vertVBO);
-    glBufferData(GL_ARRAY_BUFFER, _vertCnt * 3 * sizeof(GLfloat), vtcs.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, _vertCnt * sizeof(GLfloat), vtcs.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
@@ -300,16 +300,15 @@ size_t Hix::Slicer::SlicerGL::run()
     Shader sliceShader(vertStr, fragStr, std::string());
 
     prepareSlice();
-
     size_t i = 0;
     GLfloat height = GLlimit::epsilon() * 5; // slice height
+
     while (height < _bounds.zMax() - GLlimit::epsilon())
     {
-        //draw(sliceShader, height);
         // render slice in printer's full resolution
-        glfwSlice(sliceShader, height - GLlimit::epsilon(), i);
+        glfwSlice(sliceShader, height, i);
         height += _layer;
-        i++;
+        ++i;
     }
 
     // optional: de-allocate all resources once they've outlived their purpose:
