@@ -6,7 +6,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Slice")
-	height: 270
+	height: 290
 
 	CtrDropdownBox {
 		id: sliceType

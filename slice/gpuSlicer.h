@@ -23,7 +23,11 @@ namespace Hix
 	}
 	namespace Slicer
 	{
-
+		struct LayerInfo
+		{
+			float height;
+			size_t AAZ;
+		};
 		class SlicerGL
 		{
 		public:
@@ -39,9 +43,8 @@ namespace Hix
 
 			void setUniforms(Shader& shader, float height, float maxBright);
 			void writeToFile(const std::vector<uint8_t>& data, size_t index);
-
 			size_t _concurrentWriteMax;
-			const float _layer = 0.1;
+			float _layer = 0.1;
 			unsigned int  _VAO, _vertVBO, _maskVAO, _maskVBO, _sliceFBO, _sliceTex, _sliceBuf;
 			size_t _vertCnt;
 			Hix::Engine3D::Bounds3D _bounds;
@@ -53,8 +56,8 @@ namespace Hix
 			float _imgY;
 			size_t _resX;
 			size_t _resY;
-			size_t _sampleXY = 4;
-			size_t _sampleZ = 3;
+			size_t _sampleXY = 1;
+			size_t _sampleZ = 1;
 			GLFWwindow* _window = nullptr;
 			Hix::Common::Concurrency::Semaphore _fileWriteSem;
 			std::vector<uint8_t> _singlePassBuffer;

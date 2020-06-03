@@ -26,13 +26,14 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	co.getControl(_layerHeightSpin, "layerHeight");
 	co.getControl(_aaxySpin, "aaxy");
 	co.getControl(_aazSpin, "aaz");
-
 	co.getControl(_invertXSwtch, "invertX");
 
 
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 	_sliceTypeDrop->setEnums<SliceSetting::SlicingMode>(settings.slicingMode);
 	_layerHeightSpin->setValue(settings.layerHeight);
+	_aaxySpin->setValue(settings.AAXY);
+	_aazSpin->setValue(settings.AAZ);
 	_invertXSwtch->setChecked(settings.invertX);
 
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;

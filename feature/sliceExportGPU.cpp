@@ -50,7 +50,7 @@ void Hix::Features::SliceExportGPU::run()
 
 	// Export to SVG
 	Hix::Slicer::SlicerGL slicer(setting.layerHeight, filename.toStdString(), setting.AAXY, setting.AAZ);
-	slicer.setScreen(printerSetting.pixelPerMMX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
+	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
     Hix::Engine3D::Bounds3D bounds;
     auto vtcs = toVtxBuffer(bounds);
     slicer.addVtcs(vtcs);
@@ -119,12 +119,12 @@ std::vector<float> Hix::Features::SliceExportGPU::toVtxBuffer(Hix::Engine3D::Bou
     std::unordered_set<const SceneEntity*> entities = SlicingEngine::selectedToEntities(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager());
     std::unordered_set<const SceneEntity*> modelsAndChildren;
     size_t vtxCnt = 0;
-    for (auto m : _models)
+    for (auto m : entities)
     {
         m->SceneEntity::getChildrenModels(modelsAndChildren);
         modelsAndChildren.insert(m);
     }
-    for (auto& m : _models)
+    for (auto& m : modelsAndChildren)
     {
         vtxCnt += m->getMesh()->getVertices().size();
     }
@@ -133,7 +133,7 @@ std::vector<float> Hix::Features::SliceExportGPU::toVtxBuffer(Hix::Engine3D::Bou
 
     ;
     vtcs.reserve(vtxCnt);
-    for (auto& m : _models)
+    for (auto& m : modelsAndChildren)
     {
         genVertexBuffer(printerSetting.bedOffsetX, printerSetting.bedOffsetY, setting.invertX , vtcs, *m->getMesh(), bounds);
     }

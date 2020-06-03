@@ -958,7 +958,6 @@
     <ClInclude Include="slice\include\stb_image_write.h" />
     <ClInclude Include="slice\InfoWriter.h" />
     <ClInclude Include="slice\OpenGLIncludes.h" />
-    <ClInclude Include="slice\util.h" />
     <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />

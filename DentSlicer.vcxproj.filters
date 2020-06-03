@@ -981,9 +981,6 @@
     <ClInclude Include="slice\gpuSlicer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="slice\util.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="slice\OpenGLIncludes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
