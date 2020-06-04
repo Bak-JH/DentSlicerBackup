@@ -8,7 +8,8 @@
 #include "DentEngine/src/svgexporter.h"
 #include "../Qml/components/Inputs.h"
 #include "../Qml/components/Buttons.h"
-
+#include "../slice/InfoWriter.h"
+#include "sliceExportGPU.h"
 #include <unordered_set>
 constexpr float ZMARGIN = 5;
 using namespace Hix::Settings;
@@ -23,12 +24,16 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	auto& co = controlOwner();
 	co.getControl(_sliceTypeDrop, "sliceType");
 	co.getControl(_layerHeightSpin, "layerHeight");
+	co.getControl(_aaxySpin, "aaxy");
+	co.getControl(_aazSpin, "aaz");
 	co.getControl(_invertXSwtch, "invertX");
 
 
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 	_sliceTypeDrop->setEnums<SliceSetting::SlicingMode>(settings.slicingMode);
 	_layerHeightSpin->setValue(settings.layerHeight);
+	_aaxySpin->setValue(settings.AAXY);
+	_aazSpin->setValue(settings.AAZ);
 	_invertXSwtch->setChecked(settings.invertX);
 
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
@@ -40,6 +45,13 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	QObject::connect(_layerHeightSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.layerHeight = _layerHeightSpin->getValue();
 		});
+	QObject::connect(_aaxySpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.AAXY = _aaxySpin->getValue();
+		});
+	QObject::connect(_aazSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.AAZ = _aazSpin->getValue();
+		});
+	
 	QObject::connect(_invertXSwtch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this, &modSettings]() {
 		modSettings.invertX = _invertXSwtch->isChecked();
 		});
@@ -58,8 +70,10 @@ void Hix::Features::SliceExportMode::applyButtonClicked()
 	{
 		return;
 	}
-	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
-	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<SliceExport>(se));
+	//auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
+	auto se = new SliceExportGPU(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
+
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<SliceExportGPU>(se));
 }
 
 void Hix::Features::SliceExportMode::applyAndClose()
@@ -111,13 +125,13 @@ void Hix::Features::SliceExport::run()
 
 
 	//write info files
-	exp.createInfoFile();
-	exp.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
-
+	Hix::Slicer::InfoWriter iw(filename, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
+	iw.createInfoFile();
+	iw.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
 	
 	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
-		exp.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
+		iw.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
 	}
 
 
