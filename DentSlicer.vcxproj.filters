@@ -238,6 +238,27 @@
     <ClCompile Include="feature\zip\zip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="slice\gpuSlicer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\sliceExportGPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\InfoWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\GLContextFunctionObj.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\glad\src\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Semaphore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qt\QtUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -960,6 +981,42 @@
     <ClInclude Include="feature\zip\zip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="slice\gpuSlicer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\OpenGLIncludes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\include\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\include\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\include\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\sliceExportGPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\InfoWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\GLContextFunctionObj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\glad\include\glad\glad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\glad\include\KHR\khrplatform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Semaphore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qt\QtUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1337,6 +1394,8 @@
     <None Include="cork\src\mesh\mesh.topoCache.tpp" />
     <None Include="cork\src\mesh\mesh.tpp" />
     <None Include="cork\src\rawmesh\rawMesh.tpp" />
+    <None Include="shaders\slice.vert" />
+    <None Include="shaders\slice.frag" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
