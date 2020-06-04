@@ -187,7 +187,7 @@ void Hix::Slicer::SVGexporter::writeBasicInfo(int sliceCnt, const std::optional<
         }
     }
 
-    std::ofstream of(_infoJsonName.toStdString(), std::ios_base::trunc);
+    std::ofstream of(_infoJsonName.toStdU16String(), std::ios_base::trunc);
     rapidjson::OStreamWrapper osw{ of };
     rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
     doc.Accept(writer);
