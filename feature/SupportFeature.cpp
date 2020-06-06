@@ -192,8 +192,11 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_suppDensitySpin, "supportdensity");
 	co.getControl(_maxRadSpin, "maxradius");
 	co.getControl(_minRadSpin, "minradius");
+	co.getControl(_raftRadiusMultSpin, "raftRadiusMult");
+	co.getControl(_raftMinMaxRatioSpin, "raftMinMaxRatio");
+	co.getControl(_raftThickness, "raftThickness");
 
-
+	
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 
 	_suppTypeDrop->setEnums<SupportSetting::SupportType>(settings.supportType);
@@ -201,6 +204,9 @@ Hix::Features::SupportMode::SupportMode()
 	_suppDensitySpin->setValue(settings.supportDensity);
 	_maxRadSpin->setValue(settings.supportRadiusMax);
 	_minRadSpin->setValue(settings.supportRadiusMin);
+	_raftRadiusMultSpin->setValue(settings.raftRadiusMult);
+	_raftMinMaxRatioSpin->setValue(settings.raftMinMaxRatio);
+	_raftThickness->setValue(settings.raftThickness);
 
 
 	// bind buttons
@@ -236,6 +242,15 @@ Hix::Features::SupportMode::SupportMode()
 	QObject::connect(_minRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.supportRadiusMin = _minRadSpin->getValue();
 		});
+	QObject::connect(_raftRadiusMultSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.raftRadiusMult = _raftRadiusMultSpin->getValue();
+		});
+	QObject::connect(_raftMinMaxRatioSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.raftMinMaxRatio = _raftMinMaxRatioSpin->getValue();
+		});
+	QObject::connect(_raftThickness, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.raftThickness = _raftThickness->getValue();
+		});
 }
 
 Hix::Features::SupportMode::~SupportMode()
@@ -252,6 +267,10 @@ void Hix::Features::SupportMode::applySupportSettings()
 	modSettings.supportDensity = _suppDensitySpin->getValue();
 	modSettings.supportRadiusMax = _maxRadSpin->getValue();
 	modSettings.supportRadiusMin = _minRadSpin->getValue();
+	modSettings.raftRadiusMult = _raftRadiusMultSpin->getValue();
+	modSettings.raftMinMaxRatio = _raftMinMaxRatioSpin->getValue();
+	modSettings.raftThickness = _raftThickness->getValue();
+
 	modSettings.writeJSON();
 }
 

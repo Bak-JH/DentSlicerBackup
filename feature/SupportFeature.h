@@ -112,7 +112,11 @@ namespace Hix
 			Hix::QML::Controls::InputSpinBox* _suppDensitySpin;
 			Hix::QML::Controls::InputSpinBox* _maxRadSpin;
 			Hix::QML::Controls::InputSpinBox* _minRadSpin;
+			Hix::QML::Controls::InputSpinBox* _raftRadiusMultSpin;
+			Hix::QML::Controls::InputSpinBox* _raftMinMaxRatioSpin;
+			Hix::QML::Controls::InputSpinBox* _raftThickness;
 
+			
 
 
 
