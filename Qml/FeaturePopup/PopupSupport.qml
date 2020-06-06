@@ -8,9 +8,13 @@ FeaturePopup {
 	title: qsTr("Support")
 	height: 220
 	enableApply: false
-	function settingToggle() {
+	function supportSettingToggle() {
 		if (supportsettingpopup.visible == false) { supportsettingpopup.visible = true; }
 		else { supportsettingpopup.visible = false; }
+	}
+	function raftSettingToggle() {
+		if (raftsettingpopup.visible == false) { raftsettingpopup.visible = true; }
+		else { raftsettingpopup.visible = false; }
 	}
 	CtrTextButton {
 		id: generatesupports
@@ -24,9 +28,11 @@ FeaturePopup {
 
 	CtrTextButton {
 		id: generateraft
+		width: 186
 		anchors.top: generatesupports.bottom
+		anchors.left: parent.left
 		anchors.topMargin: 16
-		anchors.horizontalCenter: parent.horizontalCenter
+		anchors.leftMargin: 16
 		buttonText: "Generate Raft"
 	}
 
@@ -43,7 +49,24 @@ FeaturePopup {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
-		onClicked: { settingToggle();}
+		onClicked: { supportSettingToggle();}
+		onEntered: { color = "#d2e0e1" }
+		onExited: { color = "transparent" }
+	}
+	Hix.Button {
+		id: raftsettingbutton
+		width: 32
+		height: width
+		radius: width / 2
+		anchors.top: generateraft.top
+		anchors.right: parent.right
+		anchors.rightMargin: 16
+		Image {
+			source: "qrc:/Resource/support_setting.png"
+			anchors.verticalCenter: parent.verticalCenter
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
+		onClicked: { raftSettingToggle();}
 		onEntered: { color = "#d2e0e1" }
 		onExited: { color = "transparent" }
 	}
@@ -81,8 +104,8 @@ FeaturePopup {
 	SidePopup {
 		id: supportsettingpopup
 		width: 296
-		height: 240
-		anchors.topMargin: 42
+		height: 250
+		anchors.topMargin: 38
 		anchors.left: generatesupports.right
 		anchors.leftMargin: 30
 
@@ -123,7 +146,7 @@ FeaturePopup {
 		}
 		CtrSpinBox {
 			id: maxradius
-			label.text: "Max.radius (mm)"
+			label.text: "Max radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			increment: 0.05
@@ -136,7 +159,7 @@ FeaturePopup {
 		}
 		CtrSpinBox {
 			id: minradius
-			label.text: "Min.radius (mm)"
+			label.text: "Min radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			increment: 0.05
@@ -148,6 +171,53 @@ FeaturePopup {
 			anchors.topMargin: 16
 		}
 
+	}
+	SidePopup {
+		id: raftsettingpopup
+		width: 296
+		height: 200
+		anchors.topMargin: 72
+		anchors.left: generateraft.right
+		anchors.leftMargin: 30
 
+		CtrSpinBox {
+			id: raftRadiusMult
+			label.text: "Radius mult(support.max)"
+			height: 26
+			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
+			fromNum: 0.5
+			toNum: 100.0
+			anchors.left: parent.left
+			anchors.leftMargin: 32	// 16 = triangle height
+			anchors.top: parent.top
+			anchors.topMargin: 16
+		}
+		CtrSpinBox {
+			id: raftMinMaxRatio
+			label.text: "Vertical ratio"
+			height: 26
+			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.05
+			fromNum: 1.0
+			toNum: 10.0
+			anchors.left: parent.left
+			anchors.leftMargin: 32	// 16 = triangle height
+			anchors.top: raftRadiusMult.bottom
+			anchors.topMargin: 16
+		}
+		CtrSpinBox {
+			id: raftThickness
+			label.text: "Thickness"
+			height: 26
+			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.05
+			fromNum: 0.05
+			toNum: 10.0
+			anchors.left: parent.left
+			anchors.leftMargin: 32	// 16 = triangle height
+			anchors.top: raftMinMaxRatio.bottom
+			anchors.topMargin: 16
+		}
 	}
 }
