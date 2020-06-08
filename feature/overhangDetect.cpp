@@ -78,6 +78,27 @@ const QVector3D& Hix::OverhangDetect::Overhang::normal() const
 	return _normal;
 }
 
+FaceConstItr Hix::OverhangDetect::Overhang::nearestFace() const
+{
+	if (_primitive.index() == 0)
+	{
+		return std::get<0>(_primitive);
+	}
+	else
+	{
+		auto cf = std::get<1>(_primitive).connectedFaces();
+		return *cf.begin();
+	}
+}
+
+bool Hix::OverhangDetect::Overhang::isVertex() const
+{
+	if (_primitive.index() == 1)
+	{
+		return true;
+	}
+}
+
 //void Hix::OverhangDetect::Overhang::setRaycastResult(const RayHits& hit)
 //{
 //	_rayHit = hit;
