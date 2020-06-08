@@ -9,12 +9,24 @@ FeaturePopup {
 	height: 220
 	enableApply: false
 	function supportSettingToggle() {
-		if (supportsettingpopup.visible == false) { supportsettingpopup.visible = true; }
-		else { supportsettingpopup.visible = false; }
+		if (supportsettingpopup.visible == false) {
+			supportsettingpopup.visible = true; 
+			raftsettingpopup.visible = false;
+
+		}
+		else { 
+			supportsettingpopup.visible = false;
+		}
 	}
 	function raftSettingToggle() {
-		if (raftsettingpopup.visible == false) { raftsettingpopup.visible = true; }
-		else { raftsettingpopup.visible = false; }
+		if (raftsettingpopup.visible == false) {
+			raftsettingpopup.visible = true;
+			supportsettingpopup.visible = false;
+	
+		}
+		else {
+			raftsettingpopup.visible = false;
+		}
 	}
 	CtrTextButton {
 		id: generatesupports

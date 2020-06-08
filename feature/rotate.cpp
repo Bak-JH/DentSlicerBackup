@@ -121,6 +121,7 @@ void Hix::Features::Rotate::runImpl()
 		if (_rot)
 		{
 			_model->rotateModel(_rot.value());
+			_model->rotateDone();
 			UpdateWidgetModePos();
 		}
 		});
