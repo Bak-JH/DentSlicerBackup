@@ -6,7 +6,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Slice")
-	height: 220
+	height: 290
 
 	CtrDropdownBox {
 		id: sliceType
@@ -33,6 +33,34 @@ FeaturePopup {
 		anchors.top: sliceType.bottom
 		anchors.topMargin: 16
 	}
+	CtrSpinBox {
+		id: aaxy
+		label.text: "Antialiasing XY"
+		width: parent.width - 16 * 2 - 16	// 16 = triangle height
+		height: 26
+		value: 1
+		fromNum: 1
+		toNum: 8
+		increment: 1
+		anchors.left: parent.left
+		anchors.leftMargin: 32	// 16 = triangle height
+		anchors.top: layerHeight.bottom
+		anchors.topMargin: 16
+	}
+	CtrSpinBox {
+		id: aaz
+		label.text: "Antialiasing Z"
+		width: parent.width - 16 * 2 - 16	// 16 = triangle height
+		height: 26
+		value: 1
+		fromNum: 1
+		toNum: 4
+		increment: 1
+		anchors.left: parent.left
+		anchors.leftMargin: 32	// 16 = triangle height
+		anchors.top: aaxy.bottom
+		anchors.topMargin: 16
+	}
 
 	CtrToggleSwitch {
 		id: invertX
@@ -40,7 +68,7 @@ FeaturePopup {
 		isChecked: false
 		anchors.left: parent.left
 		anchors.leftMargin: 32	// 16 = triangle height
-		anchors.top: layerHeight.bottom
+		anchors.top: aaz.bottom
 		anchors.topMargin: 16
 		leftText
 		{

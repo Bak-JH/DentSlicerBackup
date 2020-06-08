@@ -27,6 +27,11 @@ void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
 	parse(doc, "layerHeight", layerHeight);
 	parse(doc, "invertX", invertX);
 	parseStrToEnum(doc, "slicingMode", slicingMode);
+	parse(doc, "useGPU", useGPU);
+	parse(doc, "AAXY", AAXY);
+	parse(doc, "AAZ", AAZ);
+
+
 
 }
 
@@ -49,6 +54,8 @@ rapidjson::Document Hix::Settings::SliceSetting::doc()
 	doc.AddMember("layerHeight", layerHeight, doc.GetAllocator());
 	doc.AddMember("invertX", invertX, doc.GetAllocator());
 	doc.AddMember("slicingMode", std::string(magic_enum::enum_name(slicingMode)), doc.GetAllocator());
-
+	doc.AddMember("useGPU", useGPU, doc.GetAllocator());
+	doc.AddMember("AAXY", AAXY, doc.GetAllocator());
+	doc.AddMember("AAZ", AAZ, doc.GetAllocator());
 	return doc;
 }

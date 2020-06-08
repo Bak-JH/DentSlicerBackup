@@ -1,5 +1,5 @@
 #pragma once
-#include "interfaces/Mode.h"`
+#include "interfaces/Mode.h"
 #include "../Tasking/Task.h"
 #include "DentEngine/src/Bounds3D.h"
 #include "../slice/slicingengine.h"
@@ -23,6 +23,9 @@ namespace Hix
 			//UI slicing options
 			Hix::QML::Controls::DropdownBox* _sliceTypeDrop;
 			Hix::QML::Controls::InputSpinBox* _layerHeightSpin;
+			Hix::QML::Controls::InputSpinBox* _aaxySpin;
+			Hix::QML::Controls::InputSpinBox* _aazSpin;
+
 			Hix::QML::Controls::ToggleSwitch* _invertXSwtch;
 
 		};
