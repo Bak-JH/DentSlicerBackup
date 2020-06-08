@@ -74,8 +74,8 @@ void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxB
 void Hix::Slicer::SlicerGL::writeToFile(const std::vector<uint8_t>& data, size_t index)
 {
     std::stringstream idxStream;
-    idxStream << std::setw(4) << std::setfill('0') << index;
-    auto idxStr = "slice" + idxStream.str() + ".png";
+    idxStream << index;
+    auto idxStr = idxStream.str() + ".png";
     std::filesystem::path file = _outPath/(idxStr);
     stbi_write_png(file.c_str(), _resX, _resY, 1, data.data(), _resX);
     _fileWriteSem.notify();

@@ -42,7 +42,7 @@ QVector4D Hix::Support::CylindricalRaft::getPrimitiveColorCode(const Hix::Engine
 
 void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std::vector<QVector3D>& contour)
 {
-
+	auto& sSetting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 
 	//need to form a contour that contains all overhangs
 	std::vector<QVector3D> path;
@@ -55,13 +55,13 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 	//cylinder is of uniform shape, except it narrows a bit in the middle-z
 
-	scales.emplace_back(0.6f);
+	scales.emplace_back(1.0f);
 	//scales.emplace_back(scale);
-	scales.emplace_back(1.2f);
+	scales.emplace_back(sSetting.raftMinMaxRatio);
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
-	path.emplace_back(QVector3D(0, 0, Hix::Application::ApplicationManager::getInstance().settings().supportSetting.raftThickness));
+	path.emplace_back(QVector3D(0, 0, sSetting.raftThickness));
 
 	//create cylinder walls
 	std::vector<std::vector<QVector3D>> jointContours;
@@ -92,7 +92,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax * 1.0);
+	auto square = Hix::Shapes2D::generateSquare(Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax * Hix::Application::ApplicationManager::getInstance().settings().supportSetting.raftRadiusMult);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());
@@ -107,7 +107,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	
 	//run concave hull algorithm on remaining points
 	//set minimum voronoid distance to avoid crazy concave shapes
-	constexpr float minVorDist = 4.0f;
+	//constexpr float minVorDist = 4.0f;
 	pcl::PointCloud<pcl::PointXYZ>::Ptr concaveOut(new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr interiorPts( new pcl::PointCloud<pcl::PointXYZ>);
 	std::vector< pcl::Vertices > polygons;

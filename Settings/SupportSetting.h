@@ -29,6 +29,8 @@ namespace Hix
 			float supportDensity;
 			float supportBaseHeight;
 			float raftThickness;
+			float raftRadiusMult;
+			float raftMinMaxRatio;
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
