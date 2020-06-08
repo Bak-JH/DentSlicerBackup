@@ -20,6 +20,8 @@ namespace Hix
 			bool operator==(const Overhang& o) const;
 			const Hix::Engine3D::Mesh* owner()const;
 			const QVector3D& normal()const;
+			FaceConstItr nearestFace()const;
+			bool isVertex()const;
 			//void setRaycastResult(const RayHits& hit);
 			//const RayHits& rayHit()const;
 		private:

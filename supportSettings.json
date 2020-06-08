@@ -4,6 +4,8 @@
     "supportDensity": 50.0,
     "supportBaseHeight": 2.0,
     "raftThickness": 1.0,
+    "raftRadiusMult": 0.6,
+    "raftMinMaxRatio": 1.5,
     "supportType": "Vertical",
     "raftType": "General"
 }

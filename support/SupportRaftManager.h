@@ -66,7 +66,7 @@ namespace Hix
 			void prepareRaycaster(const GLModel& model);
 			Qt3DCore::QEntity* _root;
 			std::vector<QVector3D> getSupportBasePts()const;
-			EditMode _supportEditMode = EditMode::None;
+			EditMode _supportEditMode = EditMode::Manual;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unordered_map<const GLModel*, std::unordered_set<ModelAttachedSupport*>> _modelSupportMap;
 			std::unique_ptr<RaftModel> _raft;

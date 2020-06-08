@@ -138,8 +138,35 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 	float minSupportScale = setting.supportRadiusMin / setting.supportRadiusMax;
 
+	//calculate overlap distance
+	float intoMeshLength = 0.0f; //120 micron
 
-	constexpr float intoMeshLength = 0.120f; //120 micron
+	auto overhangModelCoordinates = _overhang.owner()->ptToLocal(_overhang.coord());
+	auto overhangModelNormal = _overhang.owner()->ptToLocal(_overhang.normal()).normalized();
+	auto overhangIntoModelNormal = -overhangModelNormal;
+	auto startingFace = _overhang.nearestFace();
+	//less than 90 degrees, so 2
+	float maxNormSquaredDiff = 2.0f;
+	auto overlapFaces = _overhang.owner()->findNearSimilarFaces(overhangModelCoordinates, overhangModelNormal, startingFace, maxNormSquaredDiff, 100, setting.supportRadiusMin);
+	std::unordered_set<VertexConstItr> attachmentPts;
+	for (auto& f : overlapFaces)
+	{
+		auto vtcs = f.meshVertices();
+		for (auto& e : vtcs)
+		{
+			attachmentPts.insert(e);
+		}
+	}
+	for (auto& v : attachmentPts)
+	{
+		auto local = v.localPosition();
+		auto dist = v.localPosition().distanceToPlane(overhangModelCoordinates, overhangIntoModelNormal);
+		if (dist > 0.0f)
+		{
+			intoMeshLength = std::max(intoMeshLength, dist);
+		}
+	}
+	//constexpr float intoMeshLength = 0.120f; //120 micron
 	constexpr float coneLength = SUPPORT_CONE_LENGTH;
 
 	std::vector<QVector3D> path;

@@ -5,6 +5,7 @@
 #include <qdebug.h>
 #include <QQmlContext>
 #include <qqml.h>
+#include <stdexcept> 
 
 QObject* Hix::QML::findChildQItemByName(QObject* start, const std::string& name)
 {
