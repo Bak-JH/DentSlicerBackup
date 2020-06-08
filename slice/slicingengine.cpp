@@ -18,6 +18,13 @@ using namespace Hix::Slicer;
 using namespace Hix::Render;
 
 std::vector<Hix::Slicer::LayerGroup> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float delta) {
+	auto entities = selectedToEntities(models, suppRaft);
+	return sliceEntities(entities, delta);
+}
+
+
+std::unordered_set<const SceneEntity*> SlicingEngine::selectedToEntities(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft)
+{
 	std::unordered_set<const SceneEntity*> entities;
 	for (auto& m : models)
 	{
@@ -32,7 +39,7 @@ std::vector<Hix::Slicer::LayerGroup> SlicingEngine::sliceModels(const std::unord
 	{
 		entities.emplace(raft);
 	}
-	return sliceEntities(entities, delta);
+	return entities;
 }
 
 std::vector<Hix::Slicer::LayerGroup> SlicingEngine::sliceEntities(const std::unordered_set<const SceneEntity*>& models, float delta)
