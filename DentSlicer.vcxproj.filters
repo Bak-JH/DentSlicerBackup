@@ -259,6 +259,9 @@
     <ClCompile Include="Qt\QtUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh\Simplify.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1015,6 +1018,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Qt\QtUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Simplify.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
