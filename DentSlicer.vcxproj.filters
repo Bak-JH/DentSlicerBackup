@@ -103,7 +103,6 @@
     <ClCompile Include="feature\move.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="feature\Plane3D.cpp" />
-    <ClCompile Include="feature\PoissonRemesh.cpp" />
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
     <ClCompile Include="feature\repair\Algorithms\detectIntersections.cpp" />
     <ClCompile Include="feature\repair\Algorithms\holeFilling.cpp" />
@@ -801,7 +800,6 @@
     <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\Plane3D.h" />
-    <ClInclude Include="feature\PoissonRemesh.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
     <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
