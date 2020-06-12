@@ -37,6 +37,7 @@ namespace Hix
 		void rotateCW90(QVector2D& vec);
 		void rotateCCW90(QVector2D& vec);
 
+		void circleToTri(Hix::Engine3D::Mesh* supportMesh, const std::vector<QVector3D>& endCapOutline, const QVector3D& center, bool oppDir);
 		std::vector<QVector3D> generateCircle(float radius, size_t segCount);
 		std::vector<QVector3D> generateHexagon(float radius);
 		std::vector<QVector3D> generateSquare(float radius);

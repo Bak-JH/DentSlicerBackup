@@ -27,6 +27,10 @@ namespace Hix
 			void addAccelerator(RayAccelerator* accelerator);
 			RayHits rayIntersect(const QVector3D& rayOrigin, const QVector3D& rayEnd);
 			RayHits rayIntersectDirection(const QVector3D& rayFrom, const QVector3D& rayDirection);
+			/// <summary>
+			/// volumetric ray cast test with early exit.
+			/// </summary>
+			bool checkCSecInteresect(const QVector3D& origin, const QVector3D& end, const std::vector<QVector3D>& crossSec);
 
 		protected:
 			virtual RayHit rayIntersectTri(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;

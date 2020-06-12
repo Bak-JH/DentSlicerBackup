@@ -299,6 +299,9 @@
     <ClCompile Include="slice\GLContextFunctionObj.cpp" />
     <ClCompile Include="slice\gpuSlicer.cpp" />
     <ClCompile Include="slice\InfoWriter.cpp" />
+    <ClCompile Include="support\ContourModel.cpp" />
+    <ClCompile Include="support\DiagInterconnect.cpp" />
+    <ClCompile Include="support\Interconnect.cpp" />
     <ClCompile Include="Tasking\Task.cpp" />
     <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
@@ -959,6 +962,9 @@
     <ClInclude Include="slice\include\stb_image_write.h" />
     <ClInclude Include="slice\InfoWriter.h" />
     <ClInclude Include="slice\OpenGLIncludes.h" />
+    <ClInclude Include="support\ContourModel.h" />
+    <ClInclude Include="support\DiagInterconnect.h" />
+    <ClInclude Include="support\Interconnect.h" />
     <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />

@@ -1,6 +1,7 @@
 #pragma once
 #include "RayAccelerator.h"
 #include "HixBVH.h"
+#include <unordered_set>
 class GLModel;
 
 
@@ -13,6 +14,8 @@ namespace Hix
 		{
 		public:
 			BVH(const GLModel& model);
+			BVH(const std::unordered_set<const GLModel*>& model);
+
 			void initModel(const GLModel& model);
 			virtual ~BVH();
 			std::deque<FaceConstItr> getRayCandidates(const QVector3D& rayFrom, const QVector3D& rayTo)override;
@@ -22,7 +25,6 @@ namespace Hix
 
 		private:
 			bool rayIntersectsAABB(const QVector3D& dirFac, const QVector3D& orig, const Hix::Temp::BVH<FaceConstItr>::Node& node)const;
-			const GLModel& _model;
 			std::unordered_map<VertexConstItr, QVector3D> _wPosCache;
 			std::vector<Hix::Temp::BVH<FaceConstItr>::BoundedObject*> _boundedObjects;
 		};

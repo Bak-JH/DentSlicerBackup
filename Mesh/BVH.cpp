@@ -215,12 +215,12 @@ bool Hix::Engine3D::BVH::rayIntersectsAABB(const QVector3D& dirFrac, const QVect
 	return true;
 }
 
-Hix::Engine3D::BVH::BVH(const GLModel& model):_model(model)
+Hix::Engine3D::BVH::BVH(const GLModel& model)
 {
 	//cache world vertex positions and triangle bounding boxes
 	std::unordered_set<const GLModel*> allModels;
-	_model.getChildrenModels(allModels);
-	allModels.insert(&_model);
+	model.getChildrenModels(allModels);
+	allModels.insert(&model);
 	for (auto each : allModels)
 	{
 		initModel(*each);
@@ -230,6 +230,19 @@ Hix::Engine3D::BVH::BVH(const GLModel& model):_model(model)
 	//do not call parent::build, without Node factory patten, defaults to pcl::...Node class
 	build(_boundedObjects);
 
+}
+
+Hix::Engine3D::BVH::BVH(const std::unordered_set<const GLModel*>& model)
+{
+	//cache world vertex positions and triangle bounding boxes
+	for (auto each : model)
+	{
+		initModel(*each);
+	}
+	BoundedObjectFactory boundFactory(_wPosCache);
+	_boundedObjects = boundFactory.getBounds(model);
+	//do not call parent::build, without Node factory patten, defaults to pcl::...Node class
+	build(_boundedObjects);
 }
 
 
