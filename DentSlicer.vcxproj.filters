@@ -258,6 +258,15 @@
     <ClCompile Include="Qt\QtUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="support\DiagInterconnect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\Interconnect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\ContourModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1013,6 +1022,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Qt\QtUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\Interconnect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\DiagInterconnect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\ContourModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

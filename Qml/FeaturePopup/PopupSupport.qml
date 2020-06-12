@@ -6,7 +6,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Support")
-	height: 220
+	height: 260
 	enableApply: false
 	function supportSettingToggle() {
 		if (supportsettingpopup.visible == false) {
@@ -93,11 +93,19 @@ FeaturePopup {
 		// textColor: "#FFFFFF"
 	}
 
+	CtrTextButton {
+		id: reconnect
+		anchors.top: clearsupports.bottom
+		anchors.topMargin: 16
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: "Generate Interconnects"
+	}
+
 	CtrToggleSwitch {
 		id: editsupports
 		sizeMult: 1.2
 		isChecked: true
-		anchors.top: clearsupports.bottom
+		anchors.top: reconnect.bottom
 		anchors.topMargin: 16
 		anchors.left: parent.left
 		anchors.leftMargin: 30
@@ -116,7 +124,7 @@ FeaturePopup {
 	SidePopup {
 		id: supportsettingpopup
 		width: 296
-		height: 250
+		height: 305
 		anchors.topMargin: 38
 		anchors.left: generatesupports.right
 		anchors.leftMargin: 30
@@ -133,8 +141,8 @@ FeaturePopup {
 			anchors.topMargin: 16
 		}
 		CtrDropdownBox {
-			id: rafttype
-			label.text: "Raft Type"
+			id: interconnecttype
+			label.text: "Interconnect"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			color: "transparent"
@@ -153,7 +161,7 @@ FeaturePopup {
 			toNum: 100
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
-			anchors.top: rafttype.bottom
+			anchors.top: interconnecttype.bottom
 			anchors.topMargin: 16
 		}
 		CtrSpinBox {
@@ -182,16 +190,51 @@ FeaturePopup {
 			anchors.top: maxradius.bottom
 			anchors.topMargin: 16
 		}
-
+		CtrSpinBox {
+			id: supportBaseHeight
+			label.text: "Min height (mm)"
+			height: 26
+			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
+			fromNum: 1.0
+			toNum: 20
+			anchors.left: parent.left
+			anchors.leftMargin: 32	// 16 = triangle height
+			anchors.top: minradius.bottom
+			anchors.topMargin: 16
+		}
+		CtrSpinBox {
+			id: maxConnectDistance
+			label.text: "Max connect dist (mm)"
+			height: 26
+			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
+			fromNum: 0.0
+			toNum: 10000
+			anchors.left: parent.left
+			anchors.leftMargin: 32	// 16 = triangle height
+			anchors.top: supportBaseHeight.bottom
+			anchors.topMargin: 16
+		}
 	}
 	SidePopup {
 		id: raftsettingpopup
 		width: 296
-		height: 200
+		height: 250
 		anchors.topMargin: 72
 		anchors.left: generateraft.right
 		anchors.leftMargin: 30
-
+		CtrDropdownBox {
+			id: rafttype
+			label.text: "Raft Type"
+			height: 26
+			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			color: "transparent"
+			anchors.left: parent.left
+			anchors.leftMargin: 32	// 16 = triangle height
+			anchors.top: parent.top
+			anchors.topMargin: 16
+		}
 		CtrSpinBox {
 			id: raftRadiusMult
 			label.text: "Radius mult(support.max)"
@@ -202,7 +245,7 @@ FeaturePopup {
 			toNum: 100.0
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
-			anchors.top: parent.top
+			anchors.top: rafttype.bottom
 			anchors.topMargin: 16
 		}
 		CtrSpinBox {

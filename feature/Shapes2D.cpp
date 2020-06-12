@@ -149,21 +149,29 @@ std::vector<QVector3D> Hix::Shapes2D::generateCircle(float radius, size_t segCou
 
 std::vector<QVector3D> Hix::Shapes2D::generateHexagon(float radius)
 {
-	std::vector<QVector3D>hexagon;
-	hexagon.reserve(6);
 
-	constexpr  QVector3D normal(0, 0, 1);
-	auto rot = QQuaternion::fromAxisAndAngle(normal, 60);
-	auto pt = QVector3D(radius, 0, 0);
+	return generateCircle(radius, 6);
+}
 
-	for (size_t i = 0; i < 6; ++i)
+
+void Hix::Shapes2D::circleToTri(Hix::Engine3D::Mesh* supportMesh, const std::vector<QVector3D>& endCapOutline, const QVector3D& center, bool oppDir)
+{
+	size_t seg = endCapOutline.size();
+	if (oppDir)
 	{
-
-		hexagon.emplace_back(pt);
-		pt = rot.rotatedVector(pt);
-		pt.setZ(0);
+		for (size_t i = 0; i < seg; ++i)
+		{
+			supportMesh->addFace(center, endCapOutline[(i + 1) % seg], endCapOutline[i % seg]);
+		}
 	}
-	return hexagon;
+	else
+	{
+		for (size_t i = 0; i < seg; ++i)
+		{
+			supportMesh->addFace(center, endCapOutline[i % seg], endCapOutline[(i + 1) % seg]);
+		}
+	}
+
 }
 
 

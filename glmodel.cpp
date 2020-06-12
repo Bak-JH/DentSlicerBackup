@@ -172,6 +172,18 @@ GLModel* GLModel::getRootModel()
 	return back;
 }
 
+const GLModel* GLModel::getRootModel() const
+{
+	auto current = this;
+	const GLModel* back = current;
+	while (current)
+	{
+		back = current;
+		current = dynamic_cast<const GLModel*>(current->parent());
+	}
+	return back;
+}
+
 
 
 void GLModel::changeColor(const QVector4D& color)

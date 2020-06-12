@@ -31,10 +31,11 @@ void Hix::Settings::SupportSetting::parseJSONImpl(const rapidjson::Document& doc
 	parse(doc, "raftThickness", raftThickness);
 	parse(doc, "raftRadiusMult", raftRadiusMult);
 	parse(doc, "raftMinMaxRatio", raftMinMaxRatio);
-
-
+	parse(doc, "maxConnectDistance", maxConnectDistance);
 	parseStrToEnum(doc, "supportType", supportType);
 	parseStrToEnum(doc, "raftType", raftType);
+	parseStrToEnum(doc, "interconnectType", interconnectType);
+
 }
 
 void Hix::Settings::SupportSetting::initialize()
@@ -60,9 +61,11 @@ rapidjson::Document Hix::Settings::SupportSetting::doc()
 	doc.AddMember("raftThickness", raftThickness, doc.GetAllocator());
 	doc.AddMember("raftRadiusMult", raftRadiusMult, doc.GetAllocator());
 	doc.AddMember("raftMinMaxRatio", raftMinMaxRatio, doc.GetAllocator());
-
+	doc.AddMember("interconnectType", std::string(magic_enum::enum_name(interconnectType)), doc.GetAllocator());
 	doc.AddMember("supportType", std::string(magic_enum::enum_name(supportType)), doc.GetAllocator());
 	doc.AddMember("raftType", std::string(magic_enum::enum_name(raftType)), doc.GetAllocator());
+	doc.AddMember("maxConnectDistance", maxConnectDistance, doc.GetAllocator());
+
 	return doc;
 }
 
