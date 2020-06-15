@@ -26,6 +26,8 @@
 #include "feature/move.h"
 #include "application/ApplicationManager.h"
 
+#include "Mesh/Simplify.h"
+
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _STRICT_GLMODEL
@@ -272,6 +274,15 @@ void GLModel::modelSelectionClick()
 		partManager.unselectAll();
 	}
 	partManager.setSelected(listed, !isSelected);
+
+	qDebug() << "(b)triangles: " << _mesh->getFaces().size();
+	Eigen::MatrixXd testXd;
+	Eigen::MatrixXi testXi;
+	Hix::Engine3D::Simplify::to_eigen_mesh(_mesh, testXd, testXi);
+	std::cout << testXd << testXi;
+	qDebug() << "(to_eigen_mesh)triangles: " << _mesh->getFaces().size();
+	Hix::Engine3D::Simplify::simlify_mesh(testXd, testXi);
+	qDebug() << "(simlify_mesh)triangles: " << _mesh->getFaces().size();
 }
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
