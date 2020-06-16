@@ -11,14 +11,15 @@ void Hix::Engine3D::Simplify::to_eigen_mesh(const Mesh* mesh, Eigen::MatrixXd& V
 {
 	V.resize(3 * mesh->getFaces().size(), 3);
 	F.resize(mesh->getFaces().size(), 3);
+	FaceConstItr faceitr = mesh->getFaces().begin();
 	for (unsigned int i = 0; i < mesh->getFaces().size(); ++i) {
-		FaceConstItr faceitr = mesh->getFaces().begin();
 		V.block<1, 3>(3 * i + 0, 0) = to_eigen_matrix<double>(faceitr.meshVertices().at(0).localPosition());
 		V.block<1, 3>(3 * i + 1, 0) = to_eigen_matrix<double>(faceitr.meshVertices().at(1).localPosition());
 		V.block<1, 3>(3 * i + 2, 0) = to_eigen_matrix<double>(faceitr.meshVertices().at(2).localPosition());
 		F(i, 0) = int(3 * i + 0);
 		F(i, 1) = int(3 * i + 1);
 		F(i, 2) = int(3 * i + 2);
+		++faceitr;
 	}
 
 	Eigen::MatrixXd rV;
@@ -59,7 +60,6 @@ void Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 		double cost = e;
 		Eigen::RowVectorXd p(1, 3);
 		igl::shortest_edge_and_midpoint(e, V, F, E, EMAP, EF, EI, cost, p);
-		qDebug() << cost << p.x() << p.y() << p.z();
 		C.row(e) = p;
 		Qit[e] = Q.insert(std::pair<double, int>(cost, e)).first;
 	}
@@ -73,8 +73,7 @@ void Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 		const int max_iter = std::ceil(0.01 * Q.size());
 		for (int j = 0; j < max_iter; j++)
 		{
-			if (!igl::collapse_edge(
-				igl::shortest_edge_and_midpoint, V, F, E, EMAP, EF, EI, Q, Qit, C))
+			if (!igl::collapse_edge(igl::shortest_edge_and_midpoint, V, F, E, EMAP, EF, EI, Q, Qit, C))
 			{
 				break;
 			}
