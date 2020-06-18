@@ -275,14 +275,12 @@ void GLModel::modelSelectionClick()
 	}
 	partManager.setSelected(listed, !isSelected);
 
-	qDebug() << "(b)triangles: " << _mesh->getFaces().size();
 	Eigen::MatrixXd testXd;
 	Eigen::MatrixXi testXi;
+
 	Hix::Engine3D::Simplify::to_eigen_mesh(_mesh, testXd, testXi);
-	std::cout << testXd << testXi;
-	qDebug() << "(to_eigen_mesh)triangles: " << _mesh->getFaces().size();
 	Hix::Engine3D::Simplify::simlify_mesh(testXd, testXi);
-	qDebug() << "(simlify_mesh)triangles: " << _mesh->getFaces().size();
+	setMesh(Hix::Engine3D::Simplify::to_hix_mesh(_mesh, testXd, testXi));
 }
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)

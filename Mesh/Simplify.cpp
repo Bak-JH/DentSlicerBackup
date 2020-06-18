@@ -31,11 +31,9 @@ void Hix::Engine3D::Simplify::to_eigen_mesh(const Mesh* mesh, Eigen::MatrixXd& V
 	F = std::move(rF);
 }
 
-void Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF)
+bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF)
 {
 	/// properties ///
-	Eigen::MatrixXd V;
-	Eigen::MatrixXi F;
 	// Prepare array-based edge data structures and priority queue
 	Eigen::VectorXi EMAP;
 	Eigen::MatrixXi E, EF, EI;
@@ -45,42 +43,58 @@ void Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 	// If an edge were collapsed, we'd collapse it to these points:
 	Eigen::MatrixXd C;
 	int num_collapsed;
-	
-	F = OF;
-	V = OV;
-	igl::edge_flaps(F, E, EMAP, EF, EI);
-	Qit.resize(E.rows());
 
-	C.resize(E.rows(), V.cols());
-	Eigen::VectorXd costs(E.rows());
+	igl::edge_flaps(OF, E, EMAP, EF, EI);
+	Qit.resize(E.rows());
+	C.resize(E.rows(), OV.cols());
 	Q.clear();
 
 	for (int e = 0; e < E.rows(); e++)
 	{
 		double cost = e;
 		Eigen::RowVectorXd p(1, 3);
-		igl::shortest_edge_and_midpoint(e, V, F, E, EMAP, EF, EI, cost, p);
+		igl::shortest_edge_and_midpoint(e, OV, OF, E, EMAP, EF, EI, cost, p);
 		C.row(e) = p;
 		Qit[e] = Q.insert(std::pair<double, int>(cost, e)).first;
 	}
 	num_collapsed = 0;
-	
-	/// simplify ///
-	if (!Q.empty())
+
+	for (int i = 0; i < 100; ++i)
 	{
-		bool something_collapsed = false;
-		// collapse edge
-		const int max_iter = std::ceil(0.01 * Q.size());
-		for (int j = 0; j < max_iter; j++)
+		/// simplify ///
+		if (!Q.empty())
 		{
-			if (!igl::collapse_edge(igl::shortest_edge_and_midpoint, V, F, E, EMAP, EF, EI, Q, Qit, C))
+			bool something_collapsed = false;
+			// collapse edge
+			const int max_iter = std::ceil(0.01 * Q.size());
+			for (int j = 0; j < max_iter; j++)
 			{
-				break;
+				if (!igl::collapse_edge(
+					igl::shortest_edge_and_midpoint, OV, OF, E, EMAP, EF, EI, Q, Qit, C))
+				{
+					return false;
+				}
+				something_collapsed = true;
+				num_collapsed++;
 			}
-			something_collapsed = true;
-			num_collapsed++;
 		}
+		
 		qDebug() << "collapsed: " << num_collapsed;
 	}
-	
+
+	return true;
+}
+
+Hix::Engine3D::Mesh* Hix::Engine3D::Simplify::to_hix_mesh(Hix::Engine3D::Mesh* mesh, Eigen::MatrixXd& V, Eigen::MatrixXi& F)
+{
+	auto resultMesh = new Hix::Engine3D::Mesh(*mesh);
+	resultMesh->clear();
+
+	for (Eigen::Index i = 0; i < F.rows(); ++i) {
+		resultMesh->addFace(QVector3D(V.row(F.row(i)(0)).x(), V.row(F.row(i)(0)).y(), V.row(F.row(i)(0)).z()),
+							QVector3D(V.row(F.row(i)(1)).x(), V.row(F.row(i)(1)).y(), V.row(F.row(i)(1)).z()),
+							QVector3D(V.row(F.row(i)(2)).x(), V.row(F.row(i)(2)).y(), V.row(F.row(i)(2)).z()));
+	}
+
+	return resultMesh;
 }
