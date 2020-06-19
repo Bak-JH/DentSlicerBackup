@@ -54,6 +54,7 @@ namespace Hix
 			float bbMaxRadius()const;
 			QVector3D centre()const;
 			QVector3D lengths()const;
+			float volume()const;
 			const std::array<float, 6>& bound()const;
 			QVector3D displaceWithin(const Bounds3D& child, QVector3D displacement =  QVector3D())const;
 			std::array<float, 6> calculateMaxDisplacement(const Bounds3D & child)const;

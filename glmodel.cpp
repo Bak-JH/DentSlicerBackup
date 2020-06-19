@@ -278,8 +278,9 @@ void GLModel::modelSelectionClick()
 	/// testing ///
 	//Eigen::MatrixXd testXd;
 	//Eigen::MatrixXi testXi;
+
 	//Hix::Engine3D::Simplify::to_eigen_mesh(_mesh, testXd, testXi);
-	//if(Hix::Engine3D::Simplify::simlify_mesh(testXd, testXi, 100))
+	//if(Hix::Engine3D::Simplify::simlify_mesh(testXd, testXi))
 	//	setMesh(Hix::Engine3D::Simplify::to_hix_mesh(_mesh, testXd, testXi));
 }
 

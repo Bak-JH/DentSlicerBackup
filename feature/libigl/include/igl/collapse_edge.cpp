@@ -9,6 +9,7 @@
 #include "circulation.h"
 #include "edge_collapse_is_valid.h"
 #include <vector>
+#include <algorithm>
 
 IGL_INLINE bool igl::collapse_edge(
   const int e,
@@ -165,6 +166,17 @@ IGL_INLINE bool igl::collapse_edge(
     const Eigen::MatrixXi &,
     double &,
     Eigen::RowVectorXd &)> & cost_and_placement,
+  const std::function<bool(
+    const Eigen::MatrixXd&,
+    const Eigen::MatrixXi&,
+    const Eigen::MatrixXi&,
+    const Eigen::VectorXi&,
+    const Eigen::MatrixXi&,
+    const Eigen::MatrixXi&,
+    const std::set<std::pair<double, int> >&,
+    const std::vector<std::set<std::pair<double, int> >::iterator >&,
+    const Eigen::MatrixXd&,
+    const int e)>& pre_collapse,
   Eigen::MatrixXd & V,
   Eigen::MatrixXi & F,
   Eigen::MatrixXi & E,
@@ -176,18 +188,6 @@ IGL_INLINE bool igl::collapse_edge(
   Eigen::MatrixXd & C)
 {
   int e,e1,e2,f1,f2;
-  const auto always_try = [](
-    const Eigen::MatrixXd &                                         ,/*V*/
-    const Eigen::MatrixXi &                                         ,/*F*/
-    const Eigen::MatrixXi &                                         ,/*E*/
-    const Eigen::VectorXi &                                         ,/*EMAP*/
-    const Eigen::MatrixXi &                                         ,/*EF*/
-    const Eigen::MatrixXi &                                         ,/*EI*/
-    const std::set<std::pair<double,int> > &                        ,/*Q*/
-    const std::vector<std::set<std::pair<double,int> >::iterator > &,/*Qit*/
-    const Eigen::MatrixXd &                                         ,/*C*/
-    const int                                                        /*e*/
-    ) -> bool { return true;};
   const auto never_care = [](
     const Eigen::MatrixXd &                                         ,   /*V*/
     const Eigen::MatrixXi &                                         ,   /*F*/
@@ -207,7 +207,7 @@ IGL_INLINE bool igl::collapse_edge(
     )-> void { };
   return 
     collapse_edge(
-      cost_and_placement,always_try,never_care,
+      cost_and_placement, pre_collapse,never_care,
       V,F,E,EMAP,EF,EI,Q,Qit,C,e,e1,e2,f1,f2);
 }
 
@@ -279,7 +279,7 @@ IGL_INLINE bool igl::collapse_edge(
     const Eigen::MatrixXi &,
     const Eigen::MatrixXi &,
     double &,
-    Eigen::RowVectorXd &)> & cost_and_placement,
+    Eigen::RowVectorXd &)>& cost_and_placement,
   const std::function<bool(
     const Eigen::MatrixXd &                                         ,/*V*/
     const Eigen::MatrixXi &                                         ,/*F*/

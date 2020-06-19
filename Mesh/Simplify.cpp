@@ -7,31 +7,52 @@
 #include <igl/edge_flaps.h>
 #include <igl/shortest_edge_and_midpoint.h>
 
+const auto AABBCost = [](
+	const Eigen::MatrixXd& V,/*V*/
+	const Eigen::MatrixXi&,/*F*/
+	const Eigen::MatrixXi& E,/*E*/
+	const Eigen::VectorXi&,/*EMAP*/
+	const Eigen::MatrixXi&,/*EF*/
+	const Eigen::MatrixXi&,/*EI*/
+	const std::set<std::pair<double, int> >&,/*Q*/
+	const std::vector<std::set<std::pair<double, int> >::iterator >&,/*Qit*/
+	const Eigen::MatrixXd&,/*C*/
+	const int e) -> bool {
+		auto minLength = std::min(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeX(), 
+									Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeY());
+		auto voxel = pow(minLength / 2, 3);
+		auto volume = Hix::Bounds3D::Bounds3D();
+		volume.update(QVector3D(V.row(E(e, 0)).x(), V.row(E(e, 0)).y(), V.row(E(e, 0)).z()));
+		volume.update(QVector3D(V.row(E(e, 1)).x(), V.row(E(e, 1)).y(), V.row(E(e, 1)).z()));
+
+		if (volume.volume() < voxel)
+			return true;
+		return false;
+};
+
 void Hix::Engine3D::Simplify::to_eigen_mesh(const Mesh* mesh, Eigen::MatrixXd& V, Eigen::MatrixXi& F)
 {
-	V.resize(3 * mesh->getFaces().size(), 3);
+	V.resize(mesh->getVertices().size(), 3);
 	F.resize(mesh->getFaces().size(), 3);
-	FaceConstItr faceitr = mesh->getFaces().begin();
-	for (unsigned int i = 0; i < mesh->getFaces().size(); ++i) {
-		V.block<1, 3>(3 * i + 0, 0) = to_eigen_matrix<double>(faceitr.meshVertices().at(0).localPosition());
-		V.block<1, 3>(3 * i + 1, 0) = to_eigen_matrix<double>(faceitr.meshVertices().at(1).localPosition());
-		V.block<1, 3>(3 * i + 2, 0) = to_eigen_matrix<double>(faceitr.meshVertices().at(2).localPosition());
-		F(i, 0) = int(3 * i + 0);
-		F(i, 1) = int(3 * i + 1);
-		F(i, 2) = int(3 * i + 2);
-		++faceitr;
+	VertexConstItr vertexItr = mesh->getVertices().begin();
+	for (unsigned int i = 0; i < mesh->getVertices().size(); ++i)
+	{
+		V.block<1, 3>(i, 0) = to_eigen_matrix<double>(vertexItr.localPosition());
+		++vertexItr;
 	}
 
-	Eigen::MatrixXd rV;
-	Eigen::MatrixXi rF;
-	// We will convert this to a proper 3d mesh with no duplicate points.
-	Eigen::VectorXi SVI, SVJ;
-	igl::remove_duplicate_vertices(V, F, MESH_EPS, rV, SVI, SVJ, rF);
-	V = std::move(rV);
-	F = std::move(rF);
+	FaceConstItr faceitr = mesh->getFaces().begin();
+	for (unsigned int i = 0; i < mesh->getFaces().size(); ++i) 
+	{
+		auto MV = faceitr.getVerticeIndices();
+		F(i, 0) = MV[0];
+		F(i, 1) = MV[1];
+		F(i, 2) = MV[2];
+		++faceitr;
+	}
 }
 
-bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF, int simplify_level)
+bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF)
 {
 	/// properties ///
 	bool something_collapsed = false;
@@ -43,7 +64,7 @@ bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 	std::vector<PriorityQueue::iterator > Qit;
 	// If an edge were collapsed, we'd collapse it to these points:
 	Eigen::MatrixXd C;
-	int num_collapsed;
+	int num_collapsed = 1;
 
 	igl::edge_flaps(OF, E, EMAP, EF, EI);
 	Qit.resize(E.rows());
@@ -58,10 +79,11 @@ bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 		C.row(e) = p;
 		Qit[e] = Q.insert(std::pair<double, int>(cost, e)).first;
 	}
-	num_collapsed = 0;
+	
 
-	for (int i = 0; i < simplify_level; ++i)
+	while(num_collapsed != 0)
 	{
+		num_collapsed = 0;
 		/// simplify ///
 		if (!Q.empty())
 		{
@@ -70,7 +92,7 @@ bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 			for (int j = 0; j < max_iter; j++)
 			{
 				if (!igl::collapse_edge(
-					igl::shortest_edge_and_midpoint, OV, OF, E, EMAP, EF, EI, Q, Qit, C))
+					igl::shortest_edge_and_midpoint, AABBCost, OV, OF, E, EMAP, EF, EI, Q, Qit, C))
 				{
 					break;
 				}

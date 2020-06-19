@@ -228,6 +228,12 @@ QVector3D Hix::Engine3D::Bounds3D::lengths() const
 	return QVector3D(lengthX(), lengthY(), lengthZ());
 }
 
+float Hix::Engine3D::Bounds3D::volume() const
+{
+	auto len = lengths();
+	return len.x() * len.y() * len.z();
+}
+
 const std::array<float, 6>& Hix::Engine3D::Bounds3D::bound() const
 {
 	return _bound;

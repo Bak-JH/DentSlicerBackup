@@ -11,8 +11,6 @@ namespace Hix
 
 		namespace Simplify
 		{
-			const constexpr double MESH_EPS = 1e-6;
-
 			// Casting an std::vector<> from one type to another type without warnings about a loss of accuracy.
 			template<typename T_TO, typename T_FROM>
 			std::vector<T_TO> cast(const std::vector<T_FROM>& src)
@@ -36,7 +34,7 @@ namespace Hix
 			}
 
 			void to_eigen_mesh(const Mesh* mesh, Eigen::MatrixXd& V, Eigen::MatrixXi& F);
-			bool simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF, int simplify_level);
+			bool simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF);
 			Mesh* to_hix_mesh(Mesh* mesh, Eigen::MatrixXd& OV, Eigen::MatrixXi& OF);
 		}
 	}
