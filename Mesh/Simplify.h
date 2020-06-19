@@ -36,7 +36,7 @@ namespace Hix
 			}
 
 			void to_eigen_mesh(const Mesh* mesh, Eigen::MatrixXd& V, Eigen::MatrixXi& F);
-			bool simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF);
+			bool simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF, int simplify_level);
 			Mesh* to_hix_mesh(Mesh* mesh, Eigen::MatrixXd& OV, Eigen::MatrixXi& OF);
 		}
 	}

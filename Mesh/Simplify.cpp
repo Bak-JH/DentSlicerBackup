@@ -31,9 +31,10 @@ void Hix::Engine3D::Simplify::to_eigen_mesh(const Mesh* mesh, Eigen::MatrixXd& V
 	F = std::move(rF);
 }
 
-bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF)
+bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi& OF, int simplify_level)
 {
 	/// properties ///
+	bool something_collapsed = false;
 	// Prepare array-based edge data structures and priority queue
 	Eigen::VectorXi EMAP;
 	Eigen::MatrixXi E, EF, EI;
@@ -59,12 +60,11 @@ bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 	}
 	num_collapsed = 0;
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < simplify_level; ++i)
 	{
 		/// simplify ///
 		if (!Q.empty())
 		{
-			bool something_collapsed = false;
 			// collapse edge
 			const int max_iter = std::ceil(0.01 * Q.size());
 			for (int j = 0; j < max_iter; j++)
@@ -72,7 +72,7 @@ bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 				if (!igl::collapse_edge(
 					igl::shortest_edge_and_midpoint, OV, OF, E, EMAP, EF, EI, Q, Qit, C))
 				{
-					return false;
+					break;
 				}
 				something_collapsed = true;
 				num_collapsed++;
@@ -82,7 +82,7 @@ bool Hix::Engine3D::Simplify::simlify_mesh(Eigen::MatrixXd& OV, Eigen::MatrixXi&
 		qDebug() << "collapsed: " << num_collapsed;
 	}
 
-	return true;
+	return something_collapsed;
 }
 
 Hix::Engine3D::Mesh* Hix::Engine3D::Simplify::to_hix_mesh(Hix::Engine3D::Mesh* mesh, Eigen::MatrixXd& V, Eigen::MatrixXi& F)

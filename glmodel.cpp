@@ -275,12 +275,12 @@ void GLModel::modelSelectionClick()
 	}
 	partManager.setSelected(listed, !isSelected);
 
-	Eigen::MatrixXd testXd;
-	Eigen::MatrixXi testXi;
-
-	Hix::Engine3D::Simplify::to_eigen_mesh(_mesh, testXd, testXi);
-	Hix::Engine3D::Simplify::simlify_mesh(testXd, testXi);
-	setMesh(Hix::Engine3D::Simplify::to_hix_mesh(_mesh, testXd, testXi));
+	/// testing ///
+	//Eigen::MatrixXd testXd;
+	//Eigen::MatrixXi testXi;
+	//Hix::Engine3D::Simplify::to_eigen_mesh(_mesh, testXd, testXi);
+	//if(Hix::Engine3D::Simplify::simlify_mesh(testXd, testXi, 100))
+	//	setMesh(Hix::Engine3D::Simplify::to_hix_mesh(_mesh, testXd, testXi));
 }
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
