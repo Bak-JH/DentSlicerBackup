@@ -177,7 +177,6 @@
     <ClCompile Include="feature\hollowshell.cpp" />
     <ClCompile Include="utils\httpreq.cpp" />
     <ClCompile Include="utils\linemeshgeometry.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="utils\mathutils.cpp" />
     <ClCompile Include="DentEngine\src\mesh.cpp" />
     <ClCompile Include="DentEngine\src\utils\metric.cpp" />
@@ -265,6 +264,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="support\ContourModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="auth\HixAuthHttpReply.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1031,6 +1036,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="support\ContourModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="auth\HixAuthHttpReply.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
