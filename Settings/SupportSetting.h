@@ -18,6 +18,13 @@ namespace Hix
 			{
 				General
 			};
+			enum class InterconnectType : uint8_t
+			{
+				None,
+				//Automatic,
+				ZigZag,
+				Cross
+			};
 
 			SupportSetting(std::filesystem::path settingsPath);
 			~SupportSetting();
@@ -31,6 +38,8 @@ namespace Hix
 			float raftThickness;
 			float raftRadiusMult;
 			float raftMinMaxRatio;
+			InterconnectType interconnectType;
+			float maxConnectDistance;
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;

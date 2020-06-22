@@ -3,8 +3,12 @@
 #include "../feature/Extrude.h"
 #include "SupportRaftManager.h"
 #include "../glmodel.h"
+#include "../feature/Shapes2D.h"
 #include "../application/ApplicationManager.h"
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
+constexpr  float SUPPORT_BOTTOM_MAX_MULT = 2.0f;
+constexpr  float SUPPORT_BOTTOM_MAX_LENGTH = 1.0f;
+
 //constexpr  float SUPPORT_OVERLAP_LENGTH = SUPPORT_CONE_LENGTH/2;
 
 
@@ -13,6 +17,7 @@ using namespace Hix::Input;
 using namespace Hix::Render;
 using namespace Hix::Support;
 using namespace Hix::OverhangDetect;
+using namespace Hix::Shapes2D;
 using namespace Qt3DCore;
 
 
@@ -44,6 +49,11 @@ const Overhang& Hix::Support::VerticalSupportModel::getOverhang() const
 	return _overhang;
 }
 
+std::optional<std::array<QVector3D, 2>> Hix::Support::VerticalSupportModel::verticalSegment()
+{
+	return _vertSeg;
+}
+
 
 //sort in decreasing z order
 struct RayHitZSort {
@@ -63,32 +73,10 @@ RayHit getTopMost(RayHits& hits)
 	return top;
 }
 
-bool checkMinSupportRadius(RayCaster& caster, const QVector3D& origin, const QVector3D& end, float minRadius)
-{
-	std::array<QVector3D, 4> rectTop;
-	std::array<QVector3D, 4> rectBot;
-	std::array<float, 4> xOffset{ -minRadius, -minRadius, minRadius, minRadius };
-	std::array<float, 4> yOffset{ -minRadius, minRadius, -minRadius, minRadius };
-	for (size_t i = 0; i < 4; ++i)
-	{
-		QVector3D top = origin;
-		top[0] += xOffset[i];
-		top[1] += yOffset[i];
-
-		QVector3D bot = end;
-		bot[0] += xOffset[i];
-		bot[1] += yOffset[i];
-		auto rayCastResults = caster.rayIntersect(top, bot);
-		if (!rayCastResults.empty())
-			return false;
-	}
-	return true;
 
 
-
-}
-
-RayHits rayCastBottomPyramid(RayCaster& caster, const QVector3D& origin, float bottomZ, float pyramidBaseRadius, float supportMinRadius, std::vector<QVector3D>& misses)
+RayHits rayCastBottomPyramid(RayCaster& caster, const QVector3D& origin, float bottomZ, float pyramidBaseRadius,
+	const std::vector<QVector3D> crossSec, std::vector<QVector3D>& misses)
 {
 	RayHits allRayHits;
 	QVector3D rayDest = origin;
@@ -107,7 +95,7 @@ RayHits rayCastBottomPyramid(RayCaster& caster, const QVector3D& origin, float b
 			{
 				//check if this ray can support min support radius
 				//just adding on x,y results in cylinder that is always bigger than the support itself
-				if (checkMinSupportRadius(caster, origin, rayDest, supportMinRadius))
+				if (caster.checkCSecInteresect(origin, rayDest, crossSec))
 				{
 					misses.emplace_back(rayDest);
 					return allRayHits;
@@ -133,7 +121,7 @@ float getRadius(const QVector3D& origin, float bottomZ)
 	return (origin.z() - bottomZ)/2;
 }
 
-std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::vector<float>& scales)
+void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::vector<float>& scales)
 {	 
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 	float minSupportScale = setting.supportRadiusMin / setting.supportRadiusMax;
@@ -169,7 +157,6 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 	//constexpr float intoMeshLength = 0.120f; //120 micron
 	constexpr float coneLength = SUPPORT_CONE_LENGTH;
 
-	std::vector<QVector3D> path;
 	float botNormalLength = 0.100f;
 	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 
@@ -197,7 +184,7 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 		//if the raycasted side is on the backside of a triangle, this is not overhang
 		auto& topMost = rayCastResults.front();
 		if (topMost.type == HitType::BackSide)
-			return path;
+			return;
 		auto gapLength = _overhang.coord().z() -  topMost.intersection.z();
 		auto doConeLength = coneLength * 2;
 		if (gapLength < doConeLength)
@@ -205,10 +192,10 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 			//just do normal cylinder between the areas
 			QVector3D extendedTip = _overhang.coord();
 			extendedTip[2] += intoMeshLength;
-			path.emplace_back(extendedTip);
-			path.emplace_back(topMost.intersection);
+			_contour.emplace_back(extendedTip);
+			_contour.emplace_back(topMost.intersection);
 			scales = { minSupportScale, minSupportScale};
-			return path;
+			return;
 		}
 		else
 		{
@@ -231,17 +218,18 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 			float currSmallestAngle = std::numeric_limits<float>::max();
 			std::vector<QVector3D> misses;
 			auto radiusMax = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax;
-			auto pyramidRayCasts = rayCastBottomPyramid(_manager->supportRaycaster(), upperZPath, 0, getRadius(upperZPath, 0), radiusMax, misses);
+			auto suppCSec = Hix::Shapes2D::generateCircle(radiusMax, 4);
+			auto pyramidRayCasts = rayCastBottomPyramid(_manager->supportRaycaster(), upperZPath, 0, getRadius(upperZPath, 0), suppCSec, misses);
 			if (!misses.empty())
 			{
-				path.emplace_back(misses.front());
-				path.emplace_back(upperZPath);
-				path.emplace_back(coneNarrow); //min
-				path.emplace_back(extendedTip);
-				scales = {1.0f,1.0f, minSupportScale, minSupportScale};
+				_contour.emplace_back(misses.front());
+				_contour.emplace_back(upperZPath);
+				_contour.emplace_back(coneNarrow); //min
+				_contour.emplace_back(extendedTip);
+				scales = { 1.0f,1.0f, minSupportScale, minSupportScale};
 				_hasBasePt = true;
 				_basePt = misses.front();
-				return path;
+				return;
 			}
 			else
 			{
@@ -280,18 +268,18 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 					}
 				}
 				if (!bestHit)
-					return path;
+					return;
 				QVector3D bottom = bestHit->intersection;
 				QVector3D bottomZPath = bottom + (fnCache[bestHit->face] * coneLength);
 				QVector3D bottomExtendedTip = bottom - (fnCache[bestHit->face] * intoMeshLength);
-				path.emplace_back(bottomExtendedTip); //min
-				path.emplace_back(bottom); //min
-				path.emplace_back(bottomZPath); //max
-				path.emplace_back(upperZPath); //max
-				path.emplace_back(coneNarrow); //min
-				path.emplace_back(extendedTip); //min
+				_contour.emplace_back(bottomExtendedTip); //min
+				_contour.emplace_back(bottom); //min
+				_contour.emplace_back(bottomZPath); //max
+				_contour.emplace_back(upperZPath); //max
+				_contour.emplace_back(coneNarrow); //min
+				_contour.emplace_back(extendedTip); //min
 				scales = { minSupportScale, minSupportScale, 1.0f, 1.0f,  minSupportScale, minSupportScale};
-				return path;
+				return;
 			}
 
 		}
@@ -316,42 +304,31 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 		QVector3D coneWidePart = coneNarrow +  (coneLength * tipNormal);
 		//part of support that's in raft
 		QVector3D supportStart = coneWidePart;
+		QVector3D raftAttachStart = coneWidePart;
+		QVector3D raftAttachEnd = coneWidePart;
 
 		supportStart.setZ(0);
-
-		path.emplace_back(supportStart);
-		path.emplace_back(coneWidePart);
-		path.emplace_back(coneNarrow);
-		path.emplace_back(extendedTip);
-		scales = { 1.0f, 1.0f, minSupportScale, minSupportScale};
+		raftAttachStart.setZ(setting.raftThickness);
+		raftAttachEnd.setZ(setting.raftThickness + SUPPORT_BOTTOM_MAX_LENGTH);
+		_contour.emplace_back(supportStart);
+		_contour.emplace_back(raftAttachStart);
+		_contour.emplace_back(raftAttachEnd);
+		_contour.emplace_back(coneWidePart);
+		_contour.emplace_back(coneNarrow);
+		_contour.emplace_back(extendedTip);
+		_vertSeg = { raftAttachEnd, coneWidePart };
+		scales = {SUPPORT_BOTTOM_MAX_MULT, SUPPORT_BOTTOM_MAX_MULT, 1.0f, 1.0f, minSupportScale, minSupportScale};
 		_hasBasePt = true;
 		_basePt = supportStart;
 	}
 
 
-	return path;
+	return;
 }	 
 	 
 
 	 
-void hexagonToTri(Mesh* supportMesh, const std::vector<QVector3D>& endCapOutline, const QVector3D& center, bool oppDir)
-{	 
-	if (oppDir)
-	{
-		for (size_t i = 0; i < 6; ++i)
-		{
-			supportMesh->addFace(center, endCapOutline[(i + 1) % 6], endCapOutline[i % 6]);
-		}
-	}
-	else
-	{
-		for (size_t i = 0; i < 6; ++i)
-		{
-			supportMesh->addFace(center, endCapOutline[i % 6], endCapOutline[(i + 1) % 6]);
-		}
-	}
 
-}	 
 
 
 QVector4D Hix::Support::VerticalSupportModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
@@ -361,43 +338,25 @@ QVector4D Hix::Support::VerticalSupportModel::getPrimitiveColorCode(const Hix::E
 
 void Hix::Support::VerticalSupportModel::generateMesh()
 {
-	std::vector<QVector3D> contour;
-	std::vector<QVector3D> path;
+	std::vector<QVector3D> crossContour;
 	std::vector<float> scales;
 	auto mesh = new Mesh();
 
 	auto radiusMax = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax;
-	path = generateSupportPath(_manager->supportBottom(), scales);
-	if (!path.empty())
+	generateSupportPath(_manager->supportBottom(), scales);
+	if (!_contour.empty())
 	{
-		contour = generateHexagon(radiusMax);
+		crossContour = generateCircle(radiusMax, 16);
 		std::vector<std::vector<QVector3D>> jointContours;
 		std::function<void(std::vector<QVector3D>&, float)> uniformScaler(Hix::Shapes2D::scaleContour);
 
-		Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &uniformScaler);
+		Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0, 0, 1), crossContour, _contour, jointContours, &scales, &uniformScaler);
 
 		//create endcaps using joint contours;
-		hexagonToTri(mesh, jointContours.front(), path.front(), true);
-		hexagonToTri(mesh, jointContours.back(), path.back(), false);
+		circleToTri(mesh, jointContours.front(), _contour.front(), true);
+		circleToTri(mesh, jointContours.back(), _contour.back(), false);
 	}
 	setMesh(mesh);
 
 }
 
-std::vector<QVector3D> Hix::Support::generateHexagon(float radius)
-{
-	std::vector<QVector3D>hexagon;
-	hexagon.reserve(6);
-
-	constexpr  QVector3D normal(0, 0, 1);
-	auto rot = QQuaternion::fromAxisAndAngle(normal, 60);
-	auto pt = QVector3D(radius, 0, 0);
-
-	for (size_t i = 0; i < 6; ++i)
-	{
-
-		hexagon.emplace_back(pt);
-		pt = rot.rotatedVector(pt);
-	}
-	return hexagon;
-}

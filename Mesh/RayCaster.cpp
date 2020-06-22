@@ -1,7 +1,8 @@
 #include "RayCaster.h"
-#
-using namespace  Hix;
+#include "../feature/Shapes2D.h"
+using namespace Hix;
 using namespace Hix::Engine3D;
+using namespace Hix::Shapes2D;
 Hix::Engine3D::RayCaster::~RayCaster()
 {
 }
@@ -36,4 +37,24 @@ RayHits Hix::Engine3D::RayCaster::rayIntersectDirection(const QVector3D& rayFrom
 	}
 	return rayHits;
 }
+
+
+
+bool Hix::Engine3D::RayCaster::checkCSecInteresect(const QVector3D& origin, const QVector3D& end, const std::vector<QVector3D>& crossSec)
+{
+	std::array<QVector3D, 4> rectTop;
+	std::array<QVector3D, 4> rectBot;
+	RayHits hits;
+	auto segCnt = crossSec.size();
+	for (auto& pt : crossSec)
+	{
+		QVector3D top = origin + pt;
+		QVector3D bot = end + pt;
+		auto rayCastResults = rayIntersect(top, bot);
+		if (!rayCastResults.empty())
+			return false;
+	}
+	return true;
+}
+
 

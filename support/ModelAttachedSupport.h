@@ -10,6 +10,8 @@ namespace Hix
 		public:
 			virtual const Hix::OverhangDetect::Overhang& getOverhang()const = 0;
 			const GLModel& getAttachedModel();
+			const GLModel& getAttachedListedModel();
+
 		};
 	}
 }
