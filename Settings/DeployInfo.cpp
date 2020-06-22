@@ -14,9 +14,7 @@ Hix::Settings::DeployInfo::DeployInfo()
 
 std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
 {
-	auto qStrPath = QCoreApplication::applicationDirPath();
-	qStrPath += "/PrinterPresets";
-	return toStdPath(qStrPath);
+	return settingsDir/ "PrinterPresets";
 }
 
 void Hix::Settings::DeployInfo::initialize()

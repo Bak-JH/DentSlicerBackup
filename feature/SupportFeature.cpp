@@ -14,9 +14,9 @@ using namespace Hix::Settings;
 /////////////////////
 ///  Add Support  ///
 /////////////////////
-Hix::Features::AddSupport::AddSupport(const OverhangDetect::Overhang& overhang):_overhang(overhang)
-{
 
+Hix::Features::AddSupport::AddSupport(std::unique_ptr<SupportModel> model):_model(std::move(model))
+{
 }
 
 Hix::Features::AddSupport::~AddSupport()
@@ -38,11 +38,60 @@ void Hix::Features::AddSupport::redoImpl()
 
 void Hix::Features::AddSupport::runImpl()
 {
-	postUIthread([this]() {
-		auto newModel = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(_overhang);
-		_model = newModel;
-	});
+	redoImpl();
+}
+//
+//
+//Hix::Features::AddInterconnect::AddInterconnect(std::array<SupportModel*, 2> pts): _pts(pts)
+//{
+//}
+//
+//Hix::Features::AddInterconnect::~AddInterconnect()
+//{
+//}
+//
+//void Hix::Features::AddInterconnect::undoImpl()
+//{
+//	postUIthread([this]() {
+//		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
+//		});
+//}
+//
+//void Hix::Features::AddInterconnect::redoImpl()
+//{
+//	postUIthread([this]() {
+//		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+//		});
+//}
+//
+//void Hix::Features::AddInterconnect::runImpl()
+//{
+//	postUIthread([this]() {
+//		auto newModel = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addInterconnect(_pts);
+//		_model = newModel;
+//		});
+//}
+//
+//
 
+Hix::Features::ManualSupport::ManualSupport(const OverhangDetect::Overhang& overhang):_overhang(overhang)
+{
+}
+
+Hix::Features::ManualSupport::~ManualSupport()
+{
+}
+
+void Hix::Features::ManualSupport::runImpl()
+{
+	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+	std::unique_ptr<SupportModel> model;
+	postUIthread([&]() {
+		model = srMan.createSupport(_overhang);
+		});
+	auto supportFeature = new AddSupport(std::move(model));
+	tryRunFeature(*supportFeature);
+	addFeature(supportFeature);
 }
 
 
@@ -51,18 +100,45 @@ Hix::Features::AutoSupport::~AutoSupport(){}
 
 void Hix::Features::AutoSupport::runImpl()
 {
+	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
 	auto move = new Move(_model, QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
 	tryRunFeature(*move);
 	addFeature(move);
-	auto overhangs = Hix::Application::ApplicationManager::getInstance().supportRaftManager().detectOverhang(*_model);
+	auto overhangs = srMan.detectOverhang(*_model);
 	for (auto overhang : overhangs)
 	{
-		auto supportFeature = new AddSupport(overhang);
+		std::unique_ptr<SupportModel> model;
+		postUIthread([&]() {
+			model = srMan.createSupport(overhang);
+		});
+		auto supportFeature = new AddSupport(std::move(model));
 		tryRunFeature(*supportFeature);
 		addFeature(supportFeature);
 	}
 }
 
+Hix::Features::GenerateInterconnections::GenerateInterconnections(std::array<SupportModel*, 2> models):_models(models)
+{
+}
+
+Hix::Features::GenerateInterconnections::~GenerateInterconnections()
+{
+}
+
+void Hix::Features::GenerateInterconnections::runImpl()
+{
+	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+	std::vector<std::unique_ptr<SupportModel>> itcs;
+	postUIthread([&]() {
+		itcs = srMan.createInterconnects(_models);
+		});
+	for (auto& itc : itcs)
+	{
+		auto supportFeature = new AddSupport(std::move(itc));
+		addFeature(supportFeature);
+	}
+	FeatureContainer::runImpl();
+}
 
 
 ////////////////////////
@@ -182,10 +258,12 @@ Hix::Features::SupportMode::SupportMode()
 	}
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
 
+
 	auto& co = controlOwner();
 	co.getControl(_generateSupportsBttn, "generatesupports");
 	co.getControl(_generateRaftBttn, "generateraft");
 	co.getControl(_clearSupportsBttn, "clearsupports");
+	co.getControl(_reconnectBttn, "reconnect");
 	co.getControl(_manualEditBttn, "editsupports");
 	co.getControl(_suppSettBttn, "supportsettingbutton");
 	co.getControl(_raftSettBttn, "raftsettingbutton");
@@ -197,8 +275,10 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_raftRadiusMultSpin, "raftRadiusMult");
 	co.getControl(_raftMinMaxRatioSpin, "raftMinMaxRatio");
 	co.getControl(_raftThickness, "raftThickness");
+	co.getControl(_interconnectTypeDrop, "interconnecttype");
+	co.getControl(_supportBaseHeightSpin, "supportBaseHeight");
+	co.getControl(_maxConnectDistanceSpin, "maxConnectDistance");
 
-	
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 
 	_suppTypeDrop->setEnums<SupportSetting::SupportType>(settings.supportType);
@@ -209,6 +289,10 @@ Hix::Features::SupportMode::SupportMode()
 	_raftRadiusMultSpin->setValue(settings.raftRadiusMult);
 	_raftMinMaxRatioSpin->setValue(settings.raftMinMaxRatio);
 	_raftThickness->setValue(settings.raftThickness);
+	_interconnectTypeDrop->setEnums<SupportSetting::InterconnectType>(settings.interconnectType);
+	_supportBaseHeightSpin->setValue(settings.supportBaseHeight);
+	_maxConnectDistanceSpin->setValue(settings.maxConnectDistance);
+
 
 
 	// bind buttons
@@ -223,6 +307,9 @@ Hix::Features::SupportMode::SupportMode()
 		});
 	QObject::connect(_raftSettBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		applySupportSettings();
+		});
+	QObject::connect(_reconnectBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		interconnectSupports();
 		});
 	QObject::connect(_clearSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		clearSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
@@ -259,6 +346,17 @@ Hix::Features::SupportMode::SupportMode()
 	QObject::connect(_raftThickness, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.raftThickness = _raftThickness->getValue();
 		});
+	QObject::connect(_interconnectTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
+		_interconnectTypeDrop->getSelected(modSettings.interconnectType);
+		});
+	QObject::connect(_supportBaseHeightSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.supportBaseHeight = _supportBaseHeightSpin->getValue();
+		});
+	QObject::connect(_maxConnectDistanceSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
+		modSettings.maxConnectDistance = _maxConnectDistanceSpin->getValue();
+		});
+
+
 }
 
 Hix::Features::SupportMode::~SupportMode()
@@ -282,7 +380,7 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 	if (editMode == Hix::Support::EditMode::Manual && suppType != Hix::Settings::SupportSetting::SupportType::None) {
 		applySupportSettings();
 		Hix::OverhangDetect::Overhang newOverhang(selectedFace, selected->ptToRoot(hit.localIntersection()));
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new AddSupport(newOverhang));
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ManualSupport(newOverhang));
 	}
 }
 
@@ -314,22 +412,60 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)
 {
 	applySupportSettings();
-
-	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
+	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+	if (srMan.supportsEmpty())
 		return;
+
+	std::unordered_set<const GLModel*> cModels;
+	for (auto e : models) cModels.insert(e);
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 
-	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().raftActive())
+	if (srMan.raftActive())
 		container->addFeature(new RemoveRaft());
 
-	for (auto each : Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models))
+	auto prevConns = srMan.interconnects();
+	for (auto each : prevConns)
+	{
+		if (dynamic_cast<Interconnect*>(each)->isConnectedTo(cModels))
+		{
+		container->addFeature(new RemoveSupport(each));
+		}
+	}
+	for (auto each : srMan.modelAttachedSupports(models))
 		container->addFeature(new RemoveSupport(each));
 
 	for (auto model : models)
 		container->addFeature(new Move::ZToBed(model));
 
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+}
+
+
+void Hix::Features::SupportMode::interconnectSupports()
+{
+	applySupportSettings();
+	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	if (srMan.supportsEmpty())
+	{
+		return;
+	}
+	auto prevConns = srMan.interconnects();
+	for (auto each : prevConns)
+	{
+		container->addFeature(new RemoveSupport(each));
+	}
+	//add raycaster
+	srMan.prepareRaycasterSelected();
+
+	for (auto connPair : srMan.interconnectPairs())
+	{
+		container->addFeature(new GenerateInterconnections(connPair));
+	}
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+
 }
 
 void Hix::Features::SupportMode::regenerateRaft()
@@ -368,6 +504,4 @@ void Hix::Features::SupportMode::removeSupport(SupportModel* target)
 {
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new RemoveSupport(target));
 }
-
-
 
