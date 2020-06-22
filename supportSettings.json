@@ -6,6 +6,8 @@
     "raftThickness": 1.0,
     "raftRadiusMult": 0.6,
     "raftMinMaxRatio": 1.5,
+    "maxConnectDistance" : 5.0,
     "supportType": "Vertical",
+    "interconnectType": "Cross",
     "raftType": "General"
 }

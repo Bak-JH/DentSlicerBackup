@@ -3,6 +3,7 @@
 #include "SupportModel.h"
 #include "ModelAttachedSupport.h"
 #include "BaseSupport.h"
+#include "ContourModel.h"
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
@@ -13,9 +14,7 @@ namespace Hix
 	using namespace OverhangDetect;
 	namespace Support
 	{
-		//heaxgon centered at 0,0,0, rotated around positive z-axis CW
-		std::vector<QVector3D> generateHexagon(float radius);
-		class VerticalSupportModel : public SupportModel, public BaseSupport, public ModelAttachedSupport
+		class VerticalSupportModel : public SupportModel, public BaseSupport, public ModelAttachedSupport, public ContourModel
 		{
 		public:
 			VerticalSupportModel(SupportRaftManager* manager, const Overhang& overhang);
@@ -25,6 +24,7 @@ namespace Hix
 			const QVector3D& getBasePt()const override;
 			//ModelAttachedSupport
 			const Overhang& getOverhang()const override;
+			std::optional<std::array<QVector3D, 2>> verticalSegment()override;
 
 
 		protected:
@@ -34,7 +34,8 @@ namespace Hix
 			Overhang _overhang;
 			bool _hasBasePt = false;
 			void generateMesh();
-			std::vector<QVector3D>  generateSupportPath(float bottom, std::vector<float>& scales);
+			void generateSupportPath(float bottom, std::vector<float>& scales);
+			std::optional <std::array<QVector3D, 2>> _vertSeg;
 		};
 	}
 }
