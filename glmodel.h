@@ -72,6 +72,8 @@ public:
 	int ID()const;
 	QString modelName()const;
 	GLModel* getRootModel();
+	const GLModel* getRootModel()const;
+
 	void unselectMeshFaces();
 
 protected:

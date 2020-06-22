@@ -103,7 +103,6 @@
     <ClCompile Include="feature\move.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="feature\Plane3D.cpp" />
-    <ClCompile Include="feature\PoissonRemesh.cpp" />
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
     <ClCompile Include="feature\repair\Algorithms\detectIntersections.cpp" />
     <ClCompile Include="feature\repair\Algorithms\holeFilling.cpp" />
@@ -257,6 +256,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Qt\QtUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\DiagInterconnect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\Interconnect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\ContourModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -801,7 +809,6 @@
     <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\Plane3D.h" />
-    <ClInclude Include="feature\PoissonRemesh.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
     <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
@@ -1015,6 +1022,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Qt\QtUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\Interconnect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\DiagInterconnect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\ContourModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

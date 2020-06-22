@@ -2,7 +2,7 @@
 
 #include "../Settings/SupportSetting.h"
 #include "VerticalSupportModel.h"
-
+#include <array>
 class GLModel;
 namespace Hix
 {
@@ -33,9 +33,11 @@ namespace Hix
 			EditMode supportEditMode()const;
 			void  setSupportEditMode(EditMode mode);
 			//coordinate for bottom of support and raft
-
-			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
+			std::vector<std::unique_ptr<SupportModel>> createInterconnects(const std::array<SupportModel*, 2>& models);
+			std::unique_ptr<SupportModel> createSupport(const OverhangDetect::Overhang& overhang);
 			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
+			SupportModel* addInterconnect(const std::array<SupportModel*, 2>& pts);
+
 			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
 
 			bool supportsEmpty()const;
@@ -48,6 +50,8 @@ namespace Hix
 			//removed due to efficiency when deleting multiple
 			std::vector<const Hix::Render::SceneEntity*> supportModels()const;
 			std::vector<SupportModel*> modelAttachedSupports(const std::unordered_set<GLModel*>& models)const;
+			std::vector<SupportModel*> interconnects()const;
+
 			RaftModel* raftModel();
 			const RaftModel* raftModel()const;
 
@@ -57,13 +61,23 @@ namespace Hix
 			size_t supportCount()const;
 			//void checkOverhangCollision(GLModel* model, )
 			RayCaster& supportRaycaster();
+			std::vector<std::array<SupportModel*, 2>> interconnectPairs()const;
+			void prepareRaycasterSelected();
 
 		private:
 
 			void addToModelMap(SupportModel* support);
 			void removeFromModelMap(SupportModel* support);
 			void clearImpl(const std::unordered_set<const GLModel*>& models);
+			/// <summary>
+			/// Set raycaster for all selected models
+			/// </summary>
+			/// <summary>
+			/// Set raycaster for given model
+			/// </summary>
+			/// <param name="model"></param>
 			void prepareRaycaster(const GLModel& model);
+
 			Qt3DCore::QEntity* _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::Manual;

@@ -9,8 +9,6 @@ namespace Hix
 	using namespace OverhangDetect;
 	namespace Support
 	{
-		//heaxgon centered at 0,0,0, rotated around positive z-axis CW
-		std::vector<QVector3D> generateHexagon(float radius);
 		class CylindricalRaft : public Hix::Support::RaftModel
 		{
 		public:

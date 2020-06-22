@@ -10,10 +10,12 @@
 #include "../application/ApplicationManager.h"
 #include "feature/SupportFeature.h"
 #include "ModelAttachedSupport.h"
+#include "Interconnect.h"
+#include "DiagInterconnect.h"
+#include "../feature/Shapes2D.h"
 using namespace Qt3DCore;
 using namespace Hix::Support;
-using namespace Qt3DCore;
-
+using namespace Hix::Shapes2D;
 Hix::Support::SupportRaftManager::SupportRaftManager(): _root(new QEntity())
 {
 }
@@ -69,7 +71,103 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 	return basePts;
 }
 
-SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
+std::vector<std::unique_ptr<SupportModel>> Hix::Support::SupportRaftManager::createInterconnects(const std::array<SupportModel*, 2>& models)
+{
+	auto& sett = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+	constexpr float CNT_ANGLE = 45;
+	//constexpr float CNT_HEIGHT_MULT = std::tanf(CNT_ANGLE); due to legacy reasons, just hard code tanf
+	constexpr float CNT_HEIGHT_MULT = 1.0f;
+
+	auto connType = sett.interconnectType;
+
+	std::vector<std::unique_ptr<SupportModel>> itcs;
+	auto pillar0 = dynamic_cast<ContourModel*>(models[0])->verticalSegment().value();
+	auto pillar1 = dynamic_cast<ContourModel*>(models[1])->verticalSegment().value();
+	auto xyDist = pillar0[0].distanceToPoint(pillar1[0]);
+	auto zDist = xyDist * CNT_HEIGHT_MULT;
+	auto zMax = std::min(pillar0[1].z(), pillar1[1].z()) - zDist;
+	auto zMin = std::max(pillar0[0].z(), pillar1[0].z());
+
+	auto xyFrom = pillar0[0];
+	auto xyTo = pillar1[0];
+
+	//true: from->to, false to->from
+	bool flip = false;
+
+	//for raycasting
+	auto circle = generateCircle(sett.supportRadiusMax, 4);
+	auto circleF = circle;
+	{
+		QVector3D from(xyFrom);
+		QVector3D to(xyTo);
+		from.setZ(0);
+		to.setZ(zDist);
+		rotateContour(circle, QQuaternion::rotationTo(to - from, QVector3D(0, 0, 1)));
+
+	}
+	{
+		QVector3D from(xyFrom);
+		QVector3D to(xyTo);
+		from.setZ(zDist);
+		to.setZ(0);
+		rotateContour(circleF, QQuaternion::rotationTo(from-to, QVector3D(0, 0, 1)));
+	}
+	for (float currZ = zMin; currZ < zMax; currZ += zDist)
+	{
+		switch (connType)
+		{
+		case Hix::Settings::SupportSetting::InterconnectType::None:
+			break;
+		//case Hix::Settings::SupportSetting::InterconnectType::Automatic:
+		//	break;
+		case Hix::Settings::SupportSetting::InterconnectType::Cross:
+		{
+			QVector3D from(xyFrom);
+			QVector3D to(xyTo);
+			auto fromM(models[0]);
+			auto toM(models[1]);
+			auto* curCircle = &circleF;
+			if (!flip)
+			{
+				std::swap(from, to);
+				std::swap(fromM, toM);
+				curCircle = &circle;
+			}
+			from.setZ(currZ);
+			to.setZ(currZ + zDist);
+			if(_rayCaster->checkCSecInteresect(from, to, *curCircle))
+				itcs.push_back(std::unique_ptr<SupportModel>(new DiagInterconnect(this, { from, to }, { fromM, toM })));
+		}
+		//continue to zigzag
+		case Hix::Settings::SupportSetting::InterconnectType::ZigZag:
+		{
+			QVector3D from(xyFrom);
+			QVector3D to(xyTo);
+			auto fromM(models[0]);
+			auto toM(models[1]);
+			auto* curCircle = &circle;
+			if (flip)
+			{
+				std::swap(from, to);
+				std::swap(fromM, toM);
+				curCircle = &circleF;
+			}
+			from.setZ(currZ);
+			to.setZ(currZ + zDist);
+			if (_rayCaster->checkCSecInteresect(from, to, *curCircle))
+				itcs.push_back(std::unique_ptr<SupportModel>(new DiagInterconnect(this, { from, to }, { fromM, toM})));
+		}
+			break;
+		default:
+			break;
+		}
+		flip = !flip;
+	}
+	return itcs;
+
+}
+
+std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::createSupport(const OverhangDetect::Overhang& overhang)
 {
 	SupportModel* newModel = nullptr;
 	switch (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType)
@@ -82,8 +180,7 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 	}
 	break;
 	}
-	addSupport(std::unique_ptr<SupportModel>(newModel));
-	return newModel;
+	return std::unique_ptr<SupportModel>(newModel);
 }
 
 SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<SupportModel> target)
@@ -99,6 +196,11 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<Suppo
 
 	}
 	return key;
+}
+
+SupportModel* Hix::Support::SupportRaftManager::addInterconnect(const std::array<SupportModel*, 2>& pts)
+{
+	return nullptr;
 }
 
 
@@ -246,6 +348,21 @@ void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const 
 	}
 }
 
+void Hix::Support::SupportRaftManager::prepareRaycasterSelected()
+{
+	std::unordered_set<const GLModel*> models;
+
+	for (auto& e : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	{
+		e->getChildrenModels(models);
+		models.emplace(e);
+	}
+	_rayCaster.reset(new MTRayCaster());
+	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(models));
+}
+
+
+
 void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
 {
 	_rayCaster.reset( new MTRayCaster());
@@ -299,6 +416,21 @@ std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSuppor
 
 }
 
+std::vector<SupportModel*> Hix::Support::SupportRaftManager::interconnects() const
+{
+	std::vector<SupportModel*> supps;
+	for (auto curr = _supports.cbegin(); curr != _supports.cend(); ++curr)
+	{
+		auto conn = dynamic_cast<Interconnect*>(curr->first);
+		if (conn)
+		{
+			supps.push_back(curr->first);
+
+		}
+	}
+	return supps;
+}
+
 Qt3DCore::QEntity& Hix::Support::SupportRaftManager::rootEntity()
 {
 	return *_root;
@@ -312,6 +444,45 @@ size_t Hix::Support::SupportRaftManager::supportCount() const
 RayCaster& Hix::Support::SupportRaftManager::supportRaycaster()
 {
 	return *_rayCaster.get();
+}
+
+std::vector<std::array<SupportModel*, 2>> Hix::Support::SupportRaftManager::interconnectPairs() const
+{
+	std::vector<std::array<SupportModel*, 2>> pairs;
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+
+	//grab all supports that can be connected
+	std::vector<ContourModel*> candidates;
+	for (auto itr = _supports.begin(); itr != _supports.end(); ++itr)
+	{
+		auto curr = itr->second.get();
+		auto connectible = dynamic_cast<ContourModel*>(curr);
+		if (connectible)
+		{
+			auto verticalPath = connectible->verticalSegment();
+			if (verticalPath)
+			{
+				candidates.emplace_back(connectible);
+			}
+		}
+	}
+	//create pairs
+	if (candidates.empty())
+		return pairs;
+	auto last = candidates.end() - 1;
+	for (auto itr = candidates.begin(); itr != last; ++itr)
+	{
+		auto from = (*itr)->verticalSegment().value()[0];
+		for (auto next = itr + 1; next != candidates.end(); ++next)
+		{
+			auto to = (*next)->verticalSegment().value()[0];
+			if (from.distanceToPoint(to) < setting.maxConnectDistance)
+			{
+				pairs.emplace_back( std::array{dynamic_cast<SupportModel*>(*itr), dynamic_cast<SupportModel*>(*next) });
+			}
+		}
+	}
+	return pairs;
 }
 
 
