@@ -8,7 +8,7 @@ using namespace Hix::QtUtils;
 Hix::Settings::DeployInfo::DeployInfo()
 {
 	auto qStrPath = QCoreApplication::applicationDirPath();
-	qStrPath += "deploy.json";
+	qStrPath += "/deploy.json";
 	parseJSON(toStdPath(qStrPath));
 }
 
