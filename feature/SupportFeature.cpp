@@ -187,6 +187,8 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_generateRaftBttn, "generateraft");
 	co.getControl(_clearSupportsBttn, "clearsupports");
 	co.getControl(_manualEditBttn, "editsupports");
+	co.getControl(_suppSettBttn, "supportsettingbutton");
+	co.getControl(_raftSettBttn, "raftsettingbutton");
 	co.getControl(_suppTypeDrop, "supporttype");
 	co.getControl(_raftTypeDrop, "rafttype");
 	co.getControl(_suppDensitySpin, "supportdensity");
@@ -215,6 +217,12 @@ Hix::Features::SupportMode::SupportMode()
 		});
 	QObject::connect(_generateRaftBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		regenerateRaft();
+		});
+	QObject::connect(_suppSettBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		applySupportSettings();
+		});
+	QObject::connect(_raftSettBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		applySupportSettings();
 		});
 	QObject::connect(_clearSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		clearSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
@@ -255,6 +263,7 @@ Hix::Features::SupportMode::SupportMode()
 
 Hix::Features::SupportMode::~SupportMode()
 {
+	applySupportSettings();
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 }
 
@@ -262,15 +271,6 @@ Hix::Features::SupportMode::~SupportMode()
 void Hix::Features::SupportMode::applySupportSettings()
 {
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
-	_suppTypeDrop->getSelected(modSettings.supportType);
-	_raftTypeDrop->getSelected(modSettings.raftType);
-	modSettings.supportDensity = _suppDensitySpin->getValue();
-	modSettings.supportRadiusMax = _maxRadSpin->getValue();
-	modSettings.supportRadiusMin = _minRadSpin->getValue();
-	modSettings.raftRadiusMult = _raftRadiusMultSpin->getValue();
-	modSettings.raftMinMaxRatio = _raftMinMaxRatioSpin->getValue();
-	modSettings.raftThickness = _raftThickness->getValue();
-
 	modSettings.writeJSON();
 }
 
@@ -313,6 +313,8 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 
 void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)
 {
+	applySupportSettings();
+
 	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
 		return;
 
@@ -332,6 +334,8 @@ void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>
 
 void Hix::Features::SupportMode::regenerateRaft()
 {
+	applySupportSettings();
+
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	if (ApplicationManager::getInstance().supportRaftManager().raftActive())
 	{
