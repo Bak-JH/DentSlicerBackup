@@ -39,11 +39,10 @@ using namespace Qt3DCore;
 #include <QStringList>
 #include <QTimer>
 #include <QDebug>
-
-
-#include <QOAuth2AuthorizationCodeFlow>
-#include <QDesktopServices>
-#include "auth/HixAuthHttpReply.h"
+//#include <QTcpSocket>
+//#include <QOAuth2AuthorizationCodeFlow>
+//#include <QDesktopServices>
+//#include "auth/HixAuthHttpReply.h"
 //
 //#include "ytdemo.h"
 //
@@ -98,39 +97,6 @@ const auto GOOGLE_AUTH = QUrl("http://accounts.google.com/o/oauth2/auth");
 const auto GOOGLE_TOKEN = QUrl("http://accounts.google.com/o/oauth2/token");
 
 
-
-void auth(QApplication* app)
-{
-
-	auto google = new QOAuth2AuthorizationCodeFlow;
-
-	google->setScope("email"); 
-	google->setAuthorizationUrl(GOOGLE_AUTH);
-	google->setClientIdentifier(GOOGLE_CLIENT_ID);
-	google->setAccessTokenUrl(GOOGLE_TOKEN);
-	google->setClientIdentifierSharedKey(GOOGLE_APP_SECRET);
-	auto replyHandler = new HixAuthHttpReply(8000, app);
-	//replyHandler->setCallbackBase("http://127.0.0.1:8000/accounts/google/login/callback/");
-	replyHandler->setCallbackBase("http://127.0.0.1:%1/%2");
-	//replyHandler->setCallbackPath("accounts/google/login/callback/");
-	replyHandler->setCallbackPath("");
-	google->setReplyHandler(replyHandler);
-	//auto reply = google - &gt; get(QUrl("https://www.googleapis.com/plus/v1/people/me"));
-	QObject::connect(google, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,&QDesktopServices::openUrl);
-	QObject::connect(google, &QOAuth2AuthorizationCodeFlow::granted, [=]() {
-		qDebug() << __FUNCTION__ << __LINE__ << "Access Granted!";
-
-		//auto reply = this->google->get(QUrl("https://www.googleapis.com/plus/v1/people/me"));
-		//connect(reply, &QNetworkReply::finished, [reply]() {
-		//	qDebug() << "REQUEST FINISHED. Error? " << (reply->error() != QNetworkReply::NoError);
-		//	qDebug() << reply->readAll();
-		});
-	google->grant();
-
-
-
-}
-
 int main(int argc, char** argv)
 {
 #ifdef _UNIT_TEST
@@ -184,22 +150,27 @@ int main(int argc, char** argv)
 	//login or make main window visible
 	QQuickWindow *mainWindow;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
-	QQuickWindow* loginWindow;
-	QObject *loginButton;
-	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
-	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+	auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
+	auth.setMainWindow(mainWindow);
+	auth.acquireAuth();
+	//QQuickWindow* loginWindow;
+	//QObject *loginButton;
+	//Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
+	//Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
 
 	//Helper helper;
 	//QTimer::singleShot(0, &helper, SLOT(run()));
-	auth(&app);
+
 
 #if  defined(QT_DEBUG) || defined(_DEBUG)
-	mainWindow->setProperty("visible", true);
-	loginWindow->close();
+
+
+	//mainWindow->setProperty("visible", true);
+	//loginWindow->close();
 #else
-	loginWindow->setProperty("visible", true);
-	//auth
-	httpreq* hr = new httpreq(loginWindow, loginButton);
+	//loginWindow->setProperty("visible", true);
+	////auth
+	//httpreq* hr = new httpreq(loginWindow, loginButton);
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
