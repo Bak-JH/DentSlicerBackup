@@ -1,0 +1,175 @@
+format 222
+
+classinstancecanvas 128028 classinstance_ref 128028 // 
+  xyz 63 4 2000 life_line_z 2000
+end
+classinstancecanvas 128156 classinstance_ref 128156 // 
+  xyz 365 4 2000 life_line_z 2000
+end
+classinstance 131868 class_ref 128028 // AuthManager
+  name "otherUser"   xyz 468 4 2000 life_line_z 2000
+durationcanvas 128284 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 114 2010 11 40
+end
+durationcanvas 128412 classinstance_ref 128156 // :Server
+  xyzwh 384 93 2010 11 43
+end
+durationcanvas 129692 classinstance_ref 128156 // :Server
+  xyzwh 384 172 2010 11 40
+end
+durationcanvas 129820 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 172 2010 11 25
+end
+durationcanvas 130076 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 239 2010 11 40
+end
+durationcanvas 130204 classinstance_ref 128156 // :Server
+  xyzwh 384 239 2010 11 25
+end
+durationcanvas 130460 classinstance_ref 128156 // :Server
+  xyzwh 384 309 2010 11 40
+end
+durationcanvas 130588 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 309 2010 11 25
+end
+durationcanvas 130844 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 368 2010 11 40
+end
+durationcanvas 131100 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 468 2010 11 40
+end
+durationcanvas 131228 classinstance_ref 128156 // :Server
+  xyzwh 384 468 2010 11 25
+end
+durationcanvas 131484 classinstance_ref 128156 // :Server
+  xyzwh 384 535 2010 11 40
+end
+durationcanvas 131612 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 535 2010 11 25
+end
+durationcanvas 132252 classinstance_ref 131868 // otherUser:AuthManager
+  xyzwh 526 626 2010 11 40
+end
+durationcanvas 132380 classinstance_ref 128156 // :Server
+  xyzwh 384 626 2010 11 25
+end
+durationcanvas 132636 classinstance_ref 128156 // :Server
+  xyzwh 384 707 2010 11 40
+end
+durationcanvas 132764 classinstance_ref 131868 // otherUser:AuthManager
+  xyzwh 526 707 2010 11 25
+end
+durationcanvas 133020 classinstance_ref 131868 // otherUser:AuthManager
+  xyzwh 526 781 2010 11 40
+end
+durationcanvas 133276 classinstance_ref 131868 // otherUser:AuthManager
+  xyzwh 526 850 2010 11 40
+end
+durationcanvas 133404 classinstance_ref 128156 // :Server
+  xyzwh 384 850 2010 11 25
+end
+durationcanvas 133660 classinstance_ref 128156 // :Server
+  xyzwh 384 912 2010 11 40
+end
+durationcanvas 133788 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 912 2010 11 25
+end
+durationcanvas 134044 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 992 2010 11 40
+end
+durationcanvas 134300 classinstance_ref 128028 // :AuthManager
+  xyzwh 97 54 2010 11 40
+end
+durationcanvas 134556 classinstance_ref 128156 // :Server
+  xyzwh 384 972 2010 11 40
+end
+durationcanvas 134684 classinstance_ref 131868 // otherUser:AuthManager
+  xyzwh 526 972 2010 11 25
+end
+msg 128540 synchronous
+  from durationcanvas_ref 128284
+  to durationcanvas_ref 128412
+  yz 114 2015 explicitmsg "tryConnectWebsocket"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 193 100
+msg 129948 synchronous
+  from durationcanvas_ref 129692
+  to durationcanvas_ref 129820
+  yz 172 2015 explicitmsg "connectionFailure"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 204 158
+msg 130332 synchronous
+  from durationcanvas_ref 130076
+  to durationcanvas_ref 130204
+  yz 239 2015 explicitmsg "tryLogin"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 227 225
+msg 130716 synchronous
+  from durationcanvas_ref 130460
+  to durationcanvas_ref 130588
+  yz 309 2015 explicitmsg "giveSessionCk"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 211 295
+reflexivemsg 130972 synchronous
+  to durationcanvas_ref 130844
+  yz 368 2015 explicitmsg "saveSessionCk"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 80 354
+msg 131356 synchronous
+  from durationcanvas_ref 131100
+  to durationcanvas_ref 131228
+  yz 468 2015 explicitmsg "tryConnectWebsocket"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 193 454
+msg 131740 synchronous
+  from durationcanvas_ref 131484
+  to durationcanvas_ref 131612
+  yz 535 2015 explicitmsg "websocketConnectionSuccess"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 171 521
+msg 132508 synchronous
+  from durationcanvas_ref 132252
+  to durationcanvas_ref 132380
+  yz 626 2015 explicitmsg "tryLogin"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 441 612
+msg 132892 synchronous
+  from durationcanvas_ref 132636
+  to durationcanvas_ref 132764
+  yz 707 2015 explicitmsg "giveSessionCk"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 425 693
+reflexivemsg 133148 synchronous
+  to durationcanvas_ref 133020
+  yz 781 2015 explicitmsg "saveSessionCk"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 509 767
+msg 133532 synchronous
+  from durationcanvas_ref 133276
+  to durationcanvas_ref 133404
+  yz 850 2015 explicitmsg "tryConnectWebsocket"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 407 836
+msg 133916 synchronous
+  from durationcanvas_ref 133660
+  to durationcanvas_ref 133788
+  yz 912 2015 explicitmsg "sendDisconnectMsg"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 197 898
+reflexivemsg 134172 asynchronous
+  to durationcanvas_ref 134044
+  yz 993 2015 explicitmsg "blocked"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 99 979
+reflexivemsg 134428 synchronous
+  to durationcanvas_ref 134300
+  yz 54 2015 explicitmsg "blocked"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 99 40
+msg 134812 synchronous
+  from durationcanvas_ref 134556
+  to durationcanvas_ref 134684
+  yz 972 2015 explicitmsg "websocketConnectionSuccess"
+  show_full_operations_definition default show_class_of_operation default drawing_language default show_context_mode default
+  label_xy 385 958
+end

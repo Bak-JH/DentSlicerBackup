@@ -1,0 +1,12 @@
+window_sizes 1858 1057 450 1403 907 104
+
+diagrams
+  active  sequencediagram_ref 128028 // authentication sequence
+    1122 1589 100 A4 0 0
+end
+show_stereotypes
+selected sequencediagram_ref 128028 // authentication sequence
+open
+  usecaseview_ref 128028 // authentication
+end
+end

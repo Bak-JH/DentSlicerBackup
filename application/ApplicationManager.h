@@ -10,6 +10,7 @@
 #include "../Tasking/TaskManager.h"
 #include "../support/SupportRaftManager.h"
 #include "MouseCursorManager.h"
+#include "../auth/AuthManager.h"
 class QQuickItem;
 namespace Qt3DCore
 {
@@ -17,6 +18,12 @@ namespace Qt3DCore
 }
 namespace Hix
 {
+
+
+	namespace Auth
+	{
+		class AuthManager;
+	}
 	namespace Features
 	{
 		class SettingMode;
@@ -57,6 +64,8 @@ namespace Hix
 			const Hix::Settings::AppSetting& settings()const;
 			Hix::Tasking::TaskManager& taskManager();
 			Hix::Support::SupportRaftManager& supportRaftManager();
+			Hix::Auth::AuthManager& auth();
+
 			QString getVersion()const;
 
 		private:
@@ -70,7 +79,7 @@ namespace Hix
 			Hix::Tasking::TaskManager _taskManager;
 			Hix::Support::SupportRaftManager _supportRaftManager;
 			Hix::Settings::AppSetting _setting;
-
+			Hix::Auth::AuthManager _auth;
 			//TODO:temp legacy
 			//root of entire window application ie) including login window
 			QQuickItem* _windowRoot;
@@ -90,6 +99,7 @@ namespace Hix
 			friend class Hix::Features::SettingMode;
 			friend class Hix::Features::SupportMode;
 			friend class Hix::Features::SliceExportMode;
+			friend class Hix::Auth::AuthManager;
 
 
 		};

@@ -107,6 +107,11 @@ Hix::Support::SupportRaftManager& Hix::Application::ApplicationManager::supportR
 	return _supportRaftManager;
 }
 
+Hix::Auth::AuthManager& Hix::Application::ApplicationManager::auth()
+{
+	return _auth;
+}
+
 QString Hix::Application::ApplicationManager::getVersion() const
 {
 	return QString::fromStdString(settings().deployInfo.version);
