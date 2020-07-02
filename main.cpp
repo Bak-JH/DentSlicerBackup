@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
 	auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
 	auth.setMainWindow(mainWindow);
-	auth.acquireAuth();
+	auth.login();
 	//QQuickWindow* loginWindow;
 	//QObject *loginButton;
 	//Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");

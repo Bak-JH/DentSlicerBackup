@@ -48,6 +48,7 @@ void Hix::Application::ApplicationManager::init()
 	_setting.parseJSON();
 	_setting.sliceSetting.parseJSON();
 	_setting.supportSetting.parseJSON();
+	_setting.additionalSetting.parseJSON();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
