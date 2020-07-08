@@ -14,10 +14,15 @@
 #include <Wincrypt.h>
 using frozen::operator"" _fstr;
 
-constexpr auto HOST = "127.0.0.1:8000"_fstr;
-constexpr auto LOGIN_URL = "http://"_fstr + HOST + "/product/login/"_fstr;
-constexpr auto LOGIN_REDIRECT_URL = "http://"_fstr + HOST + "/product/login_redirect/"_fstr;
-constexpr auto WS_URL = "ws://"_fstr + HOST + "/ws/product/dentslicer/"_fstr;
+constexpr auto HOST = "127.0.0.1"_fstr;
+constexpr auto PORT = "8000"_fstr;
+constexpr auto ADDRESS = HOST + ":" + PORT;
+
+
+constexpr auto LOGIN_URL = "http://"_fstr + ADDRESS + "/product/login/"_fstr;
+constexpr auto LOGIN_REDIRECT_URL = "http://"_fstr + ADDRESS + "/product/login_redirect/"_fstr;
+constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
+constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
 
 //seems on windows, webview stores cookies via chromium
 //std::string encryptStr(const std::string& value);
@@ -56,7 +61,7 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
     _ws.reset(new QWebSocket());
     QObject::connect(_ws.get(), &QWebSocket::connected,
         [this]() {
-            unblockApp();
+            //unblockApp();
         });
     QObject::connect(_ws.get(), &QWebSocket::disconnected,
         [this]() {
@@ -76,24 +81,48 @@ void Hix::Auth::AuthManager::setMainWindow(QQuickWindow* window)
 }
 inline QNetworkCookie fromStdCk(const std::string& name, const std::string& val)
 {
-    return QNetworkCookie(QByteArray::fromStdString(name), QByteArray::fromStdString(val));
+
+    auto ck = QNetworkCookie(QByteArray::fromStdString(name), QByteArray::fromStdString(val));
+    ck.setDomain(HOST.data());
+    qDebug() << "cookie created: " << ck.name() << " " << ck.value() << " domain: " << ck.domain();
+    return ck;
 }
 
 void Hix::Auth::AuthManager::acquireAuth()
 {
     auto& sett = Hix::Application::ApplicationManager::getInstance().settings().additionalSetting;
 
-    QNetworkRequest request(QUrl(WS_URL.data()));
+    //QNetworkRequest request(QUrl(WS_URL.data()));
+    QNetworkRequest request(QUrl(TEST_URL.data()));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    //QString cookiestring = "csrftoken=" + csrftoken + ";" + "sessionid=" + sessionid + ";";
+
     //QList<QNetworkCookie> cks;
+
+    std::unordered_set<std::string> ckNames = { "sessionid", "csrftoken", "messages" };
+    std::string ckStr;
     for (auto& ck : _cks)
     {
         //cks.append(fromStdCk(ck.first, ck.second));
-        request.setHeader(QNetworkRequest::CookieHeader, QVariant::fromValue(fromStdCk(ck.first, ck.second)));
+        if (ckNames.find(ck.first) != ckNames.cend())
+        //if(true)
+        {
+            //qDebug() << "added ck" << QString::fromStdString(ck.first) << " : " << QString::fromStdString(ck.second);
+            ckStr += ck.first + "=" + ck.second + ";";
+            //request.setHeader(QNetworkRequest::CookieHeader, QVariant::fromValue(fromStdCk(ck.first, ck.second)));
+        }
 
     }
+    request.setRawHeader((QByteArray)"Cookie", QString::fromStdString(ckStr).toUtf8());
+    auto manager = new QNetworkAccessManager();
+    //connect(manager, SIGNAL(finished(QNetworkReply*)),
+    //    this, SLOT(replyFinished(QNetworkReply*)));
+
+    manager->get(request);
     //loadCk(cks, sett);
 
-    _ws->open(QUrl(WS_URL.data()));
+    //_ws->open(request);
 }
 
 
@@ -106,24 +135,26 @@ void Hix::Auth::AuthManager::login()
 
     //load json saved encrypted cookies from previous login
     auto cookieStore = _webView->page()->profile()->cookieStore();
+    cookieStore->deleteAllCookies();
     //loadCk(*cookieStore, sett);
-	_webView->load(QUrl(LOGIN_URL.data()));
     QObject::connect(cookieStore, &QWebEngineCookieStore::cookieAdded, [this](const QNetworkCookie& cookie) {
-        //qDebug() << cookie.name() << cookie.value();
+        qDebug() << cookie.name() << cookie.value();
         _cks[cookie.name().toStdString()] = cookie.value().toStdString();
         auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).additionalSetting;
         //storeCk(cookie, moddableSetting);
         });
     QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
-        if (_webView && url.toString().toStdString() == LOGIN_REDIRECT_URL.to_std_string())
+        qDebug() << url;
+        if (_webView && url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
         {
             //login success
             //auto cookieStore = _webView->page()->profile()->cookieStore();
-            _webView->close();
+            //_webView->close();
             acquireAuth();
-            _webView.reset();
+            //_webView.reset();
         }
         });
+    _webView->load(QUrl(LOGIN_URL.data()));
 	_webView->show();
 
 }
