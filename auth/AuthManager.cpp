@@ -21,8 +21,12 @@ constexpr auto ADDRESS = HOST + ":" + PORT;
 
 constexpr auto LOGIN_URL = "http://"_fstr + ADDRESS + "/product/login/"_fstr;
 constexpr auto LOGIN_REDIRECT_URL = "http://"_fstr + ADDRESS + "/product/login_redirect/"_fstr;
+constexpr auto REGISTER_SERIAL_URL = "http://"_fstr + ADDRESS + "/product/register/dentslicer"_fstr;
+constexpr auto REGISTER_SERIAL_DONE_URL = "http://"_fstr + ADDRESS + "/product/registration_done/"_fstr;
+
+
 constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
-constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
+//constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
 
 //seems on windows, webview stores cookies via chromium
 //std::string encryptStr(const std::string& value);
@@ -92,37 +96,21 @@ void Hix::Auth::AuthManager::acquireAuth()
 {
     auto& sett = Hix::Application::ApplicationManager::getInstance().settings().additionalSetting;
 
-    //QNetworkRequest request(QUrl(WS_URL.data()));
-    QNetworkRequest request(QUrl(TEST_URL.data()));
+    QNetworkRequest request(QUrl(WS_URL.data()));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-    //QString cookiestring = "csrftoken=" + csrftoken + ";" + "sessionid=" + sessionid + ";";
-
-    //QList<QNetworkCookie> cks;
 
     std::unordered_set<std::string> ckNames = { "sessionid", "csrftoken", "messages" };
     std::string ckStr;
     for (auto& ck : _cks)
     {
-        //cks.append(fromStdCk(ck.first, ck.second));
         if (ckNames.find(ck.first) != ckNames.cend())
-        //if(true)
         {
-            //qDebug() << "added ck" << QString::fromStdString(ck.first) << " : " << QString::fromStdString(ck.second);
             ckStr += ck.first + "=" + ck.second + ";";
-            //request.setHeader(QNetworkRequest::CookieHeader, QVariant::fromValue(fromStdCk(ck.first, ck.second)));
         }
 
     }
     request.setRawHeader((QByteArray)"Cookie", QString::fromStdString(ckStr).toUtf8());
-    auto manager = new QNetworkAccessManager();
-    //connect(manager, SIGNAL(finished(QNetworkReply*)),
-    //    this, SLOT(replyFinished(QNetworkReply*)));
-
-    manager->get(request);
-    //loadCk(cks, sett);
-
-    //_ws->open(request);
+    _ws->open(request);
 }
 
 
@@ -135,7 +123,7 @@ void Hix::Auth::AuthManager::login()
 
     //load json saved encrypted cookies from previous login
     auto cookieStore = _webView->page()->profile()->cookieStore();
-    cookieStore->deleteAllCookies();
+    //cookieStore->deleteAllCookies();
     //loadCk(*cookieStore, sett);
     QObject::connect(cookieStore, &QWebEngineCookieStore::cookieAdded, [this](const QNetworkCookie& cookie) {
         qDebug() << cookie.name() << cookie.value();
@@ -145,14 +133,23 @@ void Hix::Auth::AuthManager::login()
         });
     QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
         qDebug() << url;
-        if (_webView && url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
+        if (_webView)
         {
-            //login success
-            //auto cookieStore = _webView->page()->profile()->cookieStore();
-            //_webView->close();
-            acquireAuth();
-            //_webView.reset();
+            if (url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
+            {
+                _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
+
+            }
+            else if (url.toString().toStdString().find(REGISTER_SERIAL_DONE_URL.to_std_string()) != std::string::npos)
+            {
+                //login success
+                //auto cookieStore = _webView->page()->profile()->cookieStore();
+                //_webView->close();
+                acquireAuth();
+                //_webView.reset();
+            }
         }
+
         });
     _webView->load(QUrl(LOGIN_URL.data()));
 	_webView->show();
