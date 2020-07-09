@@ -65,7 +65,7 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
     _ws.reset(new QWebSocket());
     QObject::connect(_ws.get(), &QWebSocket::connected,
         [this]() {
-            //unblockApp();
+            unblockApp();
         });
     QObject::connect(_ws.get(), &QWebSocket::disconnected,
         [this]() {
@@ -143,13 +143,12 @@ void Hix::Auth::AuthManager::login()
             else if (url.toString().toStdString().find(REGISTER_SERIAL_DONE_URL.to_std_string()) != std::string::npos)
             {
                 //login success
-                //auto cookieStore = _webView->page()->profile()->cookieStore();
                 //_webView->close();
-                acquireAuth();
                 //_webView.reset();
+                acquireAuth();
+
             }
         }
-
         });
     _webView->load(QUrl(LOGIN_URL.data()));
 	_webView->show();
@@ -172,6 +171,12 @@ void Hix::Auth::AuthManager::blockApp()
 void Hix::Auth::AuthManager::unblockApp()
 {
     _mainWindow->setProperty("visible", true);
+    if (_webView)
+    {
+        _webView->close();
+        _webView.reset();
+    }
+
 }
 
 void Hix::Auth::AuthManager::clearSavedCks()
