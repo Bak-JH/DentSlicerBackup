@@ -16,11 +16,11 @@ namespace Hix
 			AuthManager();
 			void setMainWindow(QQuickWindow* window);
 			void login();
+			void logout();
 
 		private:
+			void setWebview();
 			void acquireAuth();
-
-			//void logout();
 			void blockApp();
 			void unblockApp();
 			void clearSavedCks();

@@ -7,7 +7,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Settings")
-	height: 150
+	height: 180
 	CtrDropdownBox {
 		id: printerPreset
 		label.text: "Printer Preset"
@@ -17,6 +17,33 @@ FeaturePopup {
 		anchors.top: parent.top
 		anchors.topMargin: 55
 	}
+	Hix.Button {
+		id: logoutButton
+		width: 224
+		height: 32
+		radius: 16
+		color: "transparent"
+		border.color: "#b2c4c6"
+
+		anchors.top: printerPreset.bottom
+		anchors.topMargin: 30
+		anchors.horizontalCenter: parent.horizontalCenter
+
+		Text 
+		{
+			color: "#859597"
+			font.pointSize: 10
+			text: "Logout"
+			font.family: openSemiBold.name
+				
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: parent.verticalCenter
+		}
+
+		onEntered: { color = "#dde5e6" }
+		onExited: { color = "transparent" }
+	}
+
 
 	// Hix.Button {
 	// 	id: refreshButton

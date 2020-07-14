@@ -92,6 +92,17 @@ inline QNetworkCookie fromStdCk(const std::string& name, const std::string& val)
     return ck;
 }
 
+void Hix::Auth::AuthManager::setWebview()
+{
+    if (!_webView)
+    {
+        _webView.reset(new QWebEngineView(nullptr));
+        _webView->setMinimumWidth(720);
+        _webView->setMinimumHeight(720);
+    }
+
+}
+
 void Hix::Auth::AuthManager::acquireAuth()
 {
     auto& sett = Hix::Application::ApplicationManager::getInstance().settings().additionalSetting;
@@ -119,7 +130,7 @@ void Hix::Auth::AuthManager::acquireAuth()
 void Hix::Auth::AuthManager::login()
 {
     auto& sett = Hix::Application::ApplicationManager::getInstance().settings().additionalSetting;
-    _webView.reset(new QWebEngineView(nullptr));
+    setWebview();
 
     //load json saved encrypted cookies from previous login
     auto cookieStore = _webView->page()->profile()->cookieStore();
@@ -155,11 +166,20 @@ void Hix::Auth::AuthManager::login()
 
 }
 
-//void Hix::Auth::AuthManager::logout()
-//{
-//	//block usage until authorized
-//	blockApp();
-//}  
+void Hix::Auth::AuthManager::logout()
+{
+    //delete login cookies so user is promted to login again
+    setWebview();
+    auto cookieStore = _webView->page()->profile()->cookieStore();
+    cookieStore->deleteAllCookies();
+    //close websocket conenction
+    if(_ws)
+    {
+        _ws->close();
+    }
+    //block usage until authorized
+	blockApp();
+}  
 
 
 void Hix::Auth::AuthManager::blockApp()
