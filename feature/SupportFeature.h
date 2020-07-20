@@ -134,7 +134,7 @@ namespace Hix
 		private:
 			Hix::Features::Feature* generateRaft();
 			Hix::Features::Feature* removeRaft();
-			void applySupportSettings();
+			static void applySupportSettings();
 			void removeSupport(SupportModel* target);
 			friend class Hix::Support::SupportModel;
 			std::unordered_set<GLModel*> _targetModels;
@@ -143,8 +143,9 @@ namespace Hix
 			Hix::QML::Controls::Button* _generateSupportsBttn;
 			Hix::QML::Controls::Button* _generateRaftBttn;
 			Hix::QML::Controls::Button* _clearSupportsBttn;
-			Hix::QML::Controls::Button* _reconnectBttn;
-			Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
+			Hix::QML::Controls::Button* _suppSettBttn;
+			Hix::QML::Controls::Button* _raftSettBttn;
+			Hix::QML::Controls::Button* _reconnectBttn;			Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
 			//UI slicing options
 			Hix::QML::Controls::DropdownBox* _suppTypeDrop;
 			Hix::QML::Controls::DropdownBox* _raftTypeDrop;
@@ -158,8 +159,8 @@ namespace Hix
 			Hix::QML::Controls::InputSpinBox* _supportBaseHeightSpin;
 			Hix::QML::Controls::InputSpinBox* _maxConnectDistanceSpin;
 
-
 			
+
 
 
 

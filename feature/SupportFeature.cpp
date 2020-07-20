@@ -265,6 +265,8 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_clearSupportsBttn, "clearsupports");
 	co.getControl(_reconnectBttn, "reconnect");
 	co.getControl(_manualEditBttn, "editsupports");
+	co.getControl(_suppSettBttn, "supportsettingbutton");
+	co.getControl(_raftSettBttn, "raftsettingbutton");
 	co.getControl(_suppTypeDrop, "supporttype");
 	co.getControl(_raftTypeDrop, "rafttype");
 	co.getControl(_suppDensitySpin, "supportdensity");
@@ -276,7 +278,7 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_interconnectTypeDrop, "interconnecttype");
 	co.getControl(_supportBaseHeightSpin, "supportBaseHeight");
 	co.getControl(_maxConnectDistanceSpin, "maxConnectDistance");
-	
+
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 
 	_suppTypeDrop->setEnums<SupportSetting::SupportType>(settings.supportType);
@@ -299,6 +301,12 @@ Hix::Features::SupportMode::SupportMode()
 		});
 	QObject::connect(_generateRaftBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		regenerateRaft();
+		});
+	QObject::connect(_suppSettBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		applySupportSettings();
+		});
+	QObject::connect(_raftSettBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		applySupportSettings();
 		});
 	QObject::connect(_reconnectBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		interconnectSupports();
@@ -353,6 +361,7 @@ Hix::Features::SupportMode::SupportMode()
 
 Hix::Features::SupportMode::~SupportMode()
 {
+	applySupportSettings();
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 }
 
@@ -360,18 +369,6 @@ Hix::Features::SupportMode::~SupportMode()
 void Hix::Features::SupportMode::applySupportSettings()
 {
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
-	_suppTypeDrop->getSelected(modSettings.supportType);
-	_raftTypeDrop->getSelected(modSettings.raftType);
-	modSettings.supportDensity = _suppDensitySpin->getValue();
-	modSettings.supportRadiusMax = _maxRadSpin->getValue();
-	modSettings.supportRadiusMin = _minRadSpin->getValue();
-	modSettings.raftRadiusMult = _raftRadiusMultSpin->getValue();
-	modSettings.raftMinMaxRatio = _raftMinMaxRatioSpin->getValue();
-	modSettings.raftThickness = _raftThickness->getValue();
-	_interconnectTypeDrop->getSelected(modSettings.interconnectType);
-	modSettings.supportBaseHeight = _supportBaseHeightSpin->getValue();
-	modSettings.maxConnectDistance = _maxConnectDistanceSpin->getValue();
-
 	modSettings.writeJSON();
 }
 
@@ -414,11 +411,13 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 
 void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)
 {
+	applySupportSettings();
 	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
-	std::unordered_set<const GLModel*> cModels;
-	for (auto e : models) cModels.insert(e); 
 	if (srMan.supportsEmpty())
 		return;
+
+	std::unordered_set<const GLModel*> cModels;
+	for (auto e : models) cModels.insert(e);
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 
@@ -430,7 +429,7 @@ void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>
 	{
 		if (dynamic_cast<Interconnect*>(each)->isConnectedTo(cModels))
 		{
-			container->addFeature(new RemoveSupport(each));
+		container->addFeature(new RemoveSupport(each));
 		}
 	}
 	for (auto each : srMan.modelAttachedSupports(models))
@@ -471,6 +470,8 @@ void Hix::Features::SupportMode::interconnectSupports()
 
 void Hix::Features::SupportMode::regenerateRaft()
 {
+	applySupportSettings();
+
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	if (ApplicationManager::getInstance().supportRaftManager().raftActive())
 	{
