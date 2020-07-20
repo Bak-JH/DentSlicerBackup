@@ -52,7 +52,7 @@ const std::filesystem::path& Hix::Settings::SupportSetting::jsonPath()
 
 rapidjson::Document Hix::Settings::SupportSetting::doc()
 {
-	rapidjson::Document doc;
+	rapidjson::Document doc; 
 	doc.SetObject();
 	doc.AddMember("supportRadiusMax", supportRadiusMax, doc.GetAllocator());
 	doc.AddMember("supportRadiusMin", supportRadiusMin, doc.GetAllocator());

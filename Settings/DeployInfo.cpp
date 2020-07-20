@@ -8,15 +8,13 @@ using namespace Hix::QtUtils;
 Hix::Settings::DeployInfo::DeployInfo()
 {
 	auto qStrPath = QCoreApplication::applicationDirPath();
-	qStrPath += "deploy.json";
+	qStrPath += "/deploy.json";
 	parseJSON(toStdPath(qStrPath));
 }
 
 std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
 {
-	auto qStrPath = QCoreApplication::applicationDirPath();
-	qStrPath += "/PrinterPresets";
-	return toStdPath(qStrPath);
+	return settingsDir/ "PrinterPresets";
 }
 
 void Hix::Settings::DeployInfo::initialize()

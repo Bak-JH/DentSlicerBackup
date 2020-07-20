@@ -28,6 +28,9 @@ namespace Hix
 
 			Hix::QML::Controls::ToggleSwitch* _invertXSwtch;
 
+
+			static void applySettings();
+
 		};
 
 		class SliceExport : public Hix::Tasking::Task
