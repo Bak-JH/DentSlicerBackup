@@ -59,12 +59,12 @@ Hix::Features::SliceExportMode::SliceExportMode()
 
 Hix::Features::SliceExportMode::~SliceExportMode()
 {
+	applySettings();
 }
 
 void Hix::Features::SliceExportMode::applyButtonClicked()
 {
-	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
-	modSettings.writeJSON();
+	applySettings();
 	auto fileName = QFileDialog::getSaveFileName(nullptr, "Export sliced file", "");
 	if (fileName.isEmpty())
 	{
@@ -82,6 +82,12 @@ void Hix::Features::SliceExportMode::applyAndClose()
 	//delete schedule last due to the blocking file dialog
 	scheduleForDelete();
 }
+
+void Hix::Features::SliceExportMode::applySettings()
+{
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
+	modSettings.writeJSON();
+} 
 
 
 

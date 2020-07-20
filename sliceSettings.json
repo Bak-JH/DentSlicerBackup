@@ -3,6 +3,6 @@
     "invertX": true,
     "slicingMode": "Uniform",
     "useGPU" : true,
-    "AAXY" : 4,
-    "AAZ" : 3
+    "AAXY" : 1,
+    "AAZ" : 1
 }
