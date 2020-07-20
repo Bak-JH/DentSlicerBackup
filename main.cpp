@@ -31,6 +31,21 @@ using namespace Qt3DCore;
 
 #endif
 
+
+
+
+
+#include <QApplication>
+#include <QStringList>
+#include <QDebug>
+
+
+const auto GOOGLE_CLIENT_ID = QString("89839571658-lte1h99n2hq3h44922g3ojj04hhtnr56.apps.googleusercontent.com");
+const auto GOOGLE_APP_SECRET = QString("NpN4y7CwF8hzGPXj1k2nIlFE");
+const auto GOOGLE_AUTH = QUrl("http://accounts.google.com/o/oauth2/auth");
+const auto GOOGLE_TOKEN = QUrl("http://accounts.google.com/o/oauth2/token");
+
+
 int main(int argc, char** argv)
 {
 #ifdef _UNIT_TEST
@@ -84,22 +99,20 @@ int main(int argc, char** argv)
 	//login or make main window visible
 	QQuickWindow *mainWindow;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
-	QQuickWindow* loginWindow;
-	QObject *loginButton;
-	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
-	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+	auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
+	auth.setMainWindow(mainWindow);
+	auth.login();
+
+
 
 
 #if  defined(QT_DEBUG) || defined(_DEBUG)
-	mainWindow->setProperty("visible", true);
-	loginWindow->close();
+
 #else
-	loginWindow->setProperty("visible", true);
-	//auth
-	httpreq* hr = new httpreq(loginWindow, loginButton);
-	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
+
+
 
 #endif
 	splash->close();
@@ -108,3 +121,4 @@ int main(int argc, char** argv)
 
 }
 
+//#include "main.moc"

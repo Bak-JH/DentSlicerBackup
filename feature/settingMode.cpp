@@ -1,10 +1,12 @@
 #include "settingMode.h"
 #include "../qml/components/Inputs.h"
+#include "../qml/components/Buttons.h"
 #include "../qml/components/ControlOwner.h"
 
 #include "render/Color.h"
 #include "glmodel.h"
 #include "application/ApplicationManager.h"
+
 using namespace Hix::Debug;
 using namespace Hix::Settings;
 namespace fs = std::filesystem;
@@ -16,6 +18,7 @@ Hix::Features::SettingMode::SettingMode()
 {
 	auto& co = controlOwner();
 	co.getControl(_printerPresets, "printerPreset");
+	co.getControl(_logoutBttn, "logoutButton");
 
 	//get settings dir
 	auto printerPresetsDir = Hix::Application::ApplicationManager::getInstance().settings().deployInfo.printerPresetsDir();
@@ -34,6 +37,13 @@ Hix::Features::SettingMode::SettingMode()
 	_oldIndex = presets.indexOf(oldPresetStr);
 	_printerPresets->setList(presets);
 	_printerPresets->setIndex(_oldIndex);
+
+	QObject::connect(_logoutBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
+		auth.logout();
+		auth.login();
+		});
+
 }
 
 Hix::Features::SettingMode::~SettingMode()
