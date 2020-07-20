@@ -7,6 +7,7 @@
 #include <QtWebSockets/QWebSocket>
 #include <QNetworkRequest>
 #include <QQuickWindow>
+#include <QWebEngineHistory>
 #include "../application/ApplicationManager.h"
 #include "../common/frozen/string.hpp"
 
@@ -14,18 +15,32 @@
 #include <Wincrypt.h>
 using frozen::operator"" _fstr;
 
-constexpr auto HOST = "127.0.0.1"_fstr;
-constexpr auto PORT = "8000"_fstr;
-constexpr auto ADDRESS = HOST + ":" + PORT;
+
+//constexpr auto HOST = "127.0.0.1"_fstr;
+//constexpr auto PORT = "8000"_fstr;
+//constexpr auto ADDRESS = HOST + ":" + PORT;
+//constexpr bool IS_TLS = false;
+
+constexpr auto HOST = "services.hix.co.kr"_fstr;
+constexpr auto ADDRESS = HOST;
+constexpr bool IS_TLS = true;
+
+//constexpr auto WS_ADDRESS = IS_TLS ? HOST + ":3443"_fstr : HOST + ":3080"_fstr;
 
 
-constexpr auto LOGIN_URL = "http://"_fstr + ADDRESS + "/product/login/"_fstr;
-constexpr auto LOGIN_REDIRECT_URL = "http://"_fstr + ADDRESS + "/product/login_redirect/"_fstr;
-constexpr auto REGISTER_SERIAL_URL = "http://"_fstr + ADDRESS + "/product/register/dentslicer"_fstr;
-constexpr auto REGISTER_SERIAL_DONE_URL = "http://"_fstr + ADDRESS + "/product/registration_done/"_fstr;
+constexpr auto PROTOCOL = IS_TLS ? "https://"_fstr : "http://"_fstr;
 
 
+constexpr auto LOGIN_URL = PROTOCOL + ADDRESS + "/product/login/"_fstr;
+constexpr auto LOGIN_REDIRECT_URL = PROTOCOL + ADDRESS + "/product/login_redirect/"_fstr;
+constexpr auto REGISTER_SERIAL_URL = PROTOCOL + ADDRESS + "/product/register/dentslicer"_fstr;
+constexpr auto REGISTER_SERIAL_DONE_URL = PROTOCOL + ADDRESS + "/product/registration_done/"_fstr;
+
+
+//constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
 constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
+
+
 //constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
 
 //seems on windows, webview stores cookies via chromium
@@ -77,6 +92,11 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
             blockApp();
             login();
         });
+    QObject::connect(_ws.get(), QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
+        [this](const QList<QSslError>& errors) {
+            blockApp();
+            login();
+        });
 }
 
 void Hix::Auth::AuthManager::setMainWindow(QQuickWindow* window)
@@ -88,7 +108,7 @@ inline QNetworkCookie fromStdCk(const std::string& name, const std::string& val)
 
     auto ck = QNetworkCookie(QByteArray::fromStdString(name), QByteArray::fromStdString(val));
     ck.setDomain(HOST.data());
-    qDebug() << "cookie created: " << ck.name() << " " << ck.value() << " domain: " << ck.domain();
+    //qDebug() << "cookie created: " << ck.name() << " " << ck.value() << " domain: " << ck.domain();
     return ck;
 }
 
@@ -108,8 +128,11 @@ void Hix::Auth::AuthManager::acquireAuth()
     auto& sett = Hix::Application::ApplicationManager::getInstance().settings().additionalSetting;
 
     QNetworkRequest request(QUrl(WS_URL.data()));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
+    QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+    config.setProtocol(QSsl::TlsV1_2OrLater);
+    request.setSslConfiguration(config);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     std::unordered_set<std::string> ckNames = { "sessionid", "csrftoken", "messages" };
     std::string ckStr;
     for (auto& ck : _cks)
@@ -134,22 +157,26 @@ void Hix::Auth::AuthManager::login()
 
     //load json saved encrypted cookies from previous login
     auto cookieStore = _webView->page()->profile()->cookieStore();
-    //cookieStore->deleteAllCookies();
+    cookieStore->deleteAllCookies();
+    //_webView->history()->clear();
+
+    //QWebEngineProfile* defaultProfile = QWebEngineProfile::defaultProfile();
+    //qDebug() << defaultProfile->cachePath();
+    //qDebug() << defaultProfile->persistentStoragePath();
     //loadCk(*cookieStore, sett);
     QObject::connect(cookieStore, &QWebEngineCookieStore::cookieAdded, [this](const QNetworkCookie& cookie) {
-        qDebug() << cookie.name() << cookie.value();
+        //qDebug() << cookie.name() << cookie.value();
         _cks[cookie.name().toStdString()] = cookie.value().toStdString();
         auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).additionalSetting;
         //storeCk(cookie, moddableSetting);
         });
     QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
-        qDebug() << url;
+        //qDebug() << url;
         if (_webView)
         {
             if (url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
             {
                 _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
-
             }
             else if (url.toString().toStdString().find(REGISTER_SERIAL_DONE_URL.to_std_string()) != std::string::npos)
             {
@@ -157,7 +184,6 @@ void Hix::Auth::AuthManager::login()
                 //_webView->close();
                 //_webView.reset();
                 acquireAuth();
-
             }
         }
         });
