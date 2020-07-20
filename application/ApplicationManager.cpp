@@ -48,6 +48,7 @@ void Hix::Application::ApplicationManager::init()
 	_setting.parseJSON();
 	_setting.sliceSetting.parseJSON();
 	_setting.supportSetting.parseJSON();
+	_setting.additionalSetting.parseJSON();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
@@ -105,6 +106,11 @@ Hix::Tasking::TaskManager& Hix::Application::ApplicationManager::taskManager()
 Hix::Support::SupportRaftManager& Hix::Application::ApplicationManager::supportRaftManager()
 {
 	return _supportRaftManager;
+}
+
+Hix::Auth::AuthManager& Hix::Application::ApplicationManager::auth()
+{
+	return _auth;
 }
 
 QString Hix::Application::ApplicationManager::getVersion() const

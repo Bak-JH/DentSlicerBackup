@@ -57,7 +57,7 @@ namespace Hix
 			}
 			template<>
 			void parse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value);
-
+			void parseAllStr(const rapidjson::Document& doc, std::unordered_map<std::string, std::string>& map);
 
 
 			//assume lower case strings for mapping

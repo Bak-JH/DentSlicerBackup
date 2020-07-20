@@ -11,6 +11,7 @@ namespace Hix
 		namespace Controls
 		{
 			class DropdownBox;
+			class Button;
 		}
 	}
 
@@ -26,6 +27,8 @@ namespace Hix
 		private:
 			bool isDirty()const;
 			Hix::QML::Controls::DropdownBox* _printerPresets;
+			Hix::QML::Controls::Button* _logoutBttn;
+
 			std::deque<std::filesystem::path> _presetPaths; //same index as combo box
 			int _oldIndex;
 		};

@@ -76,6 +76,17 @@ void Hix::Settings::JSONParsedSetting::parseJSON()
 //	}
 //}
 
+void Hix::Settings::JSON::parseAllStr(const rapidjson::Document& doc, std::unordered_map<std::string, std::string>& map)
+{
+	for (auto i = doc.MemberBegin(); i != doc.MemberEnd(); i++)
+	{
+		auto key = i->name.GetString();
+		auto value = i->value.GetString();
+		map[key] = value;
+
+	}
+}
+
 std::optional<rapidjson::Value> Hix::Settings::JSON::tryParseObj(const rapidjson::Document& doc, const std::string& key, rapidjson::MemoryPoolAllocator<>& allocator)
 {
 	try
