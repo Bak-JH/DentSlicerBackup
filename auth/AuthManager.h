@@ -3,6 +3,7 @@
 #include <string>
 #include <QMetaObject>
 #include <unordered_map>
+#include <QObject>
 class QWebEngineView;
 class QWebSocket;
 class QQuickWindow;
@@ -10,11 +11,15 @@ namespace Hix
 {
 	namespace Auth
 	{
-		class AuthManager
+
+		class AuthManager: public QObject
 		{
+			Q_OBJECT
 		public:
 			AuthManager();
 			void setMainWindow(QQuickWindow* window);
+			void setResumeWindow(QObject* resume);
+
 			void login();
 			void logout();
 
@@ -33,7 +38,12 @@ namespace Hix
 			std::unique_ptr<QWebSocket, void(*)(QWebSocket*)> _ws;
 			QMetaObject::Connection _ckAddedConnToken;
 			QQuickWindow* _mainWindow;
+			QObject* _resumeWindow;
 			std::unordered_map<std::string, std::string> _cks;
+
+		private slots:
+			void resume();
+
 		};
 
 

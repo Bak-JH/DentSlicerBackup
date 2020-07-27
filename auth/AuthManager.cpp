@@ -76,6 +76,8 @@ void qDeleteLater(QWebSocket* obj)
 
 Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nullptr, qDeleteLater)
 {
+
+
     //_webView->setPage(new HixWebviewPage());
     _ws.reset(new QWebSocket());
     QObject::connect(_ws.get(), &QWebSocket::connected,
@@ -85,20 +87,26 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
     QObject::connect(_ws.get(), &QWebSocket::disconnected,
         [this]() {
             blockApp();
-            login();
+            _resumeWindow->setProperty("visible", true);
         });
     QObject::connect(_ws.get(), QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
         [this](QAbstractSocket::SocketError error) {
             blockApp();
-            login();
+            _resumeWindow->setProperty("visible", true);
         });
     QObject::connect(_ws.get(), QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
         [this](const QList<QSslError>& errors) {
             blockApp();
-            login();
+            _resumeWindow->setProperty("visible", true);
         });
 }
 
+void Hix::Auth::AuthManager::setResumeWindow(QObject* resume)
+{
+    _resumeWindow = resume;
+    QObject::connect(_resumeWindow, SIGNAL(resume()), this, SLOT(resume()));
+
+}
 void Hix::Auth::AuthManager::setMainWindow(QQuickWindow* window)
 {
     _mainWindow = window;
@@ -120,7 +128,11 @@ void Hix::Auth::AuthManager::setWebview()
         _webView->setMinimumWidth(720);
         _webView->setMinimumHeight(720);
     }
+}
 
+void Hix::Auth::AuthManager::resume()
+{
+    login();
 }
 
 void Hix::Auth::AuthManager::acquireAuth()
@@ -157,12 +169,23 @@ void Hix::Auth::AuthManager::login()
 
     //load json saved encrypted cookies from previous login
     auto cookieStore = _webView->page()->profile()->cookieStore();
-    cookieStore->deleteAllCookies();
+    //cookieStore->deleteAllCookies();
     //_webView->history()->clear();
-
-    //QWebEngineProfile* defaultProfile = QWebEngineProfile::defaultProfile();
+    QWebEngineProfile* defaultProfile = QWebEngineProfile::defaultProfile();
     //qDebug() << defaultProfile->cachePath();
     //qDebug() << defaultProfile->persistentStoragePath();
+    
+    //because google blocks QtWebEngine UserAgent
+    //qDebug() << defaultProfile->httpUserAgent();
+    auto defUA = defaultProfile->httpUserAgent().toStdString();
+    size_t pos = defUA.find("QtWebEngine");
+    if (pos != std::string::npos)
+    {
+        defUA.erase(pos, defUA.length());
+    }
+    defaultProfile->setHttpUserAgent(QString::fromUtf8(defUA.c_str(), defUA.length()));
+    //qDebug() << defaultProfile->httpUserAgent();
+
     //loadCk(*cookieStore, sett);
     QObject::connect(cookieStore, &QWebEngineCookieStore::cookieAdded, [this](const QNetworkCookie& cookie) {
         //qDebug() << cookie.name() << cookie.value();

@@ -12,7 +12,15 @@ ApplicationWindow {
     height: 360
     visible: false
     flags : Qt.Window | Qt.FramelessWindowHint | Qt.WindowMaximizeButtonHint | Qt.WindowMinimizeButtonHint
+    id: root
+    signal resume();
 
+    function doResume()
+    {
+        visible = false;
+        resume();
+    }
+    
     Rectangle{//shadow
         id : shadowRect
         width: parent.width-2
@@ -43,7 +51,7 @@ ApplicationWindow {
 
         Keys.onPressed: {
             if (event.key == Qt.Key_Enter) {
-                loginButton.loginTrial(serialbox_text1.text + serialbox_text2.text + serialbox_text3.text + serialbox_text4.text);
+                root.doResume();
             }
         }
 
@@ -59,258 +67,28 @@ ApplicationWindow {
         }
 
         Text{
-            id : loginErrorText
+            id : info
             anchors.top : parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 170
 
-            text : "Please check your serial number"
+            text : "Logged in from another location, resume?"
 
             font.pixelSize: 14
             font.family: mainFont.name
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            color: "red"
-            visible: false
+            color: "#00B9C8"
+            visible: true
         }
 
-        //Serial Box
-        Item {
-            id: serialItem
-            width: 284
-            height: 28
-            anchors.top: parent.top
-            anchors.left : parent.left
-            anchors.topMargin: 210
-            anchors.leftMargin: 40
-            //number box
-            Rectangle {
-                id: serialbox
-                width: parent.width
-                height: parent.height
-                color: "transparent"
-                Text{
-                    width: parent.width
-                    height: parent.height
-                    anchors.centerIn: parent
 
-                    text : qsTr("Serial")
 
-                    font.pixelSize: 20
-                    font.family: mainFont.name
-                    horizontalAlignment: Text.AlignLeft
-                    verticalAlignment: Text.AlignVCenter
-                    color: "#0DA3B2"
-                }
-                TextField {
-                    id: serialbox_text1
-                    width: (parent.width-100)/4
-                    anchors.right: serialbox_text2.left
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: TextInput.AlignRight
-                    placeholderText: "AAAA"
-                    font.pixelSize: 12
-                    font.family: mainFont.name
-                    font.capitalization: Font.AllUppercase
-                    textColor: focus ? "black" : "#737375"
-                    selectByMouse: true
-                    maximumLength : 4
-                    inputMethodHints : Qt.ImhUppercaseOnly
 
-                    style: TextFieldStyle {
-                        textColor: "black"
-                        background: Rectangle {
-                            border.width: 0
-                        }
-                    }
-                }
-                Text{
-                    width: 6
-                    anchors.right: serialbox_text2.left
-                    anchors.rightMargin: -2
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    text : qsTr("-")
-
-                    font.pixelSize: 15
-                    font.family: mainFont.name
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: "#0DA3B2"
-                }
-                TextField {
-                    id: serialbox_text2
-                    width: (parent.width-100)/4
-                    anchors.right: serialbox_text3.left
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: TextInput.AlignRight
-                    placeholderText: "AAAA"
-                    font.pixelSize: 12
-                    font.family: mainFont.name
-                    font.capitalization: Font.AllUppercase
-                    textColor: focus ? "black" : "#737375"
-                    selectByMouse: true
-                    maximumLength : 4
-
-                    style: TextFieldStyle {
-                        textColor: "black"
-                        background: Rectangle {
-                            border.width: 0
-                        }
-                    }
-                }
-                Text{
-                    width: 6
-                    anchors.right: serialbox_text3.left
-                    anchors.rightMargin: -2
-                    anchors.verticalCenter: parent.verticalCenter
-                    text : qsTr("-")
-
-                    font.pixelSize: 15
-                    font.family: mainFont.name
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: "#0DA3B2"
-                }
-                TextField {
-                    id: serialbox_text3
-                    width: (parent.width-100)/4
-                    anchors.right: serialbox_text4.left
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: TextInput.AlignRight
-                    placeholderText: "AAAA"
-                    font.pixelSize: 12
-                    font.family: mainFont.name
-                    font.capitalization: Font.AllUppercase
-                    textColor: focus ? "black" : "#737375"
-                    selectByMouse: true
-                    maximumLength : 4
-
-                    style: TextFieldStyle {
-                        textColor: "black"
-                        background: Rectangle {
-                            border.width: 0
-                        }
-                    }
-                }
-                Text{
-                    width: 6
-                    anchors.right: serialbox_text4.left
-                    anchors.rightMargin: -2
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    text : qsTr("-")
-
-                    font.pixelSize: 15
-                    font.family: mainFont.name
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                    color: "#0DA3B2"
-                }
-
-                TextField {
-                    id: serialbox_text4
-                    width: (parent.width-100)/4
-                    anchors.right: parent.right
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: TextInput.AlignRight
-                    placeholderText: "AAAA"
-                    font.pixelSize: 12
-                    font.family: mainFont.name
-                    font.capitalization: Font.AllUppercase
-                    textColor: focus ? "black" : "#737375"
-                    selectByMouse: true
-                    maximumLength : 4
-
-                    style: TextFieldStyle {
-                        textColor: "black"
-                        background: Rectangle {
-                            border.width: 0
-                        }
-                    }
-                }
-
-                Rectangle{
-                    width: parent.width
-                    height: 1
-
-                    anchors.left: parent.left
-                    anchors.top: parent.bottom
-                    color: "#939396"
-                }
-            }
-        }
-
-        /*
-        //PW Box
-        Item {
-            id: pwboxItem
-            width: 284
-            height: 28
-            anchors.top: parent.top
-            anchors.left : parent.left
-            anchors.topMargin: 270
-            anchors.leftMargin: 40
-            //number box
-            Rectangle {
-                id: pwbox
-                width: parent.width
-                height: parent.height
-                color: "transparent"
-                Text{
-                    width: parent.width
-                    height: parent.height
-                    anchors.centerIn: parent
-
-                    text : qsTr("Password")
-
-                    font.pixelSize: 20
-                    font.family: mainFont.name
-                    horizontalAlignment: Text.AlignLeft
-                    verticalAlignment: Text.AlignVCenter
-                    color: "#0DA3B2"
-                }
-                TextField {
-                    id: pwbox_text
-                    width: parent.width-90
-                    anchors.right: parent.right
-                    anchors.rightMargin: 5
-                    anchors.verticalCenter: parent.verticalCenter
-                    horizontalAlignment: TextInput.AlignRight
-                    placeholderText: "Enter Password"
-
-                    font.pixelSize: 12
-                    font.family: mainFont.name
-                    textColor: focus ? "black" : "#737375"
-                    selectByMouse: true
-                    echoMode: TextInput.Password
-
-                    style: TextFieldStyle {
-                        textColor: "black"
-                        background: Rectangle {
-                            border.width: 0
-                        }
-                    }
-                }
-                Rectangle{
-                    width: parent.width
-                    height: 1
-
-                    anchors.left: parent.left
-                    anchors.top: parent.bottom
-                    color: "#939396"
-                }
-            }
-        }
-        */
 
         Rectangle { // login button
-            id : loginButton
-            objectName: "loginButton"
+            id : resumeButton
+            objectName: "resumeButton"
             width: 128
             height: 36
             anchors.left: parent.left
@@ -323,7 +101,7 @@ ApplicationWindow {
                 height: parent.height
                 anchors.centerIn: parent
 
-                text : "LOGIN"
+                text : "RESUME"
 
                 font.pixelSize: 20
                 font.family: mainFont.name
@@ -338,17 +116,8 @@ ApplicationWindow {
                 onEntered : qm.setHandCursor();
                 onExited : qm.resetCursor();
                 onClicked: {
-                    parent.loginTrial(serialbox_text1.text + serialbox_text2.text + serialbox_text3.text + serialbox_text4.text);
+                    root.doResume();
                 }
-            }
-            signal loginTrial(string serial);
-
-            function loginSuccess(){
-                loginWindow.close()
-                window.visible = true;
-            }
-            function loginFail(){
-                loginErrorText.visible = true;
             }
         }
 
