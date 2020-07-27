@@ -98,9 +98,13 @@ int main(int argc, char** argv)
 	splash->show();
 	//login or make main window visible
 	QQuickWindow *mainWindow;
+	QObject* resumeWindow;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
+	Hix::QML::getItemByID(appManager.getWindowRoot(), resumeWindow, "resumeWindow");
+
 	auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
 	auth.setMainWindow(mainWindow);
+	auth.setResumeWindow(resumeWindow);
 	auth.login();
 
 

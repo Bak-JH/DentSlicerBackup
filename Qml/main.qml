@@ -288,8 +288,8 @@ Item{
     }
 
 	Login{
-		id : loginWindow
-		objectName: "loginWindow"
+		id : resumeWindow
+		objectName: "resumeWindow"
 	}
 
 }
