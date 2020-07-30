@@ -11,6 +11,7 @@ namespace Hix
 	namespace Settings
 	{
 		enum Liscense {
+			NONE,
 			BASIC,
 			PRO
 		};

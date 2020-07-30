@@ -260,16 +260,19 @@ void Hix::Auth::AuthManager::login()
 
             if (url.toString().toStdString().find(REGISTER_SERIAL_DONE_URL.to_std_string()) != std::string::npos)
             {
-                acquireAuth();
-
-                for (auto item : Hix::Application::ApplicationManager().getInstance().featureManager().featureItems()->childItems())
+                if (Hix::Application::ApplicationManager().getInstance().settings().liscense != Hix::Settings::NONE)
                 {
-                    item->deleteLater();
-                }
+                    acquireAuth();
 
-                auto menu = dynamic_cast<Hix::QML::FeatureMenu*>(Hix::Application::ApplicationManager::getInstance().featureManager().menu());
-                Hix::Features::FeaturesLoader loader(&Hix::Application::ApplicationManager::getInstance().engine(), menu);
-                loader.loadFeatureButtons();
+                    for (auto item : Hix::Application::ApplicationManager().getInstance().featureManager().featureItems()->childItems())
+                    {
+                        item->deleteLater();
+                    }
+
+                    auto menu = dynamic_cast<Hix::QML::FeatureMenu*>(Hix::Application::ApplicationManager::getInstance().featureManager().menu());
+                    Hix::Features::FeaturesLoader loader(&Hix::Application::ApplicationManager::getInstance().engine(), menu);
+                    loader.loadFeatureButtons();
+                }
             }
             
         }
@@ -355,7 +358,7 @@ void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
         }
         else
         {
-            qDebug() << "nope";
+            qDebug() << "none";
             _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
         }
     }
