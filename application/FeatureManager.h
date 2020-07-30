@@ -59,6 +59,8 @@ namespace Hix
 			FeatureManager& operator=(FeatureManager&& other) = delete;
 			QQuickItem* featureArea();
 			QQuickItem* slideArea();
+			QQuickItem* featureItems();
+			QQuickItem* menu();
 			Hix::Features::Mode* currentMode()const;
 			void setMode(Hix::Features::Mode*);
 			Hix::Features::FeatureHistoryManager& featureHistoryManager();

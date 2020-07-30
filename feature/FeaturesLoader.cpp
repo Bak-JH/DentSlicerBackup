@@ -92,8 +92,10 @@ Hix::QML::FeatureMenu& Hix::Features::FeaturesLoader::menu()
 void Hix::Features::FeaturesLoader::loadFeatureButtons()
 {
 	addButton<Hix::Features::ImportModelMode>("open",this);
-	addButton<Hix::Features::ModelBuilderMode>("modelbuilder", this);
-
+	if (Hix::Application::ApplicationManager::getInstance().settings().liscense == Hix::Settings::PRO)
+	{
+		addButton<Hix::Features::ModelBuilderMode>("modelbuilder", this);
+	}
 	addDivider();
 
 	addButton<Hix::Features::MoveMode>("move" ,this);
@@ -101,10 +103,14 @@ void Hix::Features::FeaturesLoader::loadFeatureButtons()
 	addButton<Hix::Features::ScaleMode>("scale" ,this);
 	addDivider();
 
-	addButton<Hix::Features::ModelCut>("cut" ,this);
-	//addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
-	addButton<Hix::Features::ExtendMode>("extend" ,this);
-	addButton<Hix::Features::LabellingMode>("label" ,this);
+	if (Hix::Application::ApplicationManager::getInstance().settings().liscense == Hix::Settings::PRO)
+	{
+		addButton<Hix::Features::ModelCut>("cut", this);
+		//addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
+		addButton<Hix::Features::ExtendMode>("extend", this);
+		addButton<Hix::Features::LabellingMode>("label", this);
+	}
+
 	addButton<Hix::Features::LayFlatMode>("layflat" ,this);
 	//addButton<Hix::Features::AutoOrientateMode>("orient" ,this);
 	addButton<Hix::Features::AutoArrangeMode>("arrange" ,this);
