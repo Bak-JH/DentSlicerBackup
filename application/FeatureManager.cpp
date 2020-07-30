@@ -38,6 +38,16 @@ QQuickItem* Hix::Application::FeatureManager::slideArea()
 	return _slideArea;
 }
 
+QQuickItem* Hix::Application::FeatureManager::menu()
+{
+	return _menu;
+}
+
+QQuickItem* Hix::Application::FeatureManager::featureItems()
+{
+	return _menu->featureItems();
+}
+
 Hix::Features::Mode* Hix::Application::FeatureManager::currentMode() const
 {
 	return _currentMode.get();
