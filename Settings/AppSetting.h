@@ -32,7 +32,7 @@ namespace Hix
 			AdditionalSetting additionalSetting;
 			std::string printerPresetPath;
 			std::string version;
-			Liscense liscense;
+			Liscense liscense = NONE;
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
