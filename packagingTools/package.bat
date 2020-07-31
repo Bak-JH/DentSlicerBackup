@@ -15,7 +15,8 @@ ECHO copy DentSlicer.exe
 xcopy /s/Y ..\release\DentSlicer.exe setup
 xcopy /s/Y ..\release\wincorkDLL.dll setup
 xcopy /s/Y ..\release\glfw3.dll setup
-
+xcopy /s/Y .\openssl\libeay32.dll setup
+xcopy /s/Y .\openssl\ssleay32.dll setup
 
 
 ECHO DSP: create NSI build script
