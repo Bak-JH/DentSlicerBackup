@@ -10,6 +10,8 @@
 #include <QWebEngineHistory>
 #include "../application/ApplicationManager.h"
 #include "../common/frozen/string.hpp"
+#include "../../feature/FeaturesLoader.h"
+#include "Qml/components/FeatureMenu.h"
 
 #include <windows.h>
 #include <Wincrypt.h>
@@ -33,12 +35,14 @@ constexpr auto PROTOCOL = IS_TLS ? "https://"_fstr : "http://"_fstr;
 
 constexpr auto LOGIN_URL = PROTOCOL + ADDRESS + "/product/login/"_fstr;
 constexpr auto LOGIN_REDIRECT_URL = PROTOCOL + ADDRESS + "/product/login_redirect/"_fstr;
-constexpr auto REGISTER_SERIAL_URL = PROTOCOL + ADDRESS + "/product/register/dentslicer"_fstr;
+constexpr auto REGISTER_SERIAL_URL = PROTOCOL + ADDRESS + "/product/register/"_fstr;
 constexpr auto REGISTER_SERIAL_DONE_URL = PROTOCOL + ADDRESS + "/product/registration_done/"_fstr;
+constexpr auto OWN_BASIC_URL = PROTOCOL + ADDRESS + "/product/owns/dentslicer"_fstr;
+constexpr auto OWN_PRO_URL = PROTOCOL + ADDRESS + "/product/owns/dentslicer_pro"_fstr;
 
 
 //constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
-constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
+constexpr auto WS_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
 
 
 //constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
@@ -199,20 +203,83 @@ void Hix::Auth::AuthManager::login()
         {
             if (url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
             {
-                _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
-            }
-            else if (url.toString().toStdString().find(REGISTER_SERIAL_DONE_URL.to_std_string()) != std::string::npos)
-            {
                 //login success
                 //_webView->close();
                 //_webView.reset();
-                acquireAuth();
+                QNetworkAccessManager* manager = new QNetworkAccessManager(this);
+
+                connect(manager, SIGNAL(finished(QNetworkReply*)),
+                    this, SLOT(replyFinished(QNetworkReply*)));
+
+                QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+                config.setProtocol(QSsl::TlsV1_2OrLater);
+
+                QNetworkRequest request(QUrl(OWN_PRO_URL.data()));
+                request.setSslConfiguration(config);
+
+                request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+                std::unordered_set<std::string> ckNames = { "sessionid", "csrftoken", "messages" };
+                std::string ckStr;
+                for (auto& ck : _cks)
+                {
+                    if (ckNames.find(ck.first) != ckNames.cend())
+                        ckStr += ck.first + "=" + ck.second + ";";
+                }
+                request.setRawHeader((QByteArray)"Cookie", QString::fromStdString(ckStr).toUtf8());
+
+                manager->get(request);
             }
+
+            /// before register product ///
+            if (url.toString().toStdString().find(OWN_PRO_URL.to_std_string()) != std::string::npos)
+            {
+                _webView->page()->toPlainText([this](QString reply) {
+                    if (reply == "owns product")
+                    {
+                        auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+
+                        qDebug() << "pro";
+                        moddableSetting.liscense = Hix::Settings::PRO;
+                        _webView->load(QUrl(REGISTER_SERIAL_DONE_URL.data()));
+                    }
+                    });
+            }
+            if (url.toString().toStdString().find(OWN_BASIC_URL.to_std_string()) != std::string::npos)
+            {
+                _webView->page()->toPlainText([this](QString reply) {
+                    if (reply == "owns product")
+                    {
+                        auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+
+                        qDebug() << "basic";
+                        moddableSetting.liscense = Hix::Settings::BASIC;
+                        _webView->load(QUrl(REGISTER_SERIAL_DONE_URL.data()));
+                    }
+                });
+            }
+
+            if (url.toString().toStdString().find(REGISTER_SERIAL_DONE_URL.to_std_string()) != std::string::npos)
+            {
+                if (Hix::Application::ApplicationManager().getInstance().settings().liscense != Hix::Settings::NONE)
+                {
+                    acquireAuth();
+
+                    for (auto item : Hix::Application::ApplicationManager().getInstance().featureManager().featureItems()->childItems())
+                    {
+                        item->deleteLater();
+                    }
+
+                    auto menu = dynamic_cast<Hix::QML::FeatureMenu*>(Hix::Application::ApplicationManager::getInstance().featureManager().menu());
+                    Hix::Features::FeaturesLoader loader(&Hix::Application::ApplicationManager::getInstance().engine(), menu);
+                    loader.loadFeatureButtons();
+                }
+            }
+            
         }
         });
     _webView->load(QUrl(LOGIN_URL.data()));
 	_webView->show();
-
+    
 }
 
 void Hix::Auth::AuthManager::logout()
@@ -253,6 +320,49 @@ void Hix::Auth::AuthManager::clearSavedCks()
     auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).additionalSetting;
     moddableSetting.keyVals.clear();
 }
+
+
+/// after register product ///
+void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
+{
+    auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+
+    QString tempUrl = reply->url().toString();
+    QString text = QString::fromUtf8(reply->readAll());
+
+    qDebug() << tempUrl;
+    qDebug() << text;
+
+    if (tempUrl.toStdString().find(OWN_PRO_URL.to_std_string()) != std::string::npos)
+    {
+        if (text.toStdString().find("owns product") != std::string::npos)
+        {
+            qDebug() << "pro";
+            moddableSetting.liscense = Hix::Settings::PRO;
+            _webView->load(QUrl(REGISTER_SERIAL_DONE_URL.data()));
+        }
+        else
+        {
+            auto request = reply->request();
+            request.setUrl(QUrl(OWN_BASIC_URL.data()));
+            reply->manager()->get(request);
+        }
+    }
+    else if (tempUrl.toStdString().find(OWN_BASIC_URL.to_std_string()) != std::string::npos)
+    {
+        if (text.toStdString().find("owns product") != std::string::npos)
+        {
+            qDebug() << "basic";
+            moddableSetting.liscense = Hix::Settings::BASIC;
+            _webView->load(QUrl(REGISTER_SERIAL_DONE_URL.data()));
+        }
+        else
+        {
+            qDebug() << "none";
+            _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
+        }
+    }
+}   
 
 
 //#define MY_ENCODING_TYPE  (PKCS_7_ASN_ENCODING | X509_ASN_ENCODING)

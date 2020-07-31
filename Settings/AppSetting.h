@@ -10,6 +10,12 @@ namespace Hix
 {
 	namespace Settings
 	{
+		enum Liscense {
+			NONE,
+			BASIC,
+			PRO
+		};
+
 		class AppSetting:public JSONParsedSetting, public JSONWriteSetting
 		{
 		public:
@@ -26,6 +32,8 @@ namespace Hix
 			AdditionalSetting additionalSetting;
 			std::string printerPresetPath;
 			std::string version;
+			Liscense liscense = NONE;
+
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
 			void initialize()override;

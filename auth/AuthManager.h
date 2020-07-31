@@ -4,6 +4,8 @@
 #include <QMetaObject>
 #include <unordered_map>
 #include <QObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 class QWebEngineView;
 class QWebSocket;
 class QQuickWindow;
@@ -40,6 +42,8 @@ namespace Hix
 			QQuickWindow* _mainWindow;
 			QObject* _resumeWindow;
 			std::unordered_map<std::string, std::string> _cks;
+		public slots:
+			void replyFinished(QNetworkReply* reply); 
 
 		private slots:
 			void resume();
