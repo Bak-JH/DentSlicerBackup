@@ -42,7 +42,7 @@ constexpr auto OWN_PRO_URL = PROTOCOL + ADDRESS + "/product/owns/dentslicer_pro"
 
 
 //constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
-constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
+constexpr auto WS_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
 
 
 //constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
