@@ -80,8 +80,6 @@ void qDeleteLater(QWebSocket* obj)
 
 Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nullptr, qDeleteLater)
 {
-
-
     //_webView->setPage(new HixWebviewPage());
     _ws.reset(new QWebSocket());
     QObject::connect(_ws.get(), &QWebSocket::connected,
@@ -102,6 +100,12 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
         [this](const QList<QSslError>& errors) {
             blockApp();
             _resumeWindow->setProperty("visible", true);
+        });
+
+    _manager.reset(new QNetworkAccessManager(this));
+    QObject::connect(_manager.get(), &QNetworkAccessManager::finished, 
+        [this](QNetworkReply* reply) {
+            replyFinished(reply);
         });
 }
 
@@ -206,11 +210,6 @@ void Hix::Auth::AuthManager::login()
                 //login success
                 //_webView->close();
                 //_webView.reset();
-                QNetworkAccessManager* manager = new QNetworkAccessManager(this);
-
-                connect(manager, SIGNAL(finished(QNetworkReply*)),
-                    this, SLOT(replyFinished(QNetworkReply*)));
-
                 QSslConfiguration config = QSslConfiguration::defaultConfiguration();
                 config.setProtocol(QSsl::TlsV1_2OrLater);
 
@@ -227,7 +226,7 @@ void Hix::Auth::AuthManager::login()
                 }
                 request.setRawHeader((QByteArray)"Cookie", QString::fromStdString(ckStr).toUtf8());
 
-                manager->get(request);
+                _manager->get(request);
             }
 
             /// before register product ///

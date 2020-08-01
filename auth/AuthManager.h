@@ -38,6 +38,7 @@ namespace Hix
 			//std::unique_ptr<QWebSocket, void(QObject::*)(QWebSocket)> _ws;
 			std::unique_ptr<QWebEngineView, void(*)(QWebEngineView*)> _webView;
 			std::unique_ptr<QWebSocket, void(*)(QWebSocket*)> _ws;
+			std::unique_ptr<QNetworkAccessManager> _manager;
 			QMetaObject::Connection _ckAddedConnToken;
 			QQuickWindow* _mainWindow;
 			QObject* _resumeWindow;
