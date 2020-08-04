@@ -11,6 +11,10 @@ class QWebSocket;
 class QQuickWindow;
 namespace Hix
 {
+	namespace Settings
+	{
+		enum Liscense;
+	}
 	namespace Auth
 	{
 
@@ -27,7 +31,7 @@ namespace Hix
 
 		private:
 			void setWebview();
-			void acquireAuth();
+			void acquireAuth(Hix::Settings::Liscense license);
 			void blockApp();
 			void unblockApp();
 			void clearSavedCks();
