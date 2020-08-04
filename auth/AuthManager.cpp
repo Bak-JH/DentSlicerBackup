@@ -344,7 +344,7 @@ void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
         {
             auto request = reply->request();
             request.setUrl(QUrl(OWN_BASIC_URL.data()));
-            reply->manager()->get(request);
+            _manager->get(request);
         }
     }
     else if (tempUrl.toStdString().find(OWN_BASIC_URL.to_std_string()) != std::string::npos)
@@ -358,6 +358,7 @@ void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
         else
         {
             qDebug() << "none";
+            moddableSetting.liscense = Hix::Settings::NONE;
             _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
         }
     }
