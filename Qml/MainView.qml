@@ -40,6 +40,11 @@ Entity {
         {
             cameraViewChanged();
         }
+        function updateCameraView()
+        {
+            cameraViewChanged();
+
+        }
     }
 
 
@@ -105,6 +110,7 @@ Entity {
         systemTransform.rotationZ = 0
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
+        cm.updateCameraView();
     }
     function viewDown(){
         systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
@@ -113,6 +119,7 @@ Entity {
         systemTransform.rotationZ = 0
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
+        cm.updateCameraView();
     }
     function viewFront(){
         systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
@@ -121,6 +128,7 @@ Entity {
         systemTransform.rotationZ = 0;
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(0.02,-0.06,0))
+        cm.updateCameraView();
     }
     function viewBack(){
         systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
@@ -129,6 +137,7 @@ Entity {
         systemTransform.rotationZ = -180
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(0.02,-0.06,0))
+        cm.updateCameraView();
     }
     function viewLeft(){
         systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
@@ -137,6 +146,7 @@ Entity {
         systemTransform.rotationZ = 90;
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
+        cm.updateCameraView();
     }
     function viewRight(){
         systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
@@ -145,6 +155,7 @@ Entity {
         systemTransform.rotationZ = -90;
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
+        cm.updateCameraView();
     }
 
     function viewCenter(){
@@ -154,6 +165,7 @@ Entity {
         systemTransform.rotationZ = -40
         cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
         cm.camera.translateWorld(Qt.vector3d(-0.015,-0.16,0))
+        cm.updateCameraView();
     }
 
 }
