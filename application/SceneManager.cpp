@@ -63,6 +63,7 @@ void Hix::Application::SceneManager::drawBed()
 
 void Hix::Application::SceneManager::setViewPreset(ViewPreset preset)
 {
+	Hix::Features::UpdateWidgetModePos();
 	std::string viewFuncName("view");
 	viewFuncName.append(magic_enum::enum_name(preset));
 	QMetaObject::invokeMethod(_root, viewFuncName.c_str());
