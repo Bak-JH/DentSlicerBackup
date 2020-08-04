@@ -42,7 +42,8 @@ constexpr auto OWN_PRO_URL = PROTOCOL + ADDRESS + "/product/owns/dentslicer_pro"
 
 
 //constexpr auto WS_URL = "ws://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
-constexpr auto WS_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
+constexpr auto WS_PRO_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer_pro/"_fstr;
+constexpr auto WS_BASIC_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/"_fstr;
 
 
 //constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
@@ -94,11 +95,13 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
     QObject::connect(_ws.get(), QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
         [this](QAbstractSocket::SocketError error) {
             blockApp();
+            qDebug() << error;
             _resumeWindow->setProperty("visible", true);
         });
     QObject::connect(_ws.get(), QOverload<const QList<QSslError>&>::of(&QWebSocket::sslErrors),
         [this](const QList<QSslError>& errors) {
             blockApp();
+            qDebug() << errors;
             _resumeWindow->setProperty("visible", true);
         });
 
@@ -143,11 +146,18 @@ void Hix::Auth::AuthManager::resume()
     login();
 }
 
-void Hix::Auth::AuthManager::acquireAuth()
+void Hix::Auth::AuthManager::acquireAuth(Hix::Settings::Liscense license)
 {
     auto& sett = Hix::Application::ApplicationManager::getInstance().settings().additionalSetting;
-
-    QNetworkRequest request(QUrl(WS_URL.data()));
+    QNetworkRequest request;
+    if (license == Hix::Settings::PRO)
+    {
+        request.setUrl(QUrl(WS_PRO_URL.data()));
+    }
+    else if (license == Hix::Settings::BASIC)
+    {
+        request.setUrl(QUrl(WS_BASIC_URL.data()));
+    }
 
     QSslConfiguration config = QSslConfiguration::defaultConfiguration();
     config.setProtocol(QSsl::TlsV1_2OrLater);
@@ -261,7 +271,7 @@ void Hix::Auth::AuthManager::login()
             {
                 if (Hix::Application::ApplicationManager().getInstance().settings().liscense != Hix::Settings::NONE)
                 {
-                    acquireAuth();
+                    acquireAuth(Hix::Application::ApplicationManager().getInstance().settings().liscense);
 
                     for (auto item : Hix::Application::ApplicationManager().getInstance().featureManager().featureItems()->childItems())
                     {
