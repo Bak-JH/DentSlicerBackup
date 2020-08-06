@@ -20,6 +20,7 @@
 #include "SupportFeature.h"
 #include "stlexport.h"
 #include "sliceExport.h"
+#include "printerServer.h"
 
 #include "Qml/components/Buttons.h"
 #include "Qml/util/QMLUtil.h"
@@ -119,4 +120,6 @@ void Hix::Features::FeaturesLoader::loadFeatureButtons()
 
 	addButton<Hix::Features::STLExportMode>("save" ,this);
 	addButton<Hix::Features::SliceExportMode>("slice" ,this);
+	addButton<Hix::Features::PrinterServer>("printer", this);
+
 }
