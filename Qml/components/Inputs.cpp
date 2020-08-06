@@ -69,6 +69,11 @@ int Hix::QML::Controls::DropdownBox::getIndex() const
 	return _index;
 }
 
+size_t Hix::QML::Controls::DropdownBox::size() const
+{
+	return _dropList.size();
+}
+
 QString Hix::QML::Controls::DropdownBox::getSelectedItem() const
 {
 	return _dropList.at(_index);
@@ -83,5 +88,11 @@ void Hix::QML::Controls::DropdownBox::setIndex(int index)
 void Hix::QML::Controls::DropdownBox::setList(QStringList list)
 {
 	_dropList = list;
+	emit listChanged();
+}
+
+void Hix::QML::Controls::DropdownBox::appendList(QString item)
+{
+	_dropList.append(item);
 	emit listChanged();
 }

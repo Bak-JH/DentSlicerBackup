@@ -69,9 +69,11 @@ namespace Hix
 				DropdownBox(QQuickItem* parent = nullptr);
 				virtual ~DropdownBox();
 				int getIndex()const;
+				size_t size()const;
 				QString getSelectedItem()const;
 				void setIndex(int index);
 				void setList(QStringList list);
+				void appendList(QString item);
 
 				//for use with enum
 				template<typename EnumType>
@@ -102,7 +104,7 @@ namespace Hix
 
 			protected:
 				QStringList _dropList;
-				int _index;
+				int _index = 0;
 			};
 		}
 
