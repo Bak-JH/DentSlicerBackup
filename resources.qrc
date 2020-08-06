@@ -118,7 +118,6 @@
         <file>Resource/undo_icon_select.png</file>
         <file>Resource/flat_cut_select.png</file>
         <file>Resource/free_cut_select.png</file>
-        <file>Resource/pem/dsa_pub.pem</file>
         <file>Resource/upper_setting.png</file>
         <file>Resource/upper2_setting.png</file>
         <file>Resource/splash_final.png</file>
@@ -227,5 +226,6 @@
         <file>Resource/menu_modelbuilder_select_1.png</file>
         <file>Resource/menu_printer.png</file>
         <file>Resource/menu_printer_select_1.png</file>
+        <file>Resource/pem/service_pub.pem</file>
     </qresource>
 </RCC>
