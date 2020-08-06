@@ -12,8 +12,8 @@ void UpdateChecker::initWinSparkle(){
     // could be also, often more conveniently, done using a VERSIONINFO Windows
     // resource. See the "psdk" example and its .rc file for an example of that
     // (these calls wouldn't be needed then).
-    win_sparkle_set_appcast_url("http://services.hix.co.kr/setup/get_file/test/appcast.xml");
-    const wchar_t* version_w = L"1.1.3";
+    win_sparkle_set_appcast_url("http://services.hix.co.kr/setup/view_file/dentslicer_test/appcast.xml");
+    const wchar_t* version_w = L"1.1.4";
     current_version = QString::fromWCharArray(version_w);
     win_sparkle_set_app_details(L"HiX.org", L"DentSlicerSetup", version_w);
 
@@ -21,7 +21,8 @@ void UpdateChecker::initWinSparkle(){
     // This is na example how to provide it from external source (i.e. from Qt
     // resource). See the "psdk" example and its .rc file for an example how to
     // provide the key using Windows resource.
-    win_sparkle_set_dsa_pub_pem(reinterpret_cast<const char *>(QResource(":/Resource/pem/dsa_pub.pem").data()));
+    win_sparkle_set_dsa_pub_pem(reinterpret_cast<const char *>(QResource(":/Resource/pem/service_pub.pem").data()));
+
 
     // Initialize the updater and possibly show some UI
     win_sparkle_init();

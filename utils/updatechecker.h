@@ -4,6 +4,7 @@
 #include <QResource>
 #include <QNetworkReply>
 #include <QXmlStreamReader>
+#include "application/ApplicationManager.h"
 
 class UpdateChecker : public QObject
 {
