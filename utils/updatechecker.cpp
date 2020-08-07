@@ -1,9 +1,10 @@
 #include "updatechecker.h"
-
+#include "Settings/AppSetting.h"
+#include "application/ApplicationManager.h"
 
 UpdateChecker::UpdateChecker()
 {
-    manager = new QNetworkAccessManager();
+    _manager.reset(new QNetworkAccessManager());
     initWinSparkle();
 }
 
@@ -12,10 +13,12 @@ void UpdateChecker::initWinSparkle(){
     // could be also, often more conveniently, done using a VERSIONINFO Windows
     // resource. See the "psdk" example and its .rc file for an example of that
     // (these calls wouldn't be needed then).
-    win_sparkle_set_appcast_url("http://services.hix.co.kr/setup/view_file/dentslicer_test/appcast.xml");
-    const wchar_t* version_w = L"1.1.4";
-    current_version = QString::fromWCharArray(version_w);
-    win_sparkle_set_app_details(L"HiX.org", L"DentSlicerSetup", version_w);
+    
+    auto version = Hix::Application::ApplicationManager::getInstance().getVersion().toStdWString();
+    qDebug() << "ver: " << version;
+    win_sparkle_set_appcast_url("https://services.hix.co.kr/setup/view_file/dentslicer_test/appcast.xml");
+
+    win_sparkle_set_app_details(L"HiX.org", L"DentSlicerSetup", version.c_str());
 
     // Set DSA public key used to verify update's signature.
     // This is na example how to provide it from external source (i.e. from Qt
@@ -29,8 +32,11 @@ void UpdateChecker::initWinSparkle(){
 }
 
 void UpdateChecker::checkForUpdates(){
-    connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(parseUpdateInfo(QNetworkReply*)));
-    manager->get(QNetworkRequest(QUrl("http://services.hix.co.kr/setup/get_file/test/appcast.xml")));
+    QObject::connect(_manager.get(), &QNetworkAccessManager::finished,
+        [this](QNetworkReply* reply) {
+            parseUpdateInfo(reply);
+        });
+    _manager->get(QNetworkRequest(QUrl("https://services.hix.co.kr/setup/view_file/dentslicer_test/appcast.xml")));
 
     //win_sparkle_check_update_with_ui_and_install();
     win_sparkle_check_update_without_ui();
@@ -39,7 +45,7 @@ void UpdateChecker::checkForUpdates(){
 
 void UpdateChecker::parseUpdateInfo(QNetworkReply* reply){
     QString replyText = reply->readAll();
-
+    QString latest_version;
     QXmlStreamReader reader (replyText);
     while (!reader.atEnd())
        {
@@ -53,9 +59,13 @@ void UpdateChecker::parseUpdateInfo(QNetworkReply* reply){
                if (reader.name().toString() == "title"){
                    QString s = reader.readElementText();
                    if (s.contains("Version")){
-                       recent_version = s.split(" ")[1];
+                       latest_version = s.split(" ")[1];
                    }
                }
            }
        }
+    qDebug() << "ver: " << latest_version;
+    auto& moddableSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+    moddableSettings.version = latest_version.toStdString();
+    moddableSettings.writeJSON();
 }
