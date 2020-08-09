@@ -16,7 +16,9 @@ void UpdateChecker::initWinSparkle(){
     
     auto version = Hix::Application::ApplicationManager::getInstance().getVersion().toStdWString();
     qDebug() << "ver: " << version;
-    win_sparkle_set_appcast_url("https://services.hix.co.kr/setup/view_file/dentslicer_test/appcast.xml");
+
+    /// TODO: edit url ///
+    win_sparkle_set_appcast_url("https://services.hix.co.kr/setup/view_file/dentslicer_rc/appcast.xml");
 
     win_sparkle_set_app_details(L"HiX.org", L"DentSlicerSetup", version.c_str());
 
@@ -36,7 +38,9 @@ void UpdateChecker::checkForUpdates(){
         [this](QNetworkReply* reply) {
             parseUpdateInfo(reply);
         });
-    _manager->get(QNetworkRequest(QUrl("https://services.hix.co.kr/setup/view_file/dentslicer_test/appcast.xml")));
+
+    /// TODO: edit url ///
+    _manager->get(QNetworkRequest(QUrl("https://services.hix.co.kr/setup/view_file/dentslicer_rc/appcast.xml")));
 
     //win_sparkle_check_update_with_ui_and_install();
     win_sparkle_check_update_without_ui();
