@@ -130,8 +130,9 @@ ShowInstDetails show
 ShowUnInstDetails show
 
 Function .onInit
-  !insertmacro MUI_LANGDLL_DISPLAY
-  ReadRegStr $0 HKLM "${PRODUCT_UNINST_KEY}}" "UninstallString"
+  ExecWait "TaskKill /F /IM DentSlicer.exe"
+  !insertmacro MUI_LANGDLL_DISPLAY 
+  ReadRegStr $0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   ${If} $0 != ""
     !insertmacro UninstallExisting $0 $0
   ${EndIf}
