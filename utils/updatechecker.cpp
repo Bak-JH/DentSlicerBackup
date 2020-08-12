@@ -5,6 +5,10 @@
 UpdateChecker::UpdateChecker()
 {
     _manager.reset(new QNetworkAccessManager());
+    QObject::connect(_manager.get(), &QNetworkAccessManager::finished,
+        [this](QNetworkReply* reply) {
+            parseUpdateInfo(reply);
+        });
     initWinSparkle();
 }
 
@@ -33,11 +37,6 @@ void UpdateChecker::initWinSparkle(){
 }
 
 void UpdateChecker::checkForUpdates(){
-    QObject::connect(_manager.get(), &QNetworkAccessManager::finished,
-        [this](QNetworkReply* reply) {
-            parseUpdateInfo(reply);
-        });
-
     _manager->get(QNetworkRequest(QUrl("https://services.hix.co.kr/setup/view_file/dentslicer/appcast.xml")));
 
     //win_sparkle_check_update_with_ui_and_install();
@@ -66,8 +65,4 @@ void UpdateChecker::parseUpdateInfo(QNetworkReply* reply){
                }
            }
        }
-    qDebug() << "ver: " << latest_version;
-    auto& moddableSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
-    moddableSettings.version = latest_version.toStdString();
-    moddableSettings.writeJSON();
 }
