@@ -86,5 +86,6 @@
         <file>Qml/Controls/CtrToggleButton.qml</file>
         <file>shaders/slice.frag</file>
         <file>shaders/slice.vert</file>
+        <file>Qml/FeaturePopup/PopupPrinter.qml</file>
     </qresource>
 </RCC>
