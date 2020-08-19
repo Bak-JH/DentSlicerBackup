@@ -14,8 +14,10 @@
 #include "../render/SceneEntity.h"
 #include "../glmodel.h"
 #include "../Qt/QtUtils.h"
+#include "zip/zip.h"
 
 #include <unordered_set>
+#include <filesystem>
 constexpr float ZMARGIN = 5;
 using namespace Hix::Settings;
 
@@ -24,6 +26,10 @@ using namespace Hix::Engine3D;
 using namespace Hix::Render;
 using namespace Hix::Slicer;
 using namespace Hix::QtUtils;
+
+
+
+
 
 Hix::Features::SliceExportGPU::SliceExportGPU(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path)
 {
@@ -35,23 +41,19 @@ Hix::Features::SliceExportGPU::SliceExportGPU(const std::unordered_set<GLModel*>
 
 void Hix::Features::SliceExportGPU::run()
 {
-	// need to generate support, raft
-	 auto filename = _path + "_export";
-	QDir dir(filename);
-	if (!dir.exists()) {
-		dir.mkpath(".");
-	}
-	else {
-		dir.removeRecursively();
-		dir.mkpath(".");
-	}
+    //don't throw
+    std::error_code error;
+    //tmp directory
+    auto tmpPath = std::filesystem::temp_directory_path() / "tmpSlice";
+    std::filesystem::remove_all(tmpPath, error);
+    std::filesystem::create_directory(tmpPath, error);
 
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
 
 	// Export to SVG
-	Hix::Slicer::SlicerGL slicer(setting.layerHeight, toStdPath(filename), setting.AAXY, setting.AAZ);
+	Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ);
 	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
     Hix::Engine3D::Bounds3D bounds;
     auto vtcs = toVtxBuffer(bounds);
@@ -59,7 +61,7 @@ void Hix::Features::SliceExportGPU::run()
     slicer.setBounds(bounds);
 	auto layerCnt = slicer.run();
 	//write info files
-	Hix::Slicer::InfoWriter iw(filename, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
+	Hix::Slicer::InfoWriter iw(tmpPath, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
 	iw.createInfoFile();
 	iw.writeBasicInfo(layerCnt, printerSetting.printerConstants);
 	
@@ -68,9 +70,18 @@ void Hix::Features::SliceExportGPU::run()
 		iw.writeVittroOptions(layerCnt, printerSetting.bedBound);
 	}
 
+    //save to zip
+    miniz_cpp::zip_file file;
 
-
-
+    for (const auto& entry : std::filesystem::directory_iterator(tmpPath)) {
+        if (entry.is_regular_file()) {
+            auto filePath = entry.path();
+            file.write(filePath.string(), filePath.filename().string());
+        }
+    }
+    file.comment = "hix slice file";
+    std::ofstream zipOut(toStdPath(_path), std::ios_base::trunc | std::ios::binary);
+    file.save(zipOut);
 }
 
 

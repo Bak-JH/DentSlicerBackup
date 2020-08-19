@@ -41,7 +41,7 @@ void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
 void Hix::Settings::AppSetting::initialize()
 {
 	//auto defaultPreset = deployInfo.settingsDir;
-	//defaultPreset.append("PrinterPresets/HixCapsule.json");
+	//defaultPreset.append("PrinterPresets/HixC10.json");
 	//printerPresetPath = defaultPreset;
 	enableErrorReport = true;
 }
