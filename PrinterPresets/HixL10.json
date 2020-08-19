@@ -1,7 +1,7 @@
 {
-    "presetName": "Hix Pipeline",
+    "presetName": "Hix L10",
     "infoFileType": "Hix",
-    "sliceImageType": "SVG",
+    "sliceImageType": "PNG",
     "sliceImageResolutionX": 1920,
     "sliceImageResolutionY": 1080,
     "screenX": 120.96,
