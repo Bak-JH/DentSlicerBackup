@@ -11,7 +11,9 @@
 #include "../support/SupportRaftManager.h"
 #include "MouseCursorManager.h"
 #include "../auth/AuthManager.h"
+#include "utils/updatechecker.h"
 class QQuickItem;
+class UpdateChecker;
 namespace Qt3DCore
 {
 	class QEntity;
@@ -100,6 +102,7 @@ namespace Hix
 			friend class Hix::Features::SupportMode;
 			friend class Hix::Features::SliceExportMode;
 			friend class Hix::Auth::AuthManager;
+			friend class UpdateChecker;
 
 
 		};
