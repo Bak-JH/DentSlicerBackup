@@ -275,6 +275,15 @@
     <ClCompile Include="Settings\AdditionalSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\printerServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\exploreBonjour\bonjourservicebrowser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\exploreBonjour\bonjourserviceresolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1131,6 +1140,12 @@
     <ClInclude Include="common\frozen\type_traits_aliases.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\printerServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\exploreBonjour\bonjourrecord.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1234,6 +1249,8 @@
     <Image Include="Resource\menu_slice_select_1.png" />
     <Image Include="Resource\menu_modelbuilder.png" />
     <Image Include="Resource\menu_modelbuilder_select_1.png" />
+    <Image Include="Resource\menu_printer.png" />
+    <Image Include="Resource\menu_printer_selected_1.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Qml\components\FeatureMenu.h" />
@@ -1263,6 +1280,12 @@
     <QtMoc Include="utils\updatechecker.h" />
     <QtMoc Include="application\SceneManager.h" />
     <QtMoc Include="auth\AuthManager.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="common\exploreBonjour\bonjourservicebrowser.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="common\exploreBonjour\bonjourserviceresolver.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -310,7 +310,6 @@ void Hix::Auth::AuthManager::logout()
 void Hix::Auth::AuthManager::blockApp()
 {
     _mainWindow->setProperty("visible", false);
-
 }
 
 void Hix::Auth::AuthManager::unblockApp()
