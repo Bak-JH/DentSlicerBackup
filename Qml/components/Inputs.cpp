@@ -96,3 +96,8 @@ void Hix::QML::Controls::DropdownBox::appendList(QString item)
 	_dropList.append(item);
 	emit listChanged();
 }
+
+const QStringList& Hix::QML::Controls::DropdownBox::list() const
+{
+	return _dropList;
+}
