@@ -25,7 +25,10 @@ namespace Hix
 			void applyButtonClicked()override;
 
 		private:
+			void refresh();
 			Hix::QML::Controls::DropdownBox* _printersDrop;
+			Hix::QML::Controls::Button* _refreshButton;
+
 			std::unique_ptr<QNetworkAccessManager> _manager;
 			std::unique_ptr<BonjourServiceBrowser> _bonjourBrowser;
 			std::unique_ptr<BonjourServiceResolver> _bonjourResolver;

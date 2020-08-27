@@ -72,7 +72,7 @@ ApplicationWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 170
 
-            text : "Logged in from another location, resume?"
+            text : "Disconnected, resume?"
 
             font.pixelSize: 14
             font.family: mainFont.name

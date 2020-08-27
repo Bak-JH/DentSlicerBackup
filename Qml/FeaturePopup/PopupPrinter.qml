@@ -6,7 +6,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Printer")
-	height: 180
+	height: 200
 
 	CtrDropdownBox {
 		id: printerDrop
@@ -19,4 +19,32 @@ FeaturePopup {
 		anchors.topMargin: 44
 		anchors.leftMargin: 4
 	}
+
+		Hix.Button {
+		id: refreshButton
+		width: 224
+		height: 32
+		radius: 16
+		color: "transparent"
+		border.color: "#b2c4c6"
+
+		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 64
+		anchors.horizontalCenter: parent.horizontalCenter
+
+		Text 
+		{
+			color: "#859597"
+			font.pointSize: 10
+			text: "Refresh"
+			font.family: openSemiBold.name
+				
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: parent.verticalCenter
+		}
+
+		onEntered: { color = "#dde5e6" }
+		onExited: { color = "transparent" }
+	}
+
 }
