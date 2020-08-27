@@ -138,6 +138,8 @@ Function .onInit
   ${EndIf}
 FunctionEnd
 
+
+
 Section "MainSection" SEC01
   SetOverwrite try
   SetOutPath "$INSTDIR"
@@ -160,6 +162,18 @@ Section "MainSection" SEC01
   nsJSON::Set `settingsDir` /value `"$R0"`
   nsJSON::Serialize /format /file $INSTDIR\deploy.json
 SectionEnd
+
+; Redists
+Section "Visual Studio Runtime" SEC02
+  SetOutPath "$INSTDIR"
+  ExecWait "$INSTDIR\VC_redist.x64.exe"
+SectionEnd
+
+Section "OpenSSL" SEC03
+  SetOutPath "$INSTDIR"
+  ExecWait "$INSTDIR\Win64OpenSSL_Light-1_1_1g.exe"
+SectionEnd
+
 
 Section -AdditionalIcons
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"

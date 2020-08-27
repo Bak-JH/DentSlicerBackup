@@ -35,6 +35,11 @@ Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
 {
     auto& co = controlOwner();
     co.getControl(_printersDrop, "printerDrop");
+    co.getControl(_refreshButton, "refreshButton");
+    // bind buttons
+    QObject::connect(_refreshButton, &Hix::QML::Controls::Button::clicked, [this]() {
+        refresh();
+        });
     QObject::connect(_printersDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this]() {
         });
 
@@ -60,7 +65,6 @@ Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
         _manager->get(request);
         });
 
-    _bonjourBrowser->browseForServiceType(QLatin1String("_C10._tcp"));
     QObject::connect(_manager.get(), &QNetworkAccessManager::finished,
         [this](QNetworkReply* reply) {
             if (reply->error() == QNetworkReply::NoError)
@@ -68,7 +72,7 @@ Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
                 _printersDrop->appendList(reply->url().toString());
             }
         });
-
+    refresh();
 }
 
 
@@ -84,6 +88,12 @@ void Hix::Features::PrinterServer::applyButtonClicked()
         if (!url.isEmpty())
             QDesktopServices::openUrl(QUrl(url));
     }
+}
+
+void Hix::Features::PrinterServer::refresh()
+{
+    _bonjourBrowser->browseForServiceType(QLatin1String("_C10._tcp"));
+
 }
 
 
