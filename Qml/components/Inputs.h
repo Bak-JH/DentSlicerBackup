@@ -74,7 +74,10 @@ namespace Hix
 				void setIndex(int index);
 				void setList(QStringList list);
 				void appendList(QString item);
+				const QStringList& list()const;
 
+
+				
 				//for use with enum
 				template<typename EnumType>
 				void setEnums(EnumType initialValue)

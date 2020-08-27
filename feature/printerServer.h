@@ -4,6 +4,7 @@
 #include "interfaces/Feature.h"
 #include "interfaces/Mode.h"
 #include <memory>
+#include <boost/process/child.hpp>
 #include <QString>
 #include "interfaces/DialogedMode.h"
 #include "../Qml/components/ControlForwardInclude.h"
@@ -32,6 +33,7 @@ namespace Hix
 			std::unique_ptr<QNetworkAccessManager> _manager;
 			std::unique_ptr<BonjourServiceBrowser> _bonjourBrowser;
 			std::unique_ptr<BonjourServiceResolver> _bonjourResolver;
+			boost::process::child _mdnsService;
 		};
 
 

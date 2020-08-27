@@ -20,19 +20,51 @@
 #include <array>
 #include <algorithm>
 #include <QMetaObject>
+#include <boost/process.hpp>
+#include <iostream>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 using namespace Hix::Features;
 using namespace Hix::Engine3D;
+namespace bp = boost::process; //we will assume this for all further examples
 
 constexpr auto HTTP = "http://";
 constexpr auto PORT = ":5000/";
 const QUrl SUPPORT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupPrinter.qml");
 
 
-Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
+namespace {
+    // declare exit handler function
+    void _exitHandler(boost::system::error_code err, int rc) {
+        std::cout << "DEBUG async exit error code: "
+            << err << " rc: " << rc << std::endl;
+    }
+}
+
+
+//cmd /c bonjour\mDNSResponder.exe11 -server
+Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL), _mdnsService("bonjour/mDNSResponder.exe -server")
 {
+    //boost::asio::io_context ioctx;
+    //bp::async_system(ioctx, _exitHandler, "bonjour\mDNSResponder.exe -server");
+    //ioctx.run_one();
+    //QProcess* process = new QProcess();
+    //QString program("bonjour\mDNSResponder.exe");
+    //auto result = process->startDetached(program, QStringList() << "-server");
+    //auto err0 = process->error();
+    //auto err = process->errorString();
+
+    //QProcess* process = new QProcess();
+
+    //QString agentName = "/bonjour/mDNSResponder.exe -server";
+    //QString agentPath = QCoreApplication::applicationDirPath() + agentName;
+    //QStringList args = QStringList();
+    //args = QStringList({ "-Command", QString("Start-Process %1 -Verb runAs").arg(agentPath) });
+    //process->start("powershell", args);
+    //auto err0 = process->error();
+    //auto err = process->errorString();
+
     auto& co = controlOwner();
     co.getControl(_printersDrop, "printerDrop");
     co.getControl(_refreshButton, "refreshButton");
@@ -69,10 +101,14 @@ Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
         [this](QNetworkReply* reply) {
             if (reply->error() == QNetworkReply::NoError)
             {
-                _printersDrop->appendList(reply->url().toString());
+                auto ipStr = reply->url().toString();
+                if (!_printersDrop->list().contains(ipStr))
+                    _printersDrop->appendList(ipStr);
             }
         });
+    auto test = _mdnsService.running();
     refresh();
+    
 }
 
 
