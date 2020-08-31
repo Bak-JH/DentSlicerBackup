@@ -106,9 +106,7 @@ Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL), 
                     _printersDrop->appendList(ipStr);
             }
         });
-    auto test = _mdnsService.running();
     refresh();
-    
 }
 
 
