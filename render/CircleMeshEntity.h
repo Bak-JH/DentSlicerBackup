@@ -1,20 +1,29 @@
 #pragma once
 
-#include "SceneEntity.h"
+#include <Qt3DCore>
+#include <Qt3DExtras>
+#include <array>
+#include <unordered_set>
+#include "../feature/Plane3D.h"
+
 namespace Hix
 {
 	namespace Render
 	{
-		class CircleMeshEntity : public SceneEntity
+		class CircleMeshEntity : public Qt3DCore::QEntity
 		{
+			Q_OBJECT
 		public:
-			CircleMeshEntity(float radius, size_t segCount, const QColor& color, Qt3DCore::QEntity* parent);
+			CircleMeshEntity(Qt3DCore::QEntity* parent, bool isDoubleSided = false);
+			CircleMeshEntity(Qt3DCore::QEntity* parent, float radius, const QColor& color, bool isDoubleSided = false);
+			
 			virtual ~CircleMeshEntity();
+			Qt3DCore::QTransform& transform();
+			void setPointNormal(const Hix::Plane3D::PDPlane& plane);
 		private:
-			std::vector<QVector3D> _circle;
-			Qt3DExtras::QPhongMaterial _material;
-			float _radius;
-			size_t _segCount;
+			std::unordered_map<Qt3DCore::QEntity*, Qt3DCore::QTransform*> _meshTransformMap;
+			Qt3DCore::QTransform _transform;
+			Qt3DCore::QEntity* _owner = nullptr;
 		};
 
 

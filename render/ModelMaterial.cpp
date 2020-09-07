@@ -48,6 +48,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	auto depthTest = new QDepthTest();
 	depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
 	_renderPass.addRenderState(depthTest);
+
 	_renderTechnique.addRenderPass(&_renderPass);
 	_renderTechnique.graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
 	_renderTechnique.graphicsApiFilter()->setMajorVersion(4);
