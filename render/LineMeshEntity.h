@@ -3,6 +3,7 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 #include <vector>
+
 namespace Hix
 {
 	namespace Render
@@ -16,16 +17,28 @@ namespace Hix
 
 			LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent);
 			LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent, const QColor& color);
+		
+			virtual ~LineMeshEntity();
 		private:
+			void initialize(Qt3DCore::QEntity* parent, QByteArray& vertexData, size_t vertexCount);
+
 			Qt3DCore::QTransform _transform;
-			Qt3DExtras::QPhongMaterial _material;
+			Qt3DRender::QMaterial _material;
 
 			Qt3DRender::QGeometryRenderer _geometryRenderer;
 			Qt3DRender::QGeometry _geometry;
 
 			Qt3DRender::QBuffer _vertexBuffer;
 			Qt3DRender::QAttribute _positionAttribute;
+			Qt3DRender::QAttribute _colorAttribute;
+			
+			Qt3DRender::QParameter _lineColorParameter;
 
+			Qt3DRender::QFilterKey _filterKey;
+			Qt3DRender::QRenderPass _renderPass;
+			Qt3DRender::QShaderProgram _shaderProgram;
+			Qt3DRender::QTechnique _renderTechnique;
+			Qt3DRender::QEffect _effect;
 
 		};
 

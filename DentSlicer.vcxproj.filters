@@ -145,7 +145,6 @@
     <ClCompile Include="Qml\components\Buttons.cpp" />
     <ClCompile Include="Qml\components\Inputs.cpp" />
     <ClCompile Include="Qml\components\PopupShell.cpp" />
-    <ClCompile Include="render\CircleMeshEntity.cpp" />
     <ClCompile Include="Qml\components\SlideBar.cpp" />
     <ClCompile Include="Qml\components\Toast.cpp" />
     <ClCompile Include="Qml\components\ViewMode.cpp" />
@@ -282,6 +281,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="common\exploreBonjour\bonjourserviceresolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\CircleMeshEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -860,7 +862,6 @@
     <ClInclude Include="Mesh\MTRayCaster.h" />
     <ClInclude Include="Mesh\RayAccelerator.h" />
     <ClInclude Include="Mesh\RayCaster.h" />
-    <ClInclude Include="render\CircleMeshEntity.h" />
     <ClInclude Include="Settings\AppSetting.h" />
     <ClInclude Include="Settings\DeployInfo.h" />
     <ClInclude Include="Settings\JSONParsedSetting.h" />
@@ -1288,6 +1289,9 @@
     <QtMoc Include="common\exploreBonjour\bonjourserviceresolver.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="render\CircleMeshEntity.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -1536,6 +1540,7 @@
     <None Include="cork\src\rawmesh\rawMesh.tpp" />
     <None Include="shaders\slice.vert" />
     <None Include="shaders\slice.frag" />
+    <None Include="shaders\lineColor.frag" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
