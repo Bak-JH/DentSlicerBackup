@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <optional>
 #include <filesystem>
+#include "../common/ContainerTraits.hpp"
 namespace Hix
 {
 	namespace Settings
@@ -15,6 +16,34 @@ namespace Hix
 
 		namespace JSON
 		{
+
+			template<typename Container>
+			typename std::enable_if<Hix::Generic::is_container<Container>::value, bool>::type
+				tryParseArray(const rapidjson::Document& doc, const std::string& key, Container& out)
+			{
+				try
+				{
+					if (doc.HasMember(key.c_str()))
+					{
+						auto& genVal = doc[key.c_str()];
+						if (genVal.IsArray())
+						{
+							for (auto& e : genVal.GetArray())
+							{
+								out.insert(std::end(out), e.Get<Container::value_type>());
+							}
+							return true;
+						}
+					}
+				}
+				catch (...)
+				{
+					return false;
+				}
+				return false;
+			}
+
+
 
 			template<typename ValType>
 			bool tryParse(const rapidjson::Document& doc, const std::string& key, ValType& value)

@@ -12,6 +12,11 @@ Hix::Settings::DeployInfo::DeployInfo()
 	parseJSON(toStdPath(qStrPath));
 }
 
+std::filesystem::path Hix::Settings::DeployInfo::localSettingsDir() const
+{
+	return settingsDir / "LocalSettings";
+}
+
 std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
 {
 	return settingsDir/ "PrinterPresets";
