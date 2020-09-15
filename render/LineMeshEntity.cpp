@@ -8,9 +8,10 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 	: QEntity(parent)
 , _geometryRenderer(this)
 , _geometry(this)
-, _vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
-, _positionAttribute(this)
-, _material(this)
+, _vertexBuffer(new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, this))
+, _positionAttribute(new Qt3DRender::QAttribute(this))
+, _material(new Qt3DRender::QMaterial(this))
+, _effect(new Qt3DRender::QEffect(this))
 {
 	//initialize vertex buffers etc
 	QByteArray vertexBufferData;
@@ -29,9 +30,8 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent, const QColor& color)
 	: LineMeshEntity(vertices, parent)
 {
-	_lineColorParameter.setName(QStringLiteral("lineColor"));
-	_lineColorParameter.setValue(QColor::fromRgbF(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
-	_effect.addParameter(&_lineColorParameter);
+	_lineColorParameter->setValue(QColor::fromRgbF(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
+	_effect->addParameter(_lineColorParameter);
 }
 
 
@@ -39,8 +39,15 @@ LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertic
 	: QEntity(parent)
 , _geometryRenderer(this)
 , _geometry(this)
-, _vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
-, _positionAttribute(this)
+, _vertexBuffer(new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, this))
+, _positionAttribute(new Qt3DRender::QAttribute(this))
+, _shaderProgram(new Qt3DRender::QShaderProgram(this))
+, _renderPass(new Qt3DRender::QRenderPass(this))
+, _renderTechnique(new Qt3DRender::QTechnique(this))
+, _material(new Qt3DRender::QMaterial(this))
+, _effect(new Qt3DRender::QEffect(this))
+, _filterKey(new Qt3DRender::QFilterKey(this))
+, _lineColorParameter(new QParameter(QStringLiteral("lineColor"), QColor(0,0,0)))
 {
 	size_t vtxCount = 0;
 	for (auto& path : vertices)
@@ -80,67 +87,63 @@ Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVecto
 	: LineMeshEntity(vertices, parent)
 
 {
-	_lineColorParameter.setName(QStringLiteral("lineColor"));
-	_lineColorParameter.setValue(QColor::fromRgbF(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
-	_effect.addParameter(&_lineColorParameter);
+	_lineColorParameter->setValue(QColor::fromRgbF(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
+	_effect->addParameter(_lineColorParameter);
 }
 
 Hix::Render::LineMeshEntity::~LineMeshEntity()
 {
-	//qt sucks...
-	_shaderProgram.setParent((QNode*)nullptr);
-	_renderPass.setParent((QNode*)nullptr);
-	_renderTechnique.setParent((QNode*)nullptr);
-	_filterKey.setParent((QNode*)nullptr);
-	_effect.removeTechnique(&_renderTechnique);
+	_effect->removeParameter(_lineColorParameter);
+	_effect->removeTechnique(_renderTechnique);
+	_renderTechnique->removeFilterKey(_filterKey);
+	_renderTechnique->removeRenderPass(_renderPass);
 }
 
 void Hix::Render::LineMeshEntity::initialize(Qt3DCore::QEntity* parent, QByteArray& vertexData, size_t vertexCount)
 {
-	_vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-	_vertexBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::ReadWrite);
-	_vertexBuffer.setData(vertexData);
+	_vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	_vertexBuffer->setAccessType(Qt3DRender::QBuffer::AccessType::ReadWrite);
+	_vertexBuffer->setData(vertexData);
 
-	_positionAttribute.setAttributeType(QAttribute::VertexAttribute);
-	_positionAttribute.setBuffer(&_vertexBuffer);
-	_positionAttribute.setDataType(QAttribute::Float);
-	_positionAttribute.setDataSize(3);
-	_positionAttribute.setByteOffset(0);
-	_positionAttribute.setByteStride(3 * sizeof(float));
-	_positionAttribute.setCount(vertexCount);
-	_positionAttribute.setName(QAttribute::defaultPositionAttributeName());
+	_positionAttribute->setAttributeType(QAttribute::VertexAttribute);
+	_positionAttribute->setBuffer(_vertexBuffer);
+	_positionAttribute->setDataType(QAttribute::Float);
+	_positionAttribute->setDataSize(3);
+	_positionAttribute->setByteOffset(0);
+	_positionAttribute->setByteStride(3 * sizeof(float));
+	_positionAttribute->setCount(vertexCount);
+	_positionAttribute->setName(QAttribute::defaultPositionAttributeName());
 
-	_geometry.addAttribute(&_positionAttribute);
+	_geometry.addAttribute(_positionAttribute);
 
 	///
-	_shaderProgram.setVertexShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/default.vert")));
-	_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/lineColor.frag")));
-	_renderPass.setShaderProgram(&_shaderProgram);
+	_shaderProgram->setVertexShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/default.vert")));
+	_shaderProgram->setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/lineColor.frag")));
+	_renderPass->setShaderProgram(_shaderProgram);
 
 	auto cullFace = new QCullFace();
 	cullFace->setMode(QCullFace::CullingMode::Back);
-	_renderPass.addRenderState(cullFace);
+	_renderPass->addRenderState(cullFace);
 
-	_renderTechnique.addRenderPass(&_renderPass);
-	_renderTechnique.graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
-	_renderTechnique.graphicsApiFilter()->setMajorVersion(4);
-	_renderTechnique.graphicsApiFilter()->setMinorVersion(3);
-	_renderTechnique.graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
-	_filterKey.setName(QStringLiteral("renderingStyle"));
-	_filterKey.setValue(QStringLiteral("forward"));
-	_renderTechnique.addFilterKey(&_filterKey);
-	_effect.addTechnique(&_renderTechnique);
-	_material.setEffect(&_effect);
-	///
+	_renderTechnique->addRenderPass(_renderPass);
+	_renderTechnique->graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
+	_renderTechnique->graphicsApiFilter()->setMajorVersion(4);
+	_renderTechnique->graphicsApiFilter()->setMinorVersion(3);
+	_renderTechnique->graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
+	_filterKey->setName(QStringLiteral("renderingStyle"));
+	_filterKey->setValue(QStringLiteral("forward"));
+	_renderTechnique->addFilterKey(_filterKey);
+	_effect->addTechnique(_renderTechnique);
+
+	_material->setEffect(_effect);
 
 	_geometryRenderer.setInstanceCount(1);
 	_geometryRenderer.setFirstVertex(0);
 	_geometryRenderer.setFirstInstance(0);
-	_geometryRenderer.setPrimitiveType(QGeometryRenderer::LineStrip);
+	_geometryRenderer.setPrimitiveType(QGeometryRenderer::Lines);
 	_geometryRenderer.setGeometry(&_geometry);
 	_geometryRenderer.setVertexCount(vertexCount);
 
-	addComponent(&_material);
-	addComponent(&_transform);
+	addComponent(_material);
 	addComponent(&_geometryRenderer);
 }
