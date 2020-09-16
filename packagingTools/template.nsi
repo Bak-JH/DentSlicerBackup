@@ -7,6 +7,7 @@
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define HIX_SETTINGS_DIR "$DOCUMENTS\Hix\DentSlicer\Settings"
 
+
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
 
@@ -149,6 +150,7 @@ Section "MainSection" SEC01
 
   CopyFiles $INSTDIR\*.json "${HIX_SETTINGS_DIR}"
   CopyFiles $INSTDIR\PrinterPresets\*.json "${HIX_SETTINGS_DIR}\PrinterPresets"
+  CreateDirectory "${HIX_SETTINGS_DIR}\LocalSettings"
 
 
   Push "${HIX_SETTINGS_DIR}" 
