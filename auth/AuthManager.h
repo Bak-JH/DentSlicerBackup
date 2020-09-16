@@ -34,7 +34,6 @@ namespace Hix
 			void acquireAuth(Hix::Settings::Liscense license);
 			void blockApp();
 			void unblockApp();
-			void clearSavedCks();
 			std::string guid()const;
 
 			//we need custom deleters with these pointers since we use deleteLater
