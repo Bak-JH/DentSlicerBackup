@@ -17,11 +17,6 @@
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 
-#include "feature/Extrude.h"
-#include "feature/cut/modelcut.h"
-#include "feature/cut/DrawingPlane.h"
-#include "feature/label/labelling.h"
-#include "feature/layFlat.h"
 #include "feature/interfaces/SelectFaceMode.h"
 #include "feature/move.h"
 #include "application/ApplicationManager.h"
@@ -403,16 +398,6 @@ void GLModel:: unselectMeshFaces(){
 }
 
 
-
-bool GLModel::perPrimitiveColorActive() const
-{
-	return faceSelectionActive();
-}
-bool GLModel::faceSelectionActive() const
-{
-	return Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::ExtendMode>() ||
-		Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::LayFlat>();
-}
 
 QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
