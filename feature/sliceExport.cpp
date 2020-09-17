@@ -65,7 +65,7 @@ Hix::Features::SliceExportMode::~SliceExportMode()
 void Hix::Features::SliceExportMode::applyButtonClicked()
 {
 	applySettings();
-	auto fileName = QFileDialog::getSaveFileName(nullptr, "Export sliced file", "");
+	auto fileName = QFileDialog::getSaveFileName(nullptr, "Export sliced file", QDir::currentPath(), "Zip (*.zip)", new QString("Zip (*.zip)"));
 	if (fileName.isEmpty())
 	{
 		return;
@@ -91,71 +91,71 @@ void Hix::Features::SliceExportMode::applySettings()
 
 
 
-Hix::Features::SliceExport::SliceExport(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path)
-{
-}
+//Hix::Features::SliceExport::SliceExport(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path)
+//{
+//}
 
-void Hix::Features::SliceExport::run()
-{
-	// need to generate support, raft
-	 auto filename = _path + "_export";
-	QDir dir(filename);
-	if (!dir.exists()) {
-		dir.mkpath(".");
-	}
-	else {
-		dir.removeRecursively();
-		dir.mkpath(".");
-	}
-	//debug log
-	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
-	{
-		Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath = filename + QString("/debug/");
-		QDir debugDir(Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath);
-		if (!debugDir.exists()) {
-			debugDir.mkpath(".");
-		}
-	}
-	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
-	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
-
-	auto selectedBound = Hix::Engine3D::combineBounds(_models);
-	auto layerGroups = SlicingEngine::sliceModels(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager(), setting.layerHeight);
-
-	// Export to SVG
-	Hix::Slicer::SVGexporter exp(setting.layerHeight, printerSetting.pixelPerMMX(), printerSetting.pixelPerMMY(), 
-		printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, QVector2D(printerSetting.bedOffsetX, printerSetting.bedOffsetY),
-		setting.invertX, filename, setting.slicingMode);
-
-	exp.exportSVG(layerGroups);
-
-
-	//write info files
-	Hix::Slicer::InfoWriter iw(filename, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
-	iw.createInfoFile();
-	iw.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
-	
-	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
-	{
-		iw.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
-	}
-
-
-	//int layer = shellSlices.size();
-	//int time = layer * 15 / 60;
-	//auto bounds = selectedBound.lengths();
-	//int64_t area = 0;
-	//float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
-
-	//float volume = ((float)(area / pow(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelPerMMX(), 2)) / 1000000) * delta;
-	////Hix::Application::ApplicationManager::getInstance().setProgress(1);
-	//QStringList name_word = filename.split("/");
-
-	//QString size;
-	//size.sprintf("%.1f X %.1f X %.1f mm", bounds.x(), bounds.y(), bounds.z());
-	////Hix::Application::ApplicationManager::getInstance().openResultPopUp("",
-	////                            QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
-	////                            "");
-	//return { time , layer, size, volume };
-}
-
+//void Hix::Features::SliceExport::run()
+//{
+//	// need to generate support, raft
+//	 //auto filename = _path + "_export";
+//	//QDir dir(filename);
+//	//if (!dir.exists()) {
+//	//	dir.mkpath(".");
+//	//}
+//	//else {
+//	//	dir.removeRecursively();
+//	//	dir.mkpath(".");
+//	//}
+//	//debug log
+//	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
+//	{
+//		Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath = _path + QString("/debug/");
+//		QDir debugDir(Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath);
+//		if (!debugDir.exists()) {
+//			debugDir.mkpath(".");
+//		}
+//	}
+//	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
+//	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
+//
+//	auto selectedBound = Hix::Engine3D::combineBounds(_models);
+//	auto layerGroups = SlicingEngine::sliceModels(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager(), setting.layerHeight);
+//
+//	// Export to SVG
+//	Hix::Slicer::SVGexporter exp(setting.layerHeight, printerSetting.pixelPerMMX(), printerSetting.pixelPerMMY(), 
+//		printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, QVector2D(printerSetting.bedOffsetX, printerSetting.bedOffsetY),
+//		setting.invertX, filename, setting.slicingMode);
+//
+//	exp.exportSVG(layerGroups);
+//
+//
+//	//write info files
+//	Hix::Slicer::InfoWriter iw(filename, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
+//	iw.createInfoFile();
+//	iw.writeBasicInfo(layerGroups.size(), printerSetting.printerConstants);
+//	
+//	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
+//	{
+//		iw.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
+//	}
+//
+//
+//	//int layer = shellSlices.size();
+//	//int time = layer * 15 / 60;
+//	//auto bounds = selectedBound.lengths();
+//	//int64_t area = 0;
+//	//float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
+//
+//	//float volume = ((float)(area / pow(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelPerMMX(), 2)) / 1000000) * delta;
+//	////Hix::Application::ApplicationManager::getInstance().setProgress(1);
+//	//QStringList name_word = filename.split("/");
+//
+//	//QString size;
+//	//size.sprintf("%.1f X %.1f X %.1f mm", bounds.x(), bounds.y(), bounds.z());
+//	////Hix::Application::ApplicationManager::getInstance().openResultPopUp("",
+//	////                            QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
+//	////                            "");
+//	//return { time , layer, size, volume };
+//}
+//

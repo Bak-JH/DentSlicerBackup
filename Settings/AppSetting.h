@@ -4,7 +4,6 @@
 #include "JSONWriteSetting.h"
 #include "SliceSetting.h"
 #include "SupportSetting.h"
-#include "AdditionalSetting.h"
 
 namespace Hix
 {
@@ -29,7 +28,6 @@ namespace Hix
 			SliceSetting sliceSetting;
 			SupportSetting supportSetting;
 			PrinterSetting printerSetting;
-			AdditionalSetting additionalSetting;
 			std::string printerPresetPath;
 			std::string version;
 			Liscense liscense = NONE;
