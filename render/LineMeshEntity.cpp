@@ -93,10 +93,12 @@ Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVecto
 
 Hix::Render::LineMeshEntity::~LineMeshEntity()
 {
+	
 	_effect->removeParameter(_lineColorParameter);
 	_effect->removeTechnique(_renderTechnique);
 	_renderTechnique->removeFilterKey(_filterKey);
 	_renderTechnique->removeRenderPass(_renderPass);
+	_filterKey->clearPropertyTracking("renderingStyle");
 }
 
 void Hix::Render::LineMeshEntity::initialize(Qt3DCore::QEntity* parent, QByteArray& vertexData, size_t vertexCount)
@@ -120,10 +122,6 @@ void Hix::Render::LineMeshEntity::initialize(Qt3DCore::QEntity* parent, QByteArr
 	_shaderProgram->setVertexShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/default.vert")));
 	_shaderProgram->setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/lineColor.frag")));
 	_renderPass->setShaderProgram(_shaderProgram);
-
-	auto cullFace = new QCullFace();
-	cullFace->setMode(QCullFace::CullingMode::Back);
-	_renderPass->addRenderState(cullFace);
 
 	_renderTechnique->addRenderPass(_renderPass);
 	_renderTechnique->graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
