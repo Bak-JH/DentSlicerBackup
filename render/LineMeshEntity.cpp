@@ -4,13 +4,6 @@ using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Hix::Render;
 
-Hix::Render::LineMeshEntity::LineMeshEntity(Qt3DCore::QEntity* parent, QByteArray& vertexData, size_t vertexCount)
-	
-{
-	
-}
-
-
 LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent) 
 	: LineMeshEntity(std::vector<std::vector<QVector3D>>({vertices}), parent)
 {
