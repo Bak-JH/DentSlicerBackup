@@ -33,16 +33,16 @@ namespace Hix
 
 		};
 
-		class SliceExport : public Hix::Tasking::Task
-		{
-		public:
-			SliceExport(const std::unordered_set<GLModel*>& selected, QString path);
-			void run()override;
+		//class SliceExport : public Hix::Tasking::Task
+		//{
+		//public:
+		//	SliceExport(const std::unordered_set<GLModel*>& selected, QString path);
+		//	void run()override;
 
-		private:
-			std::unordered_set<GLModel*> _models;
-			QString _path;
+		//private:
+		//	std::unordered_set<GLModel*> _models;
+		//	QString _path;
 
-		};
+		//};
 	}
 }

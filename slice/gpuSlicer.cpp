@@ -322,5 +322,9 @@ size_t Hix::Slicer::SlicerGL::run()
     glDeleteBuffers(1, &_maskVBO);
 
     glfwTerminate();
+    for (auto& t : _pendingWrites)
+    {
+        t.wait();
+    }
     return i;
 }

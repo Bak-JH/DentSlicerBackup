@@ -10,7 +10,7 @@ using namespace Hix::Settings::JSON;
 typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> StringBuffer;
 constexpr auto SETTING_FILE("settings.json");
 
-Hix::Settings::AppSetting::AppSetting(): sliceSetting(deployInfo.settingsDir), supportSetting(deployInfo.settingsDir), additionalSetting(deployInfo.settingsDir)
+Hix::Settings::AppSetting::AppSetting(): sliceSetting(deployInfo.settingsDir), supportSetting(deployInfo.settingsDir)
 {
 	std::filesystem::path appSettingsPath = deployInfo.settingsDir;
 	//appSettingsPath.append("/settings.json");
@@ -41,7 +41,7 @@ void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
 void Hix::Settings::AppSetting::initialize()
 {
 	//auto defaultPreset = deployInfo.settingsDir;
-	//defaultPreset.append("PrinterPresets/HixCapsule.json");
+	//defaultPreset.append("PrinterPresets/HixC10.json");
 	//printerPresetPath = defaultPreset;
 	enableErrorReport = true;
 }
