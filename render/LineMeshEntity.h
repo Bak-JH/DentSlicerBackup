@@ -19,8 +19,8 @@ namespace Hix
 			LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent, const QColor& color);
 		
 			virtual ~LineMeshEntity();
+
 		private:
-			void initialize(Qt3DCore::QEntity* parent, QByteArray& vertexData, size_t vertexCount);
 
 			Qt3DRender::QBuffer* _vertexBuffer;
 			Qt3DRender::QAttribute* _positionAttribute;
