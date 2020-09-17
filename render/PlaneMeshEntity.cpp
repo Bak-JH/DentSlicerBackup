@@ -4,7 +4,8 @@
 using namespace Hix::Render;
 
 PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided):
-	PlaneMeshEntity(owner, Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX(), Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY(), QColor(244, 244, 244, 255), isDoubleSided)
+	PlaneMeshEntity(owner, Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX(),
+		Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY(), QColor(140, 140, 140, 255), isDoubleSided)
 {
 }
 

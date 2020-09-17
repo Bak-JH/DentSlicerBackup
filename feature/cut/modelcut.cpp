@@ -90,9 +90,13 @@ void Hix::Features::ModelCut::applyButtonClicked()
 	}
 	case Hix::Features::ModelCut::Polyline:
 	{
-		for (auto each : _models)
+		auto cuttingPts = _cuttingPlane.contour();
+		if (!cuttingPts.empty())
 		{
-			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new PolylineCut(each, _cuttingPlane.contour()));
+			for (auto each : _models)
+			{
+				Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new PolylineCut(each, cuttingPts));
+			}
 		}
 		break;
 	}
