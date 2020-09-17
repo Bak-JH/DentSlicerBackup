@@ -22,21 +22,21 @@ namespace Hix
 		private:
 			void initialize(Qt3DCore::QEntity* parent, QByteArray& vertexData, size_t vertexCount);
 
+			Qt3DRender::QBuffer* _vertexBuffer;
+			Qt3DRender::QAttribute* _positionAttribute;
+
+			Qt3DRender::QParameter* _lineColorParameter;
+
+			Qt3DRender::QShaderProgram* _shaderProgram;
+			Qt3DRender::QRenderPass* _renderPass;
+			Qt3DRender::QFilterKey* _filterKey;
+			Qt3DRender::QTechnique* _renderTechnique;
+
+			Qt3DRender::QEffect* _effect;
 			Qt3DRender::QMaterial* _material;
 
 			Qt3DRender::QGeometryRenderer _geometryRenderer;
 			Qt3DRender::QGeometry _geometry;
-
-			Qt3DRender::QBuffer* _vertexBuffer;
-			Qt3DRender::QAttribute* _positionAttribute;
-			
-			Qt3DRender::QParameter* _lineColorParameter;
-
-			Qt3DRender::QFilterKey* _filterKey;
-			Qt3DRender::QRenderPass* _renderPass;
-			Qt3DRender::QShaderProgram* _shaderProgram;
-			Qt3DRender::QTechnique* _renderTechnique;
-			Qt3DRender::QEffect* _effect;
 
 		};
 
