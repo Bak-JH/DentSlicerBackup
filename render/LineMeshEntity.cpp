@@ -10,8 +10,13 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 , _geometry(this)
 , _vertexBuffer(new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, this))
 , _positionAttribute(new Qt3DRender::QAttribute(this))
+, _shaderProgram(new Qt3DRender::QShaderProgram(this))
+, _renderPass(new Qt3DRender::QRenderPass(this))
+, _renderTechnique(new Qt3DRender::QTechnique(this))
 , _material(new Qt3DRender::QMaterial(this))
 , _effect(new Qt3DRender::QEffect(this))
+, _filterKey(new Qt3DRender::QFilterKey(this))
+, _lineColorParameter(new QParameter(QStringLiteral("lineColor"), QColor(0, 0, 0)))
 {
 	//initialize vertex buffers etc
 	QByteArray vertexBufferData;
