@@ -42,7 +42,7 @@ void Hix::UI::GridBed::drawBed()
 	{
 	case Hix::Settings::PrinterSetting::BedShape::Circle:
 	{
-		auto bed = new CircleMeshEntity(parent, printerSettings.bedRadius, Qt::white);
+		auto bed = new CircleMeshEntity(printerSettings.bedRadius, CIRCLE_SEG_CNT, Qt::white, parent);
 		_bedShape.reset(bed);
 		auto circleGrid = Hix::Shapes2D::gridCircle(printerSettings.bedRadius, 5); //5mm
 		for (auto& p : circleGrid)
