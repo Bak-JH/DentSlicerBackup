@@ -26,7 +26,8 @@ namespace Hix
 			None = -1,
 			SingleColor = 0,
 			PerPrimitiveColor,
-			LayerMode
+			LayerMode,
+			NoLightsMode
 		};
 		class ModelMaterial : public Qt3DRender::QMaterial
 		{

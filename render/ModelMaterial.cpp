@@ -145,6 +145,10 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			removeParameterWithKey("height");
 			removeParameterWithKey("fuckingStuipidWorldMatrix");
 		}
+		else if (_mode == ShaderMode::NoLightsMode)
+		{
+			removeParameterWithKey("lineColor");
+		}
 		switch (mode) {
 		case ShaderMode::SingleColor: // default
 			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(SINGLE_COLOR_GEOM_URL));
@@ -159,7 +163,10 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(LAYERVIEW_FRAG_URL));
 			addParameterWithKey("height");
 			addParameterWithKey("fuckingStuipidWorldMatrix");
-
+			break; 
+		case ShaderMode::NoLightsMode:
+			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/lineColor.frag")));
+			addParameterWithKey("lineColor");
 			break;
 		default:
 			break;

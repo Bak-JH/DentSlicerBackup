@@ -271,9 +271,6 @@
     <ClCompile Include="auth\AuthManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Settings\AdditionalSetting.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\printerServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -284,6 +281,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="render\CircleMeshEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\LocalSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1051,9 +1051,6 @@
     <ClInclude Include="support\ContourModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Settings\AdditionalSetting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\frozen\meta\string\boost\mpl_compatibility.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1148,6 +1145,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\ContainerTraits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\LocalSetting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\CircleMeshEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1290,9 +1293,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="common\exploreBonjour\bonjourserviceresolver.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="render\CircleMeshEntity.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
