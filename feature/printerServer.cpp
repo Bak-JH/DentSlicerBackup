@@ -180,6 +180,7 @@ void Hix::Features::PrinterServer::applyButtonClicked()
 
 void Hix::Features::PrinterServer::refresh()
 {
+    _bonjourBrowser->cleanUp();
     _bonjourBrowser->browseForServiceType(QLatin1String("_C10._tcp"));
 
 }
