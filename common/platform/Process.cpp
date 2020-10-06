@@ -40,19 +40,10 @@ Hix::Common::Process::Process::Process(void* winProc):_proc(winProc)
 
 Process Hix::Common::Process::createProcessAsync(const std::wstring& program, const std::wstring& args)
 {
-    //_putenv("__COMPAT_LAYER=RunAsAdmin");
-    //STARTUPINFO info = { sizeof(info) };
-    //PROCESS_INFORMATION processInfo;
-    //wchar_t modifyBuffer[4096]{};
-    //wcsncpy(modifyBuffer, args.c_str(), args.size());
-    //if (CreateProcess(program.c_str(), modifyBuffer, NULL, NULL, TRUE, 0, NULL, NULL, &info, &processInfo)) {
-    //    //CloseHandle(processInfo.hProcess); // Cleanup since you don't need this
-    //    //CloseHandle(processInfo.hThread); // Cleanup since you don't need this
-    //    return Process(processInfo.hProcess);
-    //}
+
     SHELLEXECUTEINFO info{};
     info.cbSize = sizeof(SHELLEXECUTEINFO);
-    info.fMask = SEE_MASK_NOCLOSEPROCESS /*| SEE_MASK_NO_CONSOLE*/;
+    info.fMask = SEE_MASK_NOCLOSEPROCESS;
     info.hwnd = NULL;
     info.lpVerb = L"runas";
     info.lpFile = program.c_str();
