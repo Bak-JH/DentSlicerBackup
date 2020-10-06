@@ -125,7 +125,7 @@
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <UACUIAccess>false</UACUIAccess>
     </Link>
     <Midl>
@@ -192,7 +192,7 @@
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
       <UACUIAccess>false</UACUIAccess>
     </Link>
     <Midl>
@@ -261,6 +261,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="common\platform\Process.cpp" />
     <ClCompile Include="common\Semaphore.cpp" />
     <ClCompile Include="feature\cdt\HixCDT.cpp" />
     <ClCompile Include="cork\src\cork.cpp" />
@@ -887,6 +888,7 @@
     <ClInclude Include="common\magic_enum.hpp" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
+    <ClInclude Include="common\platform\Process.h" />
     <ClInclude Include="common\Semaphore.h" />
     <ClInclude Include="common\Tree\BVHBuilder.h" />
     <ClInclude Include="common\Tree\NTree.h" />

@@ -33,6 +33,7 @@ using namespace Hix::Features;
 using namespace Hix::Engine3D;
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
+using namespace Hix::Common::Process;
 
 namespace bp = boost::process; //we will assume this for all further examples
 
@@ -90,8 +91,15 @@ namespace {
 
 
 //cmd /c bonjour\mDNSResponder.exe11 -server
-Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL), _mdnsService("bonjour/mDNSResponder.exe -server")
+Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
 {
+    //get current exe path 
+    auto qStrPath = QCoreApplication::applicationDirPath();
+    qStrPath += "/bonjour/mDNSResponder.exe";
+    auto lStrPath = qStrPath.toStdWString();
+    std::wstring fullArgs(L" -server");
+
+    _mdnsService = createProcessAsync(lStrPath, fullArgs);
     _manager.reset(new QNetworkAccessManager());
     _printerServerSetting.reset(new PrinterServerSetting());
     auto& co = controlOwner();
