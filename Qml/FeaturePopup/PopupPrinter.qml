@@ -12,7 +12,7 @@ FeaturePopup {
 		id: printerDrop
 		label.text: "Printers"
 		width: parent.width - 10	// 16 = triangle height
-		comboBox.width: parent.width - label.width - 10
+		comboBox.width: parent.width - label.width - 14
 		height: 26
 		color: "transparent"
 		anchors.top: parent.top

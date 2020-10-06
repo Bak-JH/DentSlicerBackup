@@ -54,6 +54,7 @@ void BonjourServiceResolver::cleanupResolve()
         delete bonjourSocket;
         bonjourPort = -1;
     }
+    emit cleanedUp();
 }
 
 void BonjourServiceResolver::resolveBonjourRecord(const BonjourRecord &record)
@@ -72,11 +73,11 @@ void BonjourServiceResolver::resolveBonjourRecord(const BonjourRecord &record)
                                                 (DNSServiceResolveReply)bonjourResolveReply, this);
     if (err != kDNSServiceErr_NoError) {
         qDebug() << "kDNSServiceErr: " << err;
-        handleError(err);
+        emit error(err);
     } else {
         int sockfd = DNSServiceRefSockFD(dnssref);
         if (sockfd == -1) {
-            handleError(kDNSServiceErr_Invalid);
+            emit error(kDNSServiceErr_Invalid);
         } else {
             bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
             connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
@@ -90,7 +91,7 @@ void BonjourServiceResolver::bonjourSocketReadyRead()
 {
     DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
     if (err != kDNSServiceErr_NoError)
-        handleError(err);
+        emit error(err);
 }
 
 
@@ -101,7 +102,7 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
 {
     BonjourServiceResolver *serviceResolver = static_cast<BonjourServiceResolver *>(context);
     if (errorCode != kDNSServiceErr_NoError) {
-        emit serviceResolver->handleError(errorCode);
+        emit serviceResolver->error(errorCode);
         return;
     }
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
@@ -110,10 +111,8 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
         }
 #endif
     serviceResolver->bonjourPort = port;
-    auto info = QHostInfo::fromName(QString::fromUtf8(hosttarget));
-    serviceResolver->cleanupResolve();
-    //QHostInfo::lookupHost(QString::fromUtf8(hosttarget),
-    //                      serviceResolver, SLOT(finishConnect(const QHostInfo &)));
+    QHostInfo::lookupHost(QString::fromUtf8(hosttarget),
+                          serviceResolver, SLOT(finishConnect(const QHostInfo &)));
 }
 
 
@@ -136,12 +135,12 @@ void BonjourServiceResolver::lookupAddress(const QString& hostName)
 
     if (err != kDNSServiceErr_NoError) {
         qDebug() << "kDNSServiceErr: " << err;
-        handleError(err);
+        emit error(err);
     }
     else {
         int sockfd = DNSServiceRefSockFD(dnssref);
         if (sockfd == -1) {
-            handleError(kDNSServiceErr_Invalid);
+            emit error(kDNSServiceErr_Invalid);
         }
         else {
             bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
@@ -150,6 +149,13 @@ void BonjourServiceResolver::lookupAddress(const QString& hostName)
     }
 }
 
+
+void BonjourServiceResolver::finishConnect(const QHostInfo &hostInfo)
+{
+
+    emit bonjourRecordResolved(hostInfo);
+    QMetaObject::invokeMethod(this, "cleanupResolve", Qt::QueuedConnection);
+}
 
 void BonjourServiceResolver::handleError(DNSServiceErrorType err)
 {

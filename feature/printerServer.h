@@ -12,6 +12,7 @@ class QNetworkAccessManager;
 class BonjourServiceBrowser;
 class BonjourServiceResolver;
 class PrinterServerSetting;
+class BonjourRecord;
 namespace Hix
 {
 	namespace Features
@@ -27,12 +28,13 @@ namespace Hix
 		private:
 			void refresh();
 			void checkIP(const QString& ip);
+			void attachResolver(const BonjourRecord& record);
 			Hix::QML::Controls::DropdownBox* _printersDrop;
 			Hix::QML::Controls::Button* _refreshButton;
 			Hix::Common::Process::Process _mdnsService;
 			std::unique_ptr<QNetworkAccessManager> _manager;
 			std::unique_ptr<BonjourServiceBrowser> _bonjourBrowser;
-			std::unique_ptr<BonjourServiceResolver> _bonjourResolver;
+			std::vector<std::unique_ptr<BonjourServiceResolver>> _bonjourResolvers;
 			std::unique_ptr<PrinterServerSetting> _printerServerSetting;
 		};
 
