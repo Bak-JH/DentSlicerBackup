@@ -286,6 +286,9 @@
     <ClCompile Include="Settings\LocalSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="common\platform\Process.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1151,6 +1154,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="render\CircleMeshEntity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\platform\Process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

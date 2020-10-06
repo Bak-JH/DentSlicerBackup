@@ -4,10 +4,10 @@
 #include "interfaces/Feature.h"
 #include "interfaces/Mode.h"
 #include <memory>
-#include <boost/process/child.hpp>
 #include <QString>
 #include "interfaces/DialogedMode.h"
 #include "../Qml/components/ControlForwardInclude.h"
+#include "../common/platform/Process.h"
 class QNetworkAccessManager;
 class BonjourServiceBrowser;
 class BonjourServiceResolver;
@@ -29,11 +29,10 @@ namespace Hix
 			void checkIP(const QString& ip);
 			Hix::QML::Controls::DropdownBox* _printersDrop;
 			Hix::QML::Controls::Button* _refreshButton;
-
+			Hix::Common::Process::Process _mdnsService;
 			std::unique_ptr<QNetworkAccessManager> _manager;
 			std::unique_ptr<BonjourServiceBrowser> _bonjourBrowser;
 			std::unique_ptr<BonjourServiceResolver> _bonjourResolver;
-			boost::process::child _mdnsService;
 			std::unique_ptr<PrinterServerSetting> _printerServerSetting;
 		};
 
