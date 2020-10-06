@@ -54,17 +54,15 @@ public:
 
 signals:
     void bonjourRecordResolved(const QHostInfo &hostInfo);
-    void error(DNSServiceErrorType error);
-    void cleanedUp();
     void foundHostIP(QString ip);
 
-private slots:
-    void cleanupResolve();
-    void bonjourSocketReadyRead();
-    void finishConnect(const QHostInfo &hostInfo);
-    void handleError(DNSServiceErrorType err);
+
 
 private:
+    void cleanupResolve();
+    void bonjourSocketReadyRead();
+    void handleError(DNSServiceErrorType err);
+
     static void DNSSD_API bonjourResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags,
                                     quint32 interfaceIndex, DNSServiceErrorType errorCode,
                                     const char *fullName, const char *hosttarget, quint16 port,
