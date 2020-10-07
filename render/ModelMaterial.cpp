@@ -147,7 +147,7 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 		}
 		else if (_mode == ShaderMode::NoLightsMode)
 		{
-			removeParameterWithKey("singleColor");
+			removeParameterWithKey("color");
 		}
 		switch (mode) {
 		case ShaderMode::SingleColor: // default
@@ -166,7 +166,7 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			break; 
 		case ShaderMode::NoLightsMode:
 			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/singleColorNoLight.frag")));
-			addParameterWithKey("singleColor");
+			addParameterWithKey("color");
 			break;
 		default:
 			break;

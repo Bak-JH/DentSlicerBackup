@@ -29,7 +29,7 @@ LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertic
 	, _material(new Qt3DRender::QMaterial(this))
 	, _effect(new Qt3DRender::QEffect(this))
 	, _filterKey(new Qt3DRender::QFilterKey(this))
-	, _lineColorParameter(new QParameter(QStringLiteral("singleColor"), QColor(0, 0, 0)))
+	, _lineColorParameter(new QParameter(QStringLiteral("color"), QColor(0, 0, 0)))
 {
 	size_t vtxCount = 0;
 	for (auto& path : vertices)
