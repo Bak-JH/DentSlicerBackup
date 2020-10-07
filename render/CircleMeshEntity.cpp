@@ -7,7 +7,7 @@ CircleMeshEntity::CircleMeshEntity(float radius, size_t segCount, const QColor& 
 	: SceneEntityWithMaterial(parent)
 {
 	setMaterialMode(ShaderMode::NoLightsMode);
-	setMaterialParamter("lineColor", QVector4D(color.redF(), color.greenF(), color.blueF(), 1.0f));
+	setMaterialParamter("color", QVector4D(color.redF(), color.greenF(), color.blueF(), 1.0f));
 
 	auto mesh = new Mesh();
 	auto circle = Hix::Shapes2D::generateCircle(radius, segCount);

@@ -147,7 +147,7 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 		}
 		else if (_mode == ShaderMode::NoLightsMode)
 		{
-			removeParameterWithKey("lineColor");
+			removeParameterWithKey("color");
 		}
 		switch (mode) {
 		case ShaderMode::SingleColor: // default
@@ -165,8 +165,8 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			addParameterWithKey("fuckingStuipidWorldMatrix");
 			break; 
 		case ShaderMode::NoLightsMode:
-			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/lineColor.frag")));
-			addParameterWithKey("lineColor");
+			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/singleColorNoLight.frag")));
+			addParameterWithKey("color");
 			break;
 		default:
 			break;
