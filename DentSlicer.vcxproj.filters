@@ -1549,7 +1549,7 @@
     <None Include="cork\src\rawmesh\rawMesh.tpp" />
     <None Include="shaders\slice.vert" />
     <None Include="shaders\slice.frag" />
-    <None Include="shaders\lineColor.frag" />
+    <None Include="shaders\singleColorNoLight.frag" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

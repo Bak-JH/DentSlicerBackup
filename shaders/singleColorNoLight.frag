@@ -1,6 +1,6 @@
 #version 430 core
 out vec4 fragColor;
-uniform vec4 lineColor;
+uniform vec4 color;
 
 
 // in EyeSpaceVertex {
@@ -10,6 +10,6 @@ uniform vec4 lineColor;
 
 void main()
 {
-    fragColor = lineColor;
+    fragColor = color;
     //fragColor = vec4(0.0, 0.0, 0.0 , 1.0);
 }

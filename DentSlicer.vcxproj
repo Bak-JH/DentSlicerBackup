@@ -1444,7 +1444,7 @@
     <None Include="shaders\layerview.frag" />
     <None Include="shaders\layerview.geom" />
     <None Include="shaders\light.inc.frag" />
-    <None Include="shaders\lineColor.frag" />
+    <None Include="shaders\singleColorNoLight.frag" />
     <None Include="shaders\perPrimitive.geom" />
     <None Include="shaders\singleColor.geom" />
     <None Include="shaders\slice.frag" />
