@@ -7,6 +7,8 @@ import QtGraphicalEffects 1.12
 
 DropdownBox {
 	property alias label: label
+	property alias comboBox: control
+
 	Text {
 		id: label
 		anchors.verticalCenter: parent.verticalCenter
@@ -102,7 +104,7 @@ DropdownBox {
 			contentItem: ListView {
 				id: content
 				clip: true
-				implicitHeight: contentHeight * 0.5
+				implicitHeight: Math.max(contentHeight * 0.5, 50)
 				model: control.popup.visible ? control.delegateModel : null
 				currentIndex: control.highlightedIndex
 
