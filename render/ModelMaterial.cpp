@@ -48,6 +48,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	auto depthTest = new QDepthTest();
 	depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
 	_renderPass.addRenderState(depthTest);
+
 	_renderTechnique.addRenderPass(&_renderPass);
 	_renderTechnique.graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
 	_renderTechnique.graphicsApiFilter()->setMajorVersion(4);
@@ -144,6 +145,10 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			removeParameterWithKey("height");
 			removeParameterWithKey("fuckingStuipidWorldMatrix");
 		}
+		else if (_mode == ShaderMode::NoLightsMode)
+		{
+			removeParameterWithKey("color");
+		}
 		switch (mode) {
 		case ShaderMode::SingleColor: // default
 			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(SINGLE_COLOR_GEOM_URL));
@@ -158,7 +163,10 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(LAYERVIEW_FRAG_URL));
 			addParameterWithKey("height");
 			addParameterWithKey("fuckingStuipidWorldMatrix");
-
+			break; 
+		case ShaderMode::NoLightsMode:
+			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(QUrl("qrc:/shaders/singleColorNoLight.frag")));
+			addParameterWithKey("color");
 			break;
 		default:
 			break;

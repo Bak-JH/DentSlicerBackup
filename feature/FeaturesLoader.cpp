@@ -101,7 +101,10 @@ void Hix::Features::FeaturesLoader::loadFeatureButtons()
 
 	addButton<Hix::Features::MoveMode>("move" ,this);
 	addButton<Hix::Features::RotateMode>("rotate" ,this);
-	addButton<Hix::Features::ScaleMode>("scale" ,this);
+	if (Hix::Application::ApplicationManager::getInstance().settings().liscense == Hix::Settings::PRO)
+	{
+		addButton<Hix::Features::ScaleMode>("scale", this);
+	}
 	addDivider();
 
 	if (Hix::Application::ApplicationManager::getInstance().settings().liscense == Hix::Settings::PRO)

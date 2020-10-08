@@ -2,7 +2,6 @@
 
 #include "interfaces/Feature.h"
 #include "glmodel.h"
-#include "cut/DrawingPlane.h"
 #include "interfaces/DialogedMode.h"
 
 namespace Hix

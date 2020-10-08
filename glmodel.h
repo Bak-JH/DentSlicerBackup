@@ -51,11 +51,7 @@ public:
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 
 
-	void setBoundingBoxVisible(bool isEnabled);
-	// useless funcitons. why did you use them?
-	bool perPrimitiveColorActive()const;
-	bool faceSelectionActive()const;
-
+	//void setBoundingBoxVisible(bool isEnabled);
 	void moveModel(const QVector3D& movement);
 	void rotateModel(const QQuaternion& rotation);
 	void scaleModel(const QVector3D& scale);

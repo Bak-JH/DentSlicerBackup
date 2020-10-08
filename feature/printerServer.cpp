@@ -33,6 +33,7 @@ using namespace Hix::Features;
 using namespace Hix::Engine3D;
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
+using namespace Hix::Common::Process;
 
 namespace bp = boost::process; //we will assume this for all further examples
 
@@ -80,18 +81,17 @@ protected:
 
 };
 
-namespace {
-    // declare exit handler function
-    void _exitHandler(boost::system::error_code err, int rc) {
-        std::cout << "DEBUG async exit error code: "
-            << err << " rc: " << rc << std::endl;
-    }
-}
-
 
 //cmd /c bonjour\mDNSResponder.exe11 -server
-Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL), _mdnsService("bonjour/mDNSResponder.exe -server")
+Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL)
 {
+    //get current exe path 
+    auto qStrPath = QCoreApplication::applicationDirPath();
+    qStrPath += "/bonjour/mDNSResponder.exe";
+    auto lStrPath = qStrPath.toStdWString();
+    std::wstring fullArgs(L" -server");
+
+    _mdnsService = createProcessAsync(lStrPath, fullArgs);
     _manager.reset(new QNetworkAccessManager());
     _printerServerSetting.reset(new PrinterServerSetting());
     auto& co = controlOwner();
@@ -123,23 +123,15 @@ Hix::Features::PrinterServer::PrinterServer(): DialogedMode(SUPPORT_POPUP_URL), 
 
 
     _bonjourBrowser.reset(new BonjourServiceBrowser());
-    _bonjourResolver.reset(new BonjourServiceResolver(nullptr));
     _bonjourBrowser->setInterval(100);
 
     QObject::connect(_bonjourBrowser.get(), &BonjourServiceBrowser::currentBonjourRecordsChanged, [this](const QList<BonjourRecord>& recs) {
         for (auto& e : recs)
         {
-            _bonjourResolver->resolveBonjourRecord(e);
+            attachResolver(e);
         }
         });
-    QObject::connect(_bonjourResolver.get(), &BonjourServiceResolver::bonjourRecordResolved, [this](const QHostInfo& info) {
-        _bonjourResolver->lookupAddress(info.hostName());
-        const QList<QHostAddress>& addresses = info.addresses();
-        });
 
-    QObject::connect(_bonjourResolver.get(), &BonjourServiceResolver::foundHostIP, [this](QString ip) {
-        checkIP(ip);
-        });
 
     refresh();
 }
@@ -149,6 +141,22 @@ void Hix::Features::PrinterServer::checkIP(const QString& ip)
     QNetworkRequest request(QUrl(HTTP + ip + PORT));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     _manager->get(request);
+}
+void Hix::Features::PrinterServer::attachResolver(const BonjourRecord& record)
+{
+    auto resolver = new BonjourServiceResolver(nullptr);
+
+    QObject::connect(resolver, &BonjourServiceResolver::bonjourRecordResolved, [this, resolver](const QHostInfo& info) {
+        resolver->lookupAddress(info.hostName());
+        const QList<QHostAddress>& addresses = info.addresses();
+        });
+
+    QObject::connect(resolver, &BonjourServiceResolver::foundHostIP, [this](QString ip) {
+        checkIP(ip);
+        });
+
+    resolver->resolveBonjourRecord(record);
+    _bonjourResolvers.emplace_back(std::unique_ptr<BonjourServiceResolver>(resolver));
 }
 Hix::Features::PrinterServer::~PrinterServer()
 {
@@ -172,6 +180,7 @@ void Hix::Features::PrinterServer::applyButtonClicked()
 
 void Hix::Features::PrinterServer::refresh()
 {
+    _bonjourBrowser->cleanUp();
     _bonjourBrowser->browseForServiceType(QLatin1String("_C10._tcp"));
 
 }

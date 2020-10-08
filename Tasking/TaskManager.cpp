@@ -79,6 +79,7 @@ void TaskManager::run()
 				},
 				[this]() {
 					Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
+					_progressManager.deletePopup();
 				}
 				);
 				}, Qt::BlockingQueuedConnection);

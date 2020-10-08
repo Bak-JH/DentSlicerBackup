@@ -87,5 +87,6 @@
         <file>shaders/slice.frag</file>
         <file>shaders/slice.vert</file>
         <file>Qml/FeaturePopup/PopupPrinter.qml</file>
+        <file>shaders/singleColorNoLight.frag</file>
     </qresource>
 </RCC>

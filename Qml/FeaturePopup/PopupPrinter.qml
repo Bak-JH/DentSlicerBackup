@@ -10,8 +10,9 @@ FeaturePopup {
 
 	CtrDropdownBox {
 		id: printerDrop
-		label.text: "Printer Servers"
-		width: parent.width - 14	// 16 = triangle height
+		label.text: "Printers"
+		width: parent.width - 10	// 16 = triangle height
+		comboBox.width: parent.width - label.width - 14
 		height: 26
 		color: "transparent"
 		anchors.top: parent.top

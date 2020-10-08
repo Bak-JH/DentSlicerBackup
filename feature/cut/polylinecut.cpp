@@ -39,6 +39,7 @@ void Hix::Features::Cut::PolylineCut::runImpl()
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
 	Mesh polylineWall;
+
 	generateCuttingWalls(_cuttingPoints, _target->recursiveAabb(), polylineWall);
 	//convert all meshes to cork meshes
 	auto cylinderWallCork = toCorkMesh(polylineWall);
