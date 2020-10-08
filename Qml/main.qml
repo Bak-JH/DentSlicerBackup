@@ -95,14 +95,18 @@ Item{
 				}
 			}
 			
-
-			FeatureMenu {
-				id: featureMenu
-				height: 100
-				anchors.top: parent.top
+			Item{
+				id: featureMenuArea
 				anchors.left: partList.right
-				anchors.leftMargin: 50
-				anchors.topMargin: sidePadding
+				anchors.right: printsetting.left
+
+				FeatureMenu {
+					id: featureMenu
+					height: 100
+					anchors.top: parent.top
+					anchors.topMargin: sidePadding
+					anchors.horizontalCenter: parent.horizontalCenter
+				}
 			}
 
 			PartList{
