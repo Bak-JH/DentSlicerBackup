@@ -17,8 +17,8 @@ namespace Hix
 
 			Q_OBJECT
 		public:
-			PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided = false);
-			PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided = false);
+			PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided = false, float alpha = 0.5f);
+			PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided = false, float alpha = 0.5f);
 
 			virtual ~PlaneMeshEntity();
 			Qt3DCore::QTransform& transform();

@@ -3,13 +3,13 @@
 
 using namespace Hix::Render;
 
-PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided):
+PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided, float alpha):
 	PlaneMeshEntity(owner, Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX(),
 		Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY(), QColor(140, 140, 140, 255), isDoubleSided)
 {
 }
 
-Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided) : Qt3DCore::QEntity(owner)
+Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided, float alpha) : Qt3DCore::QEntity(owner)
 {
 	size_t plnCnt = 1;
 	if (isDoubleSided)
@@ -20,7 +20,7 @@ Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float wi
 		planeMaterial->setAmbient(color);
 		planeMaterial->setDiffuse(color);
 		planeMaterial->setSpecular(color);
-		planeMaterial->setAlpha(1.0f);
+		planeMaterial->setAlpha(alpha);
 		auto planeEntity = new Qt3DCore::QEntity(this);
 		//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
 		auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
