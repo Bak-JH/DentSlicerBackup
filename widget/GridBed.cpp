@@ -55,7 +55,7 @@ void Hix::UI::GridBed::drawBed()
 	}
 	case Hix::Settings::PrinterSetting::BedShape::Rect:
 	{
-		auto bed = new PlaneMeshEntity(parent, printerSettings.bedX, printerSettings.bedY, Qt::white);
+		auto bed = new PlaneMeshEntity(parent, printerSettings.bedX, printerSettings.bedY, Qt::white, false, 1.0f);
 		_bedShape.reset(bed);
 		auto rectGrid = Hix::Shapes2D::gridRect(printerSettings.bedX, printerSettings.bedY, 5); //5mm
 		for (auto& p : rectGrid)
