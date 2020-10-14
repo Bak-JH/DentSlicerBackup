@@ -17,11 +17,12 @@ namespace Hix
 
 			Q_OBJECT
 		public:
-			PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided = false, float alpha = 0.5f);
-			PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided = false, float alpha = 0.5f);
+			PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided = false);
+			PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided = false);
 
 			virtual ~PlaneMeshEntity();
 			Qt3DCore::QTransform& transform();
+			void setAlpha(const float alpha);
 			void setPointNormal(const Hix::Plane3D::PDPlane& plane);
 		protected:
 			std::unordered_map<Qt3DCore::QEntity*, Qt3DCore::QTransform*> _meshTransformMap;

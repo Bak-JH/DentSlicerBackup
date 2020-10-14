@@ -52,6 +52,7 @@ void ModelCut::cutModeSelected()
 		_cuttingPlane.enableDrawing(false);
 		_cuttingPlane.clearPt();
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
+		_cuttingPlane.setAlpha(0.5f);
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Center);
@@ -64,6 +65,7 @@ void ModelCut::cutModeSelected()
 		_cuttingPlane.enableDrawing(true);
 		//want cutting plane to be over model mesh
 		float zOverModel = _modelsBound.zMax() + 0.1f;
+		_cuttingPlane.setAlpha(0.5f); //TODO: solve alpha value problem
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, zOverModel));
 		_cuttingPlane.enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
