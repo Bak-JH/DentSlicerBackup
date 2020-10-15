@@ -30,9 +30,7 @@ void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
 	parse(doc, "useGPU", useGPU);
 	parse(doc, "AAXY", AAXY);
 	parse(doc, "AAZ", AAZ);
-
-
-
+	parse(doc, "minHeight", minHeight);
 }
 
 
@@ -57,5 +55,6 @@ rapidjson::Document Hix::Settings::SliceSetting::doc()
 	doc.AddMember("useGPU", useGPU, doc.GetAllocator());
 	doc.AddMember("AAXY", AAXY, doc.GetAllocator());
 	doc.AddMember("AAZ", AAZ, doc.GetAllocator());
+	doc.AddMember("minHeight", minHeight, doc.GetAllocator());
 	return doc;
 }

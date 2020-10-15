@@ -23,6 +23,7 @@ namespace Hix
 			bool useGPU;
 			size_t AAXY;
 			size_t AAZ;
+			float minHeight;
 
 
 

@@ -9,5 +9,6 @@
     "maxConnectDistance" : 5.0,
     "supportType": "Vertical",
     "interconnectType": "Cross",
-    "raftType": "General"
+    "raftType": "General",
+    "thickenFeet" : true
 }

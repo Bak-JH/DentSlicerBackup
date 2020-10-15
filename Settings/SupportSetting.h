@@ -40,6 +40,7 @@ namespace Hix
 			float raftMinMaxRatio;
 			InterconnectType interconnectType;
 			float maxConnectDistance;
+			bool thickenFeet;
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;

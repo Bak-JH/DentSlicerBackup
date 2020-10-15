@@ -35,7 +35,10 @@ void Hix::Settings::SupportSetting::parseJSONImpl(const rapidjson::Document& doc
 	parseStrToEnum(doc, "supportType", supportType);
 	parseStrToEnum(doc, "raftType", raftType);
 	parseStrToEnum(doc, "interconnectType", interconnectType);
+	parse(doc, "thickenFeet", thickenFeet);
 
+
+	
 }
 
 void Hix::Settings::SupportSetting::initialize()
@@ -65,7 +68,7 @@ rapidjson::Document Hix::Settings::SupportSetting::doc()
 	doc.AddMember("supportType", std::string(magic_enum::enum_name(supportType)), doc.GetAllocator());
 	doc.AddMember("raftType", std::string(magic_enum::enum_name(raftType)), doc.GetAllocator());
 	doc.AddMember("maxConnectDistance", maxConnectDistance, doc.GetAllocator());
-
+	doc.AddMember("thickenFeet", thickenFeet, doc.GetAllocator());
 	return doc;
 }
 

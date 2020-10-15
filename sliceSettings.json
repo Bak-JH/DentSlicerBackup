@@ -4,5 +4,7 @@
     "slicingMode": "Uniform",
     "useGPU" : true,
     "AAXY" : 1,
-    "AAZ" : 1
+    "AAZ" : 1,
+    "minHeight" : 0.0001
+
 }

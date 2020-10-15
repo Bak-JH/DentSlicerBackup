@@ -21,6 +21,7 @@ Hix::Features::SliceExportMode::SliceExportMode()
 :DialogedMode(POPUP_URL)
 
 {
+
 	auto& co = controlOwner();
 	co.getControl(_sliceTypeDrop, "sliceType");
 	co.getControl(_layerHeightSpin, "layerHeight");
@@ -28,7 +29,8 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	co.getControl(_aazSpin, "aaz");
 	co.getControl(_invertXSwtch, "invertX");
 
-
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
+	modSettings.parseJSON();
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 	_sliceTypeDrop->setEnums<SliceSetting::SlicingMode>(settings.slicingMode);
 	_layerHeightSpin->setValue(settings.layerHeight);
@@ -36,7 +38,6 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	_aazSpin->setValue(settings.AAZ);
 	_invertXSwtch->setChecked(settings.invertX);
 
-	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
 	
 	// bind inputs
 	QObject::connect(_sliceTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
