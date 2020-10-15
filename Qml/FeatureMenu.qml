@@ -14,6 +14,7 @@ Hix.FeatureMenu {
 		height: 90
 		radius: 45
 		color: "#FFFFFF"
+		anchors.horizontalCenter: parent.horizontalCenter
 		RowLayout {
 		    id: featureItems
 			objectName: "featureItems"
