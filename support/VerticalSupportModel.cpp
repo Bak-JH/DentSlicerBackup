@@ -317,7 +317,10 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 		_contour.emplace_back(coneNarrow);
 		_contour.emplace_back(extendedTip);
 		_vertSeg = { raftAttachEnd, coneWidePart };
-		scales = {SUPPORT_BOTTOM_MAX_MULT, SUPPORT_BOTTOM_MAX_MULT, 1.0f, 1.0f, minSupportScale, minSupportScale};
+		auto botMult = 1.0f;
+		if (setting.thickenFeet)
+			botMult = SUPPORT_BOTTOM_MAX_MULT;
+		scales = { botMult, botMult, 1.0f, 1.0f, minSupportScale, minSupportScale};
 		_hasBasePt = true;
 		_basePt = supportStart;
 	}

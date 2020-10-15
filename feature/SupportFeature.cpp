@@ -257,7 +257,7 @@ Hix::Features::SupportMode::SupportMode()
 		return;
 	}
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
-
+	
 
 	auto& co = controlOwner();
 	co.getControl(_generateSupportsBttn, "generatesupports");
@@ -265,6 +265,7 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_clearSupportsBttn, "clearsupports");
 	co.getControl(_reconnectBttn, "reconnect");
 	co.getControl(_manualEditBttn, "editsupports");
+	co.getControl(_thickenFeetBttn, "thickenFeet");
 	co.getControl(_suppSettBttn, "supportsettingbutton");
 	co.getControl(_raftSettBttn, "raftsettingbutton");
 	co.getControl(_suppTypeDrop, "supporttype");
@@ -292,8 +293,7 @@ Hix::Features::SupportMode::SupportMode()
 	_interconnectTypeDrop->setEnums<SupportSetting::InterconnectType>(settings.interconnectType);
 	_supportBaseHeightSpin->setValue(settings.supportBaseHeight);
 	_maxConnectDistanceSpin->setValue(settings.maxConnectDistance);
-
-
+	_thickenFeetBttn->setChecked(settings.thickenFeet);
 
 	// bind buttons
 	QObject::connect(_generateSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
@@ -322,6 +322,7 @@ Hix::Features::SupportMode::SupportMode()
 
 	// bind inputs
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
+
 	QObject::connect(_suppTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
 		_suppTypeDrop->getSelected(modSettings.supportType);
 		});
@@ -354,6 +355,11 @@ Hix::Features::SupportMode::SupportMode()
 		});
 	QObject::connect(_maxConnectDistanceSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.maxConnectDistance = _maxConnectDistanceSpin->getValue();
+		});
+
+
+	QObject::connect(_thickenFeetBttn, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this, &modSettings]() {
+		modSettings.thickenFeet = _thickenFeetBttn->isChecked();
 		});
 
 
