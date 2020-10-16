@@ -17,13 +17,13 @@ namespace Hix
 			SliceSetting(std::filesystem::path settingsPath);
 			~SliceSetting();
 
-			float layerHeight;
+			double layerHeight;
 			SlicingMode slicingMode;
 			bool invertX;
 			bool useGPU;
 			size_t AAXY;
 			size_t AAZ;
-			float minHeight;
+			double minHeight;
 
 
 

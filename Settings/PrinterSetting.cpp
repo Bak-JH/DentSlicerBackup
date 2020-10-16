@@ -10,22 +10,22 @@ Hix::Settings::PrinterSetting::PrinterSetting(): _allocator(&_buffer, _buffer.si
 {
 }
 
-float Hix::Settings::PrinterSetting::pixelPerMMX() const
+double Hix::Settings::PrinterSetting::pixelPerMMX() const
 {
 	return sliceImageResolutionX / screenX;
 }
 
-float Hix::Settings::PrinterSetting::pixelPerMMY() const
+double Hix::Settings::PrinterSetting::pixelPerMMY() const
 {
 	return sliceImageResolutionY / screenY;
 }
 
-float Hix::Settings::PrinterSetting::pixelSizeX() const
+double Hix::Settings::PrinterSetting::pixelSizeX() const
 {
 	return screenX/ sliceImageResolutionX;
 }
 
-float Hix::Settings::PrinterSetting::pixelSizeY() const
+double Hix::Settings::PrinterSetting::pixelSizeY() const
 {
 	return screenY/ sliceImageResolutionY;
 }

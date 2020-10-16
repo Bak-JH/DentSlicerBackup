@@ -31,15 +31,15 @@ namespace Hix
 
 			SupportType supportType;
 			RaftType raftType;
-			float supportRadiusMax;
-			float supportRadiusMin;
-			float supportDensity;
-			float supportBaseHeight;
-			float raftThickness;
-			float raftRadiusMult;
-			float raftMinMaxRatio;
+			double supportRadiusMax;
+			double supportRadiusMin;
+			double supportDensity;
+			double supportBaseHeight;
+			double raftThickness;
+			double raftRadiusMult;
+			double raftMinMaxRatio;
 			InterconnectType interconnectType;
-			float maxConnectDistance;
+			double maxConnectDistance;
 			bool thickenFeet;
 
 		protected:

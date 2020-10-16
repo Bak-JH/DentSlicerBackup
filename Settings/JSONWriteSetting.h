@@ -10,6 +10,15 @@ namespace Hix
 	namespace Settings
 	{
 
+		namespace JSON
+		{
+
+			template<typename ValType>
+			void writeVal(const ValType& val, )
+			{
+
+			}
+		}
 		class JSONWriteSetting
 		{
 		public:
