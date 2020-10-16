@@ -29,8 +29,6 @@ using namespace Hix::QtUtils;
 
 
 
-
-
 Hix::Features::SliceExportGPU::SliceExportGPU(const std::unordered_set<GLModel*>& selected, QString path): _models(selected), _path(path)
 {
 }
@@ -53,7 +51,7 @@ void Hix::Features::SliceExportGPU::run()
 
 
 	// Export to SVG
-	Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ);
+	Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
 	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
     Hix::Engine3D::Bounds3D bounds;
     auto vtcs = toVtxBuffer(bounds);

@@ -124,7 +124,7 @@ FeaturePopup {
 	SidePopup {
 		id: supportsettingpopup
 		width: 296
-		height: 305
+		height: 350
 		anchors.topMargin: 38
 		anchors.left: generatesupports.right
 		anchors.leftMargin: 30
@@ -216,6 +216,24 @@ FeaturePopup {
 			anchors.top: supportBaseHeight.bottom
 			anchors.topMargin: 16
 		}
+		CtrToggleSwitch {
+			id: thickenFeet
+			sizeMult: 1.2
+			isChecked: true
+			anchors.top: maxConnectDistance.bottom
+			anchors.topMargin: 16
+			anchors.left: parent.left
+			anchors.leftMargin: 30
+			leftText
+			{
+				text: "Disabled"
+			}
+			rightText
+			{
+				text: "Wider Bottom"
+			}
+		}
+
 	}
 	SidePopup {
 		id: raftsettingpopup
