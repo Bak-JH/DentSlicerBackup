@@ -3,21 +3,22 @@
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/PrettyWriter.h"
 #include "../common/rapidjson/ostreamwrapper.h"
+#include "../common/rapidjson/stringbuffer.h"
+
 #include <fstream>
 #include <QDebug>
 
+
 void Hix::Settings::JSONWriteSetting::writeJSON()
 {
-	//char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
-	//rapidjson::Document doc(&allocator, 256);
-	//doc.SetObject();
-	////doc.AddMember("printerPresetPath", printerPresetPath, allocator);
-	////doc.AddMember("enableErrorReport", enableErrorReport, allocator);
-	//doc.AddMember("printerPresetPath", printerPresetPath, doc.GetAllocator());
-	//doc.AddMember("enableErrorReport", enableErrorReport, doc.GetAllocator());
-	auto document = doc();
+
+	_workingBuffer.reset(new rapidjson::StringBuffer());
+	rapidjson::PrettyWriter<rapidjson::StringBuffer> objWriter;
+	objWriter.StartObject();
+	writeObjects();
+	objWriter.EndObject();
+
 	std::ofstream of(jsonPath(), std::ios_base::trunc);
-	rapidjson::OStreamWrapper osw{ of };
-	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
-	document.Accept(writer);
+	std::string json(_workingBuffer->GetString(), _workingBuffer->GetSize());
+	of << json;
 }
