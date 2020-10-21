@@ -1,6 +1,7 @@
 #include "stlexport.h"
 #include <qfiledialog.h>
 #include "application/ApplicationManager.h"
+#include "../support/RaftModel.h"
 #include "glmodel.h"
 #include "STL/stlio.hpp"
 #include "../common/rapidjson/writer.h"
@@ -10,6 +11,7 @@
 #include "zip/zip.h"
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
+using namespace Hix::Render;
 using namespace tyti::stl;
 const constexpr auto STL_TEMP_PATH = "hix_temp_stl";
 
@@ -64,6 +66,27 @@ void Hix::Features::STLExport::run()
 	exportModels();
 }
 
+std::unordered_set<const SceneEntity*> getSuppRaft()
+{
+	auto& supp = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+	std::unordered_set<const SceneEntity*> entities;
+
+	if (supp.supportActive())
+	{
+		auto supps = supp.supportModels();
+		for (auto& e : supps)
+		{
+			entities.insert(e);
+		}
+		if (supp.raftActive())
+		{
+			auto raft = supp.raftModel();
+			entities.insert(dynamic_cast<const SceneEntity*>(raft));
+		}
+	}
+	return entities;
+}
+
 void Hix::Features::STLExport::exportModels()
 {
 	for (auto& m : _models)
@@ -73,17 +96,38 @@ void Hix::Features::STLExport::exportModels()
 		std::unordered_set<const GLModel*> children;
 		m->getChildrenModels(children);
 		children.insert(m);
+		std::unordered_set<const SceneEntity*> entities;
+		for (auto& e : children)
+		{
+			entities.insert(e);
+		}
 
 #ifdef SAVE_ASCII
-		exportSTLAscii(children, _currIdx);
+		//if (_models.size() == 1)
+		//{
+		//	auto supp = getSuppRaft();
+		//	for (auto& e : supp) entities.insert(e);
+		//}
+		exportSTLAscii(entities, _currIdx);
 #else
-		exportSTLBin(children, _currIdx);
+		//if (_models.size() == 1)
+		//{
+		//	auto supp = getSuppRaft();
+		//	for (auto& e : supp) entities.insert(e);
+		//}
+		exportSTLBin(entities, _currIdx);
+
 #endif
 		++_currIdx;
 	}
+
 	//zip files if there are multiple models in the scene
 	if (_modelsMap.size() > 1)
 	{
+		//support 
+		//auto supp = getSuppRaft();
+		//exportSTLBin(supp, ++_currIdx);
+
 		//write json
 		auto jsonPath = _tmpPath;
 		jsonPath /= STL_EXPORT_JSON;
@@ -95,9 +139,11 @@ void Hix::Features::STLExport::exportModels()
 		for (size_t i = 0; i != _currIdx; ++i)
 		{
 			rapidjson::Value k(getNthModelName(i), doc.GetAllocator());
-			rapidjson::Value v(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
-			doc.AddMember(k, v, doc.GetAllocator());
-
+			if (_modelsMap.find(i) != _modelsMap.cend())
+			{
+				rapidjson::Value v(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
+				doc.AddMember(k, v, doc.GetAllocator());
+			}
 			//add to zip archive
 			auto modelPath = _tmpPath;
 			modelPath /= getNthModelName(i);
@@ -127,21 +173,26 @@ tyti::stl::vec3 toExportVec(const QVector3D& vec)
 	return vec3(vec.x(), vec.y(), vec.z());
 }
 
-void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const GLModel*>& childs, size_t idx)
+void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const SceneEntity*>& childs, size_t idx)
 {
 	auto path = _tmpPath;
 	path /= getNthModelName(idx);
 	std::ofstream ofs(path, std::ios_base::trunc|std::ios::binary);
+
+	tyti::stl::basic_solid<float> exportSolid;
+	size_t faceCnt = 0;
+	for (auto& c : childs)
+	{
+		faceCnt += c->getMesh()->getFaces().size();
+	}
+	exportSolid.normals.reserve(faceCnt);
+	exportSolid.vertices.reserve(faceCnt * 3);
 	for (auto& c : childs)
 	{
 		auto mesh = c->getMesh();
 		if (mesh)
 		{
 			auto& faces = mesh->getFaces();
-			tyti::stl::basic_solid<float> exportSolid;
-			exportSolid.normals.reserve(faces.size());
-			exportSolid.vertices.reserve(faces.size() * 3);
-
 			auto faceCend = faces.cend();
 			for (auto mf = faces.cbegin(); mf != faceCend; ++mf)
 			{
@@ -155,14 +206,14 @@ void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const GLMod
 				exportSolid.vertices.emplace_back(toExportVec(mv2.worldPosition()));
 				exportSolid.vertices.emplace_back(toExportVec(mv3.worldPosition()));
 			}
-			tyti::stl::write_binary(ofs, exportSolid);
-			ofs.close();
 		}
 	}
+	tyti::stl::write_binary(ofs, exportSolid);
+	ofs.close();
 	return;
 }
 
-void STLExport::exportSTLAscii(const std::unordered_set<const GLModel*>& childs, size_t idx)
+void STLExport::exportSTLAscii(const std::unordered_set<const SceneEntity*>& childs, size_t idx)
 {
 	auto path = _tmpPath;
 	path /= getNthModelName(idx);

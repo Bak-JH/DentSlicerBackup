@@ -261,6 +261,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="common\mathUtil.cpp" />
     <ClCompile Include="common\platform\Process.cpp" />
     <ClCompile Include="common\Semaphore.cpp" />
     <ClCompile Include="feature\cdt\HixCDT.cpp" />
@@ -886,6 +887,7 @@
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\magic_enum.hpp" />
+    <ClInclude Include="common\mathUtil.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\platform\Process.h" />

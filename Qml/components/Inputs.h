@@ -13,6 +13,7 @@ namespace Hix
 	{
 		namespace Controls
 		{
+			//warning! Now siginificant figure aware, will clean value if it can
 			class InputSpinBox : public QQuickItem, public InputControl
 			{
 				Q_OBJECT
@@ -28,6 +29,14 @@ namespace Hix
 				void setValue(double value);
 				void setRange(double min, double max);
 				void setIncrement(double inc);
+				//Q_INVOKABLE QVariantMap parseStringSigFig(QString str)const;
+				///// <summary>
+				///// Pretty damn accurate sig fig guessing from given double
+				///// </summary>
+				///// <param name="dbl"> "dirty" double number</param>
+				///// <returns>json equivalnet of value: doubleNumber, digits: validDec </returns>
+				//Q_INVOKABLE QVariantMap guessDoubleSigFig(QString str)const;
+
 
 			signals:
 				void valueChanged();

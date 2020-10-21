@@ -289,6 +289,9 @@
     <ClCompile Include="common\platform\Process.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="common\mathUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1157,6 +1160,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\platform\Process.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\mathUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
