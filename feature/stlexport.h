@@ -9,6 +9,10 @@
 #include <iostream>
 namespace Hix
 {
+	namespace Render
+	{
+		class SceneEntity;
+	}
 
 	namespace Features
 	{
@@ -28,8 +32,8 @@ namespace Hix
 			void run()override;
 		private:
 			void exportModels();
-			void exportSTLBin(const std::unordered_set<const GLModel*>& childs, size_t idx);
-			void exportSTLAscii(const std::unordered_set<const GLModel*>& childs, size_t idx);
+			void exportSTLBin(const std::unordered_set<const Hix::Render::SceneEntity*>& childs, size_t idx);
+			void exportSTLAscii(const std::unordered_set<const Hix::Render::SceneEntity*>& childs, size_t idx);
 			void writeFace(const Hix::Engine3D::Mesh* mesh, const Hix::Engine3D::FaceConstItr& mf, std::ostream& content);
 			void writeHeader(std::ostream& content);
 			void writeFooter(std::ostream& content);

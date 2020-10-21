@@ -19,5 +19,6 @@ void Hix::Settings::JSONWriteSetting::writeJSON()
 	std::ofstream of(jsonPath(), std::ios_base::trunc);
 	rapidjson::OStreamWrapper osw{ of };
 	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
+	writer.SetMaxDecimalPlaces(6);
 	document.Accept(writer);
 }
