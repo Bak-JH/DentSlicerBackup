@@ -31,7 +31,7 @@ namespace Hix
 		class SlicerGL
 		{
 		public:
-			SlicerGL(float delta, std::filesystem::path outPath, size_t sampleXY, size_t sampleZ, float minHeight);
+			SlicerGL(float delta, std::filesystem::path outPath, size_t sampleXY, size_t sampleZ);
 			~SlicerGL();
 			void addVtcs(const std::vector<float>& vtcs);
 			void setScreen(float pixelWidth, size_t imgX, size_t imgY);
@@ -54,7 +54,6 @@ namespace Hix
 			//size of sliced image in mm(or other units);
 			float _imgX;
 			float _imgY;
-			float _minHeight;
 			size_t _resX;
 			size_t _resY;
 			size_t _sampleXY = 1;

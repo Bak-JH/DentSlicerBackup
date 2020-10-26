@@ -13,14 +13,13 @@ namespace Hix
 		class InfoWriter
 		{
 		private:
-			//QString _outfoldername;
-			std::filesystem::path _outfoldername;
-			std::filesystem::path _infoJsonName;
+			QString _outfoldername;
+			QString _infoJsonName;
 			size_t _resX, _resY;
-			double _layerHeight;
+			float _layerHeight;
 
 		public:
-			InfoWriter(std::filesystem::path outFolder, size_t resX, size_t resY, double layerHeight);
+			InfoWriter(QString outFolder, size_t resX, size_t resY, float layerHeight);
 			void createInfoFile();
 			void writeVittroOptions(int max_slices, const Hix::Engine3D::Bounds3D& bound);
 			void writeBasicInfo(int sliceCnt, const std::optional<rapidjson::Value>& optionalVal);

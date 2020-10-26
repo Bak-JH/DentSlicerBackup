@@ -28,8 +28,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "include/stb_image_write.h"
 
-using GLlimit =  std::numeric_limits<GLfloat>;
 
+using GLlimit =  std::numeric_limits<GLfloat>;
 
 using namespace Hix::Slicer;
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -63,8 +63,7 @@ void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxB
         glm::vec3(0.0f, 1.0f, 0.0f)
     );
     glm::mat4 model = glm::mat4(1.0f);
-    auto transHeight = std::max(_minHeight, height);
-    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -transHeight));
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, std::min(0.0f, -height)));
     glm::mat4 mvp = proj * view * model; // Remember, matrix multiplication is the other way around
     shader.setMat4("mvp", mvp);
     shader.setFloat("maxBright", maxBright);
@@ -157,12 +156,11 @@ void Hix::Slicer::SlicerGL::glfwSlice(Shader& shader, float height, size_t index
 
 
 
-Hix::Slicer::SlicerGL::SlicerGL(float delta, std::filesystem::path outPath, size_t sampleXY, size_t sampleZ, float minHeight):
+Hix::Slicer::SlicerGL::SlicerGL(float delta, std::filesystem::path outPath, size_t sampleXY, size_t sampleZ):
     _concurrentWriteMax(std::thread::hardware_concurrency()),
     _fileWriteSem(_concurrentWriteMax),
     _outPath(outPath),
     _layer(delta),
-    _minHeight(minHeight),
     _sampleXY(sampleXY),
     _sampleZ(sampleZ)
 {
@@ -306,9 +304,7 @@ size_t Hix::Slicer::SlicerGL::run()
 
     prepareSlice();
     size_t i = 0;
-
-
-    GLfloat height = _minHeight; // slice height
+    GLfloat height = GLlimit::epsilon() * 5; // slice height
 
     while (height < _bounds.zMax() - GLlimit::epsilon())
     {
