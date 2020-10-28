@@ -1,9 +1,7 @@
 #include "ModalShell.h"
 
 #include "Buttons.h"
-#include <QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/private/qquicktext_p.h>
-#include "QtQml/private/qqmllistmodel_p.h"
+
 #include "../util/QMLUtil.h"
 #include "glmodel.h"
 

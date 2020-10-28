@@ -46,7 +46,7 @@ Hix.ToastShell {
 			font.pointSize: 10
 		}
 		/*
-		Hix.Button {
+		CtrButtonBase {
 			width: 16
 			height: 16
 			color: "transparent"

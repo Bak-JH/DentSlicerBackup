@@ -3,42 +3,53 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
+import "Controls"
 
 Item {
 	property var btnSize: 60
 	width: 180
 	height: btnSize
 
-	Hix.Button {
-		id: undo
-		color: "#ffffff"
-		width: btnSize
-		height: btnSize
-		radius: width / 2
-		anchors.left: parent.left
-		Image {
-			source: "qrc:/Resource/undo_arrow.png"
-			anchors.verticalCenter: parent.verticalCenter
-			anchors.horizontalCenter: parent.horizontalCenter
+	CtrButtonBase {
+		Rectangle
+		{
+			id: rectUndo
+			anchors.fill: parent
+			color: "#ffffff"
+			radius: width / 2
+			Image {
+				source: "qrc:/Resource/undo_arrow.png"
+				anchors.verticalCenter: parent.verticalCenter
+				anchors.horizontalCenter: parent.horizontalCenter
+			}
 		}
-		onEntered: { color = "#eeeeee" }
-		onExited: { color = "#ffffff" }
-	}
-	Hix.Button {
-		id: redo
-		color: "#ffffff"
+		id: undo
 		width: btnSize
 		height: btnSize
-		radius: width / 2
+		anchors.left: parent.left
+		onEntered: { rectUndo.color = "#eeeeee" }
+		onExited: { rectUndo.color = "#ffffff" }
+	}
+	CtrButtonBase {
+		Rectangle
+		{
+			id: rectRedo
+			anchors.fill: parent
+			color: "#ffffff"
+			radius: width / 2
+			Image {
+				source: "qrc:/Resource/redo_arrow.png"
+				anchors.verticalCenter: parent.verticalCenter
+				anchors.horizontalCenter: parent.horizontalCenter
+			}
+		}
+		id: redo
+		width: btnSize
+		height: btnSize
 		anchors.left: undo.right
 		anchors.leftMargin: parent.width - btnSize * 2
-		Image {
-			source: "qrc:/Resource/redo_arrow.png"
-			anchors.verticalCenter: parent.verticalCenter
-			anchors.horizontalCenter: parent.horizontalCenter
-		}
-		onEntered: { color = "#eeeeee" }
-		onExited: { color = "#ffffff" }
+		onEntered: { rectRedo.color = "#eeeeee" }
+		onExited: { rectRedo.color = "#ffffff" }
 	}
 	DropShadow {
 		anchors.fill: undo

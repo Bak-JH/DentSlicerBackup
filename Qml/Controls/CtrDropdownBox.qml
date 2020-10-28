@@ -8,7 +8,7 @@ import QtGraphicalEffects 1.12
 DropdownBox {
 	property alias label: label
 	property alias comboBox: control
-
+	
 	Text {
 		id: label
 		anchors.verticalCenter: parent.verticalCenter

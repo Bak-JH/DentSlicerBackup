@@ -15,7 +15,7 @@ Hix.PartListItem {
 
 	Column {
 		anchors.verticalCenter: parent.verticalCenter
-		Hix.Button{
+		CtrRectButton{
 			id: selectButton
 			width: 224
 			height: 28
@@ -91,7 +91,6 @@ Hix.PartListItem {
 		anchors.right: parent.right
 		anchors.rightMargin: 6
 		anchors.verticalCenter: parent.verticalCenter
-		color: "transparent"
 		Image {
 			id: showhideimg
 			source: "qrc:/Resource/part_show_1.png"

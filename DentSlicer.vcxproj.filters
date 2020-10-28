@@ -1556,6 +1556,8 @@
     <None Include="shaders\slice.vert" />
     <None Include="shaders\slice.frag" />
     <None Include="shaders\singleColorNoLight.frag" />
+    <None Include="Qml\Controls\CtrButtonBase.qml" />
+    <None Include="Qml\FeatureDivider.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

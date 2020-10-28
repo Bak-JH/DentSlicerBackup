@@ -1,9 +1,5 @@
 #pragma once
-#include <QtQuick/private/qquicktext_p.h>
-#include <QtQuick/private/qquickimage_p.h>
-#include <QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/private/qquickmousearea_p.h>
-#include <QtQuick/private/qquickevents_p_p.h>
+#include <QQuickItem>
 #include <qvariant.h>
 #include "InputControl.h"
 
@@ -14,7 +10,7 @@ namespace Hix
 		namespace Controls
 		{
 			/// Button base class ///
-			class Button : public QQuickRectangle, public InputControl
+			class Button : public QQuickItem, public InputControl
 			{
 				Q_OBJECT
 			public:
@@ -23,21 +19,20 @@ namespace Hix
 
 			signals:
 				void clicked();
-				void entered();
-				void exited();
-				void positionChanged(QQuickMouseEvent* mouse);
+				//void entered();
+				//void exited();
+				//void positionChanged(QQuickMouseEvent* mouse);
 
 			protected slots:
 				virtual void onClicked();
-				virtual void onEntered();
-				virtual void onExited();
-				virtual void onPositionChanged(QQuickMouseEvent* mouse);
+				//virtual void onEntered();
+				//virtual void onExited();
+				//virtual void onPositionChanged(QQuickMouseEvent* mouse);
 
 			protected:
-				QQuickMouseArea* _mouseArea;
 			};
 			/// Toggle Switch ///
-			class ToggleSwitch : public QQuickRectangle, public InputControl
+			class ToggleSwitch : public QQuickItem, public InputControl
 			{
 				Q_OBJECT
 				Q_PROPERTY(bool isChecked MEMBER _isChecked NOTIFY checkedChanged)

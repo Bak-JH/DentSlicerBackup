@@ -61,6 +61,8 @@ namespace Hix
 
 		private:
 			QQmlComponent _component;
+			QQmlComponent _dividerComp;
+
 			Hix::QML::FeatureMenu* _menu;
 		};
 	}

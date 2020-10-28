@@ -96,7 +96,6 @@ FeaturePopup {
 		}
 	}
 	CtrToggleButton {
-		color: "transparent"
 		width: 22
 		height: 128
 		id: lockAxis

@@ -1,6 +1,6 @@
 #include "RangeSliderMode.h"
 #include "../../application/ApplicationManager.h"
-
+#include <QQmlComponent>
 const QUrl RURL = QUrl("qrc:/Qml/RangedSlider.qml");
 
 Hix::Features::RangeSliderMode::RangeSliderMode(double min, double max)

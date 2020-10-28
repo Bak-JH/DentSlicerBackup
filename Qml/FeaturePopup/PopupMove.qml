@@ -44,7 +44,7 @@ FeaturePopup {
 		anchors.topMargin: 56
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		id: snapButton
 		width: 224
 		height: 32
