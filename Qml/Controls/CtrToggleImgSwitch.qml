@@ -43,7 +43,7 @@ Hix.ToggleSwitch {
 		}
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		id: leftBtn
 		width: 104
 		height: 96
@@ -78,7 +78,7 @@ Hix.ToggleSwitch {
 	}
 
 	//FreeCutButton {
-	Hix.Button {
+	CtrRectButton {
 		id: rightBtn
 		width: 104
 		height: 96

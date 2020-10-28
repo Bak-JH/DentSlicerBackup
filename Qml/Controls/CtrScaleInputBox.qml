@@ -61,7 +61,7 @@ Item {
 		anchors.topMargin: 56
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		color: "transparent"
 		width: 22
 		height: 128

@@ -86,7 +86,7 @@ Item {
 	// 	height: 88
 	// 	popupColor: "#FFFFFF"
 
-	// 	Hix.Button {
+	// 	CtrButtonBase {
 	// 		id: objectviewbutton
 	// 		width: 160
 	// 		height: 36
@@ -111,7 +111,7 @@ Item {
 	// 		}
 	// 	}
 
-	// 	Hix.Button {
+	// 	CtrButtonBase {
 	// 		id: layerviewbutton
 	// 		width: 160
 	// 		height: 36

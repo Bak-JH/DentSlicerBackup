@@ -30,7 +30,7 @@ Hix.ModalShell {
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.verticalCenter: parent.verticalCenter
 
-		Hix.Button {
+		CtrRectButton {
 			id: closeButton
 			width: 16
 			height: 16

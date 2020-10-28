@@ -88,5 +88,8 @@
         <file>shaders/slice.vert</file>
         <file>Qml/FeaturePopup/PopupPrinter.qml</file>
         <file>shaders/singleColorNoLight.frag</file>
+        <file>Qml/FeatureDivider.qml</file>
+        <file>Qml/Controls/CtrButtonBase.qml</file>
+        <file>Qml/Controls/CtrRectButton.qml</file>
     </qresource>
 </RCC>

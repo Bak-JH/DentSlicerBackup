@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 import QtQuick.Layouts 1.12
+import "Controls"
 
 Hix.PartList {
 	id: partList
@@ -54,7 +55,7 @@ Hix.PartList {
 			}
 		}
 
-		Hix.Button {
+		CtrButtonBase {
 			id: deleteButton
 			width: 14
 			height: width

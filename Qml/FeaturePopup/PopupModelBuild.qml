@@ -27,7 +27,7 @@ FeaturePopup {
 		anchors.leftMargin: 16
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		width: 30
 		height: width
 		radius: width / 2
