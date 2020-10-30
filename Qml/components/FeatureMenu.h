@@ -25,7 +25,6 @@ namespace Hix
 			
 
 		private:
-			std::optional<QQmlComponent> _component;
 			QQuickItem* _featureItems;
 		};
 	}

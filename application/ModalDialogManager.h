@@ -6,7 +6,7 @@
 #include "../Qml/components/ModalShell.h"
 
 class QQuickItem;
-
+class QQmlApplicationEngine;
 namespace Hix
 {
 	namespace QML
@@ -19,7 +19,7 @@ namespace Hix
 		class ModalDialogManager
 		{
 		public:
-			ModalDialogManager();
+			ModalDialogManager(QQmlApplicationEngine* engine);
 			ModalDialogManager(const ModalDialogManager& other) = delete;
 			ModalDialogManager(ModalDialogManager&& other) = delete;
 			ModalDialogManager& operator=(ModalDialogManager other) = delete;
@@ -40,6 +40,8 @@ namespace Hix
 		private:
 			std::unique_ptr<Hix::QML::ModalShell> _popup;
 			QQuickItem* _root;
+			QQmlComponent _component;
+
 			friend class ModalDialogManagerLoader;
 		};
 		class ModalDialogManagerLoader
