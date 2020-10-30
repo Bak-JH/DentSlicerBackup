@@ -18,9 +18,8 @@ Hix::ProgressManager::~ProgressManager()
 
 void Hix::ProgressManager::generatePopup()
 {
-	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_URL);
 	auto popupArea = Hix::Application::ApplicationManager::getInstance().modalDialogManager().popupArea();
-	auto qmlInstance = component->create(qmlContext(popupArea));
+	auto qmlInstance = _popupComp->create(qmlContext(popupArea));
 	auto popupShell = dynamic_cast<Hix::QML::ProgressPopupShell*>(qmlInstance);
 	_popup.reset(popupShell);
 	_popup->setParentItem(popupArea);
@@ -29,9 +28,8 @@ void Hix::ProgressManager::generatePopup()
 
 void Hix::ProgressManager::generateErrorPopup(const char* message)
 {
-	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), ERROR_POPUP_URL);
 	auto popupArea = Hix::Application::ApplicationManager::getInstance().modalDialogManager().popupArea();
-	auto qmlInstance = component->create(qmlContext(popupArea));
+	auto qmlInstance = _errorComp->create(qmlContext(popupArea));
 	auto popupShell = dynamic_cast<Hix::QML::ProgressPopupShell*>(qmlInstance);
 
 	_popup.reset(popupShell);
@@ -42,8 +40,7 @@ void Hix::ProgressManager::generateErrorPopup(const char* message)
 void Hix::ProgressManager::addProgress(Hix::Progress* progress)
 {
 	qDebug() << progress->getDisplayText();
-	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_ITEM_URL);
-	auto item = dynamic_cast<QQuickItem*>(component->create(qmlContext(_popup->featureLayout())));
+	auto item = dynamic_cast<QQuickItem*>(_progressComp->create(qmlContext(_popup->featureLayout())));
 	item->setProperty("featureName", progress->getDisplayText());
 	item->setParentItem(_popup->featureLayout());
 
@@ -52,6 +49,29 @@ void Hix::ProgressManager::addProgress(Hix::Progress* progress)
 void Hix::ProgressManager::deletePopup()
 {
 	_popup.reset();
+}
+
+void Hix::ProgressManager::init(QQmlApplicationEngine* engine)
+{
+	_popupComp.emplace(engine, POPUP_URL);
+	_errorComp.emplace(engine, ERROR_POPUP_URL);
+	_progressComp.emplace(engine, POPUP_ITEM_URL);
+
+#ifdef _DEBUG
+	if (!_popupComp->isReady())
+	{
+		qDebug() << "_popupComp error: " << _popupComp->errors();
+	}
+	if (!_errorComp->isReady())
+	{
+		qDebug() << "_errorComp error: " << _errorComp->errors();
+	}	
+	if (!_progressComp->isReady())
+	{
+		qDebug() << "_progressComp error: " << _progressComp->errors();
+	}
+#endif
+
 }
 
 void Hix::ProgressManager::draw()

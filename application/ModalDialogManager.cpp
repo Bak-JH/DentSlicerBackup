@@ -6,8 +6,14 @@ using namespace Hix::QML;
 using namespace Hix::Application;
 const QUrl POPUP_URL = QUrl("qrc:/Qml/ModalWindow.qml");
 
-Hix::Application::ModalDialogManager::ModalDialogManager()
+Hix::Application::ModalDialogManager::ModalDialogManager(QQmlApplicationEngine * engine):_component(engine, POPUP_URL)
 {
+#ifdef _DEBUG
+	if (!_component.isReady())
+	{
+		qDebug() << "_component error: " << _component.errors();
+	}
+#endif
 }
 
 void Hix::Application::ModalDialogManager::openOkCancelDialog(const std::string& msg, const std::string& okButtonStr, const std::string& cancelButtonStr, 
@@ -39,8 +45,7 @@ void Hix::Application::ModalDialogManager::openCancelDialog(const std::string& m
 
 void Hix::Application::ModalDialogManager::openDialog(const std::string& msg, std::deque<ModalShellButtonArg>&& args, std::function<void()>&& cancelFunctor)
 {
-	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_URL);
-	auto qmlInstance = component->create(qmlContext(_root));
+	auto qmlInstance = _component.create(qmlContext(_root));
 	auto popupShell = dynamic_cast<Hix::QML::ModalShell*>(qmlInstance);
 	_popup.reset(popupShell);
 	_popup->setMessage(msg);

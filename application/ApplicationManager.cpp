@@ -19,8 +19,9 @@
 using namespace Hix::Application;
 using namespace Hix::QML;
 using namespace Hix::Input;
+using namespace Hix::Tasking;
 
-Hix::Application::ApplicationManager::ApplicationManager(): _engine(new QQmlApplicationEngine())
+Hix::Application::ApplicationManager::ApplicationManager(): _engine(new QQmlApplicationEngine()), _modalManager(_engine)
 {
 }
 
@@ -43,6 +44,7 @@ void Hix::Application::ApplicationManager::init()
 	PartManagerLoader::init(_partManager, uiRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
+	TaskManagerLoader::init(_taskManager, _engine);
 	_supportRaftManager.initialize(_partManager.modelRoot());
 	//settings
 	_setting.parseJSON();

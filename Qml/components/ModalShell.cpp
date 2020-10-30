@@ -10,8 +10,14 @@
 using namespace  Hix::QML;
 const QUrl ITEM_URL = QUrl("qrc:/Qml/ModalWindowButton.qml");
 
-Hix::QML::ModalShell::ModalShell(QQuickItem* parent) : QQuickItem(parent)
+Hix::QML::ModalShell::ModalShell(QQuickItem* parent) : QQuickItem(parent), _component(&Hix::Application::ApplicationManager::getInstance().engine(), ITEM_URL)
 {
+#ifdef _DEBUG
+	if (!_component.isReady())
+	{
+		qDebug() << "_component error: " << _component.errors();
+	}
+#endif
 }
 
 Hix::QML::ModalShell::~ModalShell()
@@ -33,8 +39,7 @@ void Hix::QML::ModalShell::addButton(std::deque<ModalShellButtonArg>&& args)
 
 	for (auto& arg : args)
 	{
-		QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), ITEM_URL);
-		auto button = dynamic_cast<Hix::QML::Controls::Button*>(component->create(qmlContext(_buttonArea)));
+		auto button = dynamic_cast<Hix::QML::Controls::Button*>(_component.create(qmlContext(_buttonArea)));
 		button->setProperty("btnText", QString::fromStdString(arg.buttonName));
 		button->setProperty("defaultColor", arg.defaultColor);
 		button->setProperty("hoverColor", arg.hoverColor);
