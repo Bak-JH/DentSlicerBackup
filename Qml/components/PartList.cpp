@@ -1,11 +1,9 @@
 #include "PartList.h"
 #include "Buttons.h"
-#include <QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/private/qquicktext_p.h>
-#include "QtQml/private/qqmllistmodel_p.h"
 #include "../util/QMLUtil.h"
 #include "glmodel.h"
 #include "Buttons.h"
+#include <QMetaObject>
 
 #include "../../feature/deleteModel.h"
 
@@ -18,6 +16,12 @@ const QUrl ITEM_URL = QUrl("qrc:/Qml/PartListItem.qml");
 
 Hix::QML::PartList::PartList(QQuickItem* parent) : QQuickItem(parent), _component(&Hix::Application::ApplicationManager::getInstance().getInstance().engine(), ITEM_URL)
 {
+#ifdef _DEBUG
+	if (!_component.isReady())
+	{
+		qDebug() << "_component error: " << _component.errors();
+	}
+#endif
 }
 
 Hix::QML::PartList::~PartList()

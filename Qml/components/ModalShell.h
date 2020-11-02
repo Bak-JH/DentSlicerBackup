@@ -5,6 +5,7 @@
 #include <qcolor.h>
 #include <functional>
 #include <deque>
+
 namespace Hix
 {
 	namespace QML
@@ -37,6 +38,7 @@ namespace Hix
 			QQuickItem* _buttonArea;
 			Controls::Button* _closeButton = nullptr;
 			std::deque<ModalShellButtonArg> _buttonArgs;
+			QQmlComponent _component;
 
 		};
 

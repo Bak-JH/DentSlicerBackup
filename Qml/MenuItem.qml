@@ -16,8 +16,12 @@ CtrToggleButton {
 
 	width: 80
 	height: 90
-	color: "#FFFFFF"
-	
+	Rectangle
+	{
+		anchors.fill: parent
+		id: rect
+		color: defaultColor
+	}
 	Image {
 		id: iconImg
 		sourceSize.width: width
@@ -50,11 +54,11 @@ CtrToggleButton {
 	mouseArea {
 		onEntered: {
 			if (nameColor == activeNameColor) {}	// hover on already selected button
-			else color = hoverColor	// hover on unselected button
+			else rect.color = hoverColor	// hover on unselected button
 		}
 		onExited: {
 			if (nameColor == activeNameColor) {}	// exit from already selected button
-			else color = defaultColor	// exit from unselected button
+			else rect.color = defaultColor	// exit from unselected button
 		}
 	}
 

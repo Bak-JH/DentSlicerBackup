@@ -17,7 +17,7 @@ FeaturePopup {
 		anchors.top: parent.top
 		anchors.topMargin: 55
 	}
-	Hix.Button {
+	CtrRectButton {
 		id: logoutButton
 		width: 224
 		height: 32
@@ -45,7 +45,7 @@ FeaturePopup {
 	}
 
 
-	// Hix.Button {
+	// CtrButtonBase {
 	// 	id: refreshButton
 	// 	width: 26
 	// 	height: width

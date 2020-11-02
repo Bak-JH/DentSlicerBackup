@@ -3,7 +3,7 @@ import hix.qml 1.0 as Hix
 
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
-
+import "../Controls"
 
 Hix.FeaturePopupShell 
 {
@@ -38,7 +38,7 @@ Hix.FeaturePopupShell
 			anchors.leftMargin: myPadding
 		}
 
-		Hix.Button 
+		CtrRectButton 
 		{
 			id: closeButton
 			width: 16
@@ -58,7 +58,7 @@ Hix.FeaturePopupShell
 			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 
-		Hix.Button
+		CtrRectButton
 		{
 			id: applyButton
 			width: 224

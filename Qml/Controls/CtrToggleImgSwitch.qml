@@ -3,7 +3,7 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
-
+import "../Controls"
 Hix.ToggleSwitch {
 	id: root
 	property string leftBtnImgSource
@@ -43,7 +43,7 @@ Hix.ToggleSwitch {
 		}
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		id: leftBtn
 		width: 104
 		height: 96
@@ -78,7 +78,7 @@ Hix.ToggleSwitch {
 	}
 
 	//FreeCutButton {
-	Hix.Button {
+	CtrRectButton {
 		id: rightBtn
 		width: 104
 		height: 96

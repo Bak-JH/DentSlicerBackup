@@ -4,7 +4,6 @@ import hix.qml 1.0 as Hix
 
 Hix.ToggleSwitch {
 	property var sizeMult: 1.0
-	color: "transparent"
 	height: 16 * sizeMult
 	id: root
 	property alias leftText: leftText

@@ -3,7 +3,7 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
-
+import "../Controls"
 Item {
 	width: 256
 	height: 180
@@ -61,7 +61,7 @@ Item {
 		anchors.topMargin: 56
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		color: "transparent"
 		width: 22
 		height: 128

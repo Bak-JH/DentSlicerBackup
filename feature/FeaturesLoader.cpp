@@ -24,18 +24,35 @@
 
 #include "Qml/components/Buttons.h"
 #include "Qml/util/QMLUtil.h"
+#include <qquickitem.h>
+#include <qqmlcomponent.h>
+
+
 
 const std::string ICO_PRE("qrc:/Resource/menu_");
 const std::string ICO_BASIC_SUF(".png");
 const std::string ICO_SELECTED_SUF("_select_1.png");
 const QUrl MENU_ITEM_URL = QUrl("qrc:/Qml/MenuItem.qml");
+const QUrl DIV_URL = QUrl("qrc:/Qml/FeatureDivider.qml");
 
 using namespace Hix::QML;
 using namespace Hix::Features;
 
 
-Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMenu* menu) : _component(e, MENU_ITEM_URL), _menu(menu)
+Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMenu* menu) : _component(e, MENU_ITEM_URL),_dividerComp(e, DIV_URL), _menu(menu)
 {
+
+#ifdef _DEBUG
+	if (!_component.isReady())
+	{
+		qDebug() <<"_component error: " << _component.errors();
+	}
+
+	if (!_dividerComp.isReady())
+	{
+		qDebug() << "_dividerComp error: " << _dividerComp.errors();
+	}
+#endif
 }
 
 
@@ -73,11 +90,8 @@ void addButton(const std::string& name, FeaturesLoader* loader)
 
 void Hix::Features::FeaturesLoader::addDivider()
 {
-	auto rect = new QQuickRectangle();
-	rect->setProperty("width", 1);
-	rect->setProperty("height", 80);
-	rect->setProperty("color", "#dddddd");
-	rect->setParentItem(_menu->featureItems());
+	auto divider = _dividerComp.create(qmlContext(&menu()));
+	dynamic_cast<QQuickItem*>(divider)->setParentItem(_menu->featureItems());
 }
 
 QQmlComponent& Hix::Features::FeaturesLoader::parsedComp()

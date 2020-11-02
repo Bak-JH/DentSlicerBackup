@@ -13,7 +13,6 @@ FeaturePopup {
 		label.text: "Slicing Mode"
 		width: parent.width - 16 * 2 - 16	// 16 = triangle height
 		height: 26
-		color: "transparent"
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.topMargin: 44
