@@ -2,7 +2,7 @@ import QtQuick 2.6
 import hix.qml 1.0 as Hix
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
-
+import "../Controls"
 FeaturePopup {
 	id: leftpopupshell
 	title: qsTr("Model Build")
@@ -27,7 +27,7 @@ FeaturePopup {
 		anchors.leftMargin: 16
 	}
 
-	Hix.Button {
+	CtrRectButton {
 		width: 30
 		height: width
 		radius: width / 2

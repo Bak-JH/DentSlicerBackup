@@ -5,7 +5,7 @@ import QtQuick.Controls 2.1
 import "../Controls" 
 
 
-Hix.Button {
+CtrRectButton {
 	property var buttonText
 	property var fontPoint: 10
 	property var textColor: "#FFFFFF"

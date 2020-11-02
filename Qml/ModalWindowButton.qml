@@ -1,6 +1,7 @@
 import QtQuick 2.6
 import hix.qml 1.0 as Hix 
-Hix.Button
+import "Controls"
+CtrRectButton
 {
 	property string btnText;
 	property string hoverColor;

@@ -4,7 +4,7 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 import QtQuick.Layouts 1.12
-
+import "Controls"
 Hix.ModalShell {
 	id: root
 	width: window.width
@@ -30,7 +30,7 @@ Hix.ModalShell {
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.verticalCenter: parent.verticalCenter
 
-		Hix.Button {
+		CtrRectButton {
 			id: closeButton
 			width: 16
 			height: 16

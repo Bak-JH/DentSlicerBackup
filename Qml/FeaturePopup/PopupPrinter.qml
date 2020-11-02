@@ -14,14 +14,13 @@ FeaturePopup {
 		width: parent.width - 10	// 16 = triangle height
 		comboBox.width: parent.width - label.width - 14
 		height: 26
-		color: "transparent"
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.topMargin: 44
 		anchors.leftMargin: 4
 	}
 
-		Hix.Button {
+		CtrRectButton {
 		id: refreshButton
 		width: 224
 		height: 32

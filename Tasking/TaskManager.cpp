@@ -126,3 +126,7 @@ TaskManager::~TaskManager()
 	_taskThread.join();
 }
 
+void Hix::Tasking::TaskManagerLoader::init(TaskManager& manager, QQmlApplicationEngine* engine)
+{
+	manager.progressManager().init(engine);
+}

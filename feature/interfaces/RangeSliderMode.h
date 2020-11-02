@@ -1,5 +1,6 @@
 #pragma once
 #include "Mode.h"
+#include <memory>
 #include "Qml/components/SlideBar.h"
 
 namespace Hix

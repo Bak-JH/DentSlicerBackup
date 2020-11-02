@@ -11,6 +11,11 @@
 
 namespace Hix
 {
+	namespace Application
+	{
+		class ApplicationManager;
+	}
+
 	namespace Tasking
 	{
 		class TaskManager
@@ -29,6 +34,13 @@ namespace Hix
 			bool _end = false;
 			std::thread _taskThread;
 			Hix::ProgressManager _progressManager;
+		};
+
+		class TaskManagerLoader
+		{
+		private:
+			static void init(TaskManager& manager, QQmlApplicationEngine* entity);
+			friend class Hix::Application::ApplicationManager;
 		};
 	}
 }
