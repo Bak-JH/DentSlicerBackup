@@ -7,7 +7,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Settings")
-	height: 180
+	height: 220
 	CtrDropdownBox {
 		id: printerPreset
 		label.text: "Printer Preset"
@@ -28,7 +28,6 @@ FeaturePopup {
 		anchors.top: printerPreset.bottom
 		anchors.topMargin: 30
 		anchors.horizontalCenter: parent.horizontalCenter
-
 		Text 
 		{
 			color: "#859597"
@@ -39,7 +38,31 @@ FeaturePopup {
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
 		}
+		onEntered: { color = "#dde5e6" }
+		onExited: { color = "transparent" }
+	}
 
+		CtrRectButton {
+		id: updateButton
+		width: 224
+		height: 32
+		radius: 16
+		color: "transparent"
+		border.color: "#b2c4c6"
+		anchors.top: logoutButton.bottom
+		anchors.topMargin: 10
+		anchors.horizontalCenter: parent.horizontalCenter
+
+		Text 
+		{
+			color: "#859597"
+			font.pointSize: 10
+			text: "Check for update"
+			font.family: openSemiBold.name
+				
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: parent.verticalCenter
+		}
 		onEntered: { color = "#dde5e6" }
 		onExited: { color = "transparent" }
 	}

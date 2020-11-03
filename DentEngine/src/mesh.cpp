@@ -12,7 +12,7 @@
 #define _STRICT_MESH
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
 #endif
-using namespace Utils::Math;
+using namespace Hix::Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Render;
