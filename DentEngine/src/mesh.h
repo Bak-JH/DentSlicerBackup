@@ -170,8 +170,6 @@ namespace Hix
 			const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces()const;
 			const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges()const;
 
-			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal,FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000)const;
-			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D pt, QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000, float radius = 5.0f)const;
 
 			void setSceneEntity(const Render::SceneEntity* entity);
 			const Render::SceneEntity* entity()const;
@@ -186,6 +184,59 @@ namespace Hix
 			std::unordered_map<FaceConstItr, QVector3D> cacheWorldFN()const;
 			std::unordered_map<VertexConstItr, QVector3D> cacheWorldPos()const;
 			std::unordered_map<VertexConstItr, QVector3D> cacheWorldVN()const;
+
+			
+
+
+			//templates
+
+			template <typename FaceCond>
+			std::unordered_set<FaceConstItr> findNearFaces(FaceConstItr startFace, FaceCond cond, size_t maxCount) const
+			{
+				auto radSquared = radius * radius;
+				std::unordered_set<FaceConstItr> result;
+				std::unordered_set<FaceConstItr> explored;
+				std::deque<FaceConstItr>q;
+				result.reserve(maxCount);
+				explored.reserve(maxCount);
+				q.emplace_back(mf);
+				result.emplace(mf);
+				explored.emplace(mf);
+				while (!q.empty())
+				{
+					auto curr = q.front();
+					q.pop_front();
+					if (explored.size() == maxCount)
+						break;
+					auto edge = curr.edge();
+					for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
+						auto nFaces = edge.twinFaces();
+						for (auto nFace : nFaces)
+						{
+							if (explored.find(nFace) == explored.end())
+							{
+								explored.emplace(nFace);
+								if (cond(nFace))
+								{
+									q.emplace_back(nFace);
+									result.emplace(nFace);
+								}
+							}
+							else
+							{
+								if (result.find(nFace) == result.end())
+								{
+									qDebug() << "overtaken face?";
+								}
+							}
+						}
+					}
+				}
+				return result;
+			}
+			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000)const;
+			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D pt, QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000, float radius = 5.0f)const;
+
 
 
 		private:
