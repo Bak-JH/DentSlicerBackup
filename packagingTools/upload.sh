@@ -42,3 +42,10 @@ scp -i ${pem_path} \
 scp -i ${pem_path} \
     -r $4 \
     ubuntu@ec2-52-79-239-4.ap-northeast-2.compute.amazonaws.com:~/HixProductServer/SetupFiles/$2/patch_$3.html
+
+# this part for local test #
+
+# mkdir -p ./$2
+# scp -r $1 ./$2
+# scp -r appcast.xml ./$2
+# scp -r $4 ./$2/patch_$3.html
