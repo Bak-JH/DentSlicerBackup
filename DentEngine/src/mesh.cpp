@@ -678,47 +678,15 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 
 
+
+
+
 std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf, float maxNormalDiff, size_t maxCount)const
 {
-	std::unordered_set<FaceConstItr> result;
-	std::unordered_set<FaceConstItr> explored;
-	std::deque<FaceConstItr>q;
-	result.reserve(maxCount);
-	explored.reserve(maxCount);
-	q.emplace_back(mf);
-	result.emplace(mf);
-	explored.emplace(mf);
-	while (!q.empty())
-	{
-		auto curr = q.front();
-		q.pop_front();
-		if (explored.size() == maxCount)
-			break;
-		auto edge = curr.edge();
-		for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
-			auto nFaces = edge.twinFaces();
-			for (auto nFace : nFaces)
-			{
-				if (explored.find(nFace) == explored.end())
-				{
-					explored.emplace(nFace);
-					if ((nFace.localFn() - normal).lengthSquared() < maxNormalDiff)
-					{
-						q.emplace_back(nFace);
-						result.emplace(nFace);
-					}
-				}
-				else
-				{
-					if (result.find(nFace) == result.end())
-					{
-						qDebug() << "overtaken face?";
-					}
-				}
-			}
-		}
-	}
-	return result;
+	auto faceCond = [normal, maxNormalDiff, maxCount](const FaceConstItr& nf)->bool {
+		return (nf.localFn() - normal).lengthSquared() < maxNormalDiff;
+	};
+	return findNearFaces(mf, faceCond, maxCount);
 }
 
 std::unordered_set<FaceConstItr> Hix::Engine3D::Mesh::findNearSimilarFaces(QVector3D pt, QVector3D normal, FaceConstItr mf, float maxNormalDiff, size_t maxCount, float radius) const
