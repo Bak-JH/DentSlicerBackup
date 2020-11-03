@@ -20,7 +20,6 @@
 #include "QtConcurrent/QtConcurrent"
 #include "QFuture"
 #include <QSplashScreen>
-#include "utils/updatechecker.h"
 #include "utils/gridmesh.h"
 #include "qml/components/HixQML.h"
 #include "qml/util/QMLUtil.h"
@@ -108,17 +107,6 @@ int main(int argc, char** argv)
 	auth.login();
 
 
-
-
-#if  defined(QT_DEBUG) || defined(_DEBUG)
-
-#else
-	UpdateChecker* up = new UpdateChecker();
-	up->checkForUpdates();
-
-
-
-#endif
 	splash->close();
 	return app.exec();
 #endif
