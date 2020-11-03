@@ -1,6 +1,6 @@
 if [ "$#" -ne 4 ]
 then
-echo "usage: upload.sh [product_path] [product_name] [product_version] [patch_note_path]"
+echo "usage: upload.sh [setup_file_path] [product_name] [product_version] [patch_note_path]"
 exit 1
 fi
 #need to edit pem path
