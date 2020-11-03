@@ -5,8 +5,8 @@ exit 1
 fi
 
 #need to edit pem path
-pem_path="/mnt/c/Users/bakjh/Downloads/hixbananatest.pem"
-
+pem_path=%HIXHOME_PEM%
+echo pem_path
 ssh -i ${pem_path} \
     ubuntu@ec2-52-79-239-4.ap-northeast-2.compute.amazonaws.com \
     "mkdir -p ~/HixProductServer/SetupFiles/$2" \
