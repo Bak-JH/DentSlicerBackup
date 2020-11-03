@@ -11,6 +11,7 @@ using namespace Hix::Debug;
 using namespace Hix::Settings;
 namespace fs = std::filesystem;
 
+
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PrintSettingPopup.qml");
 
 Hix::Features::SettingMode::SettingMode() 
@@ -19,6 +20,7 @@ Hix::Features::SettingMode::SettingMode()
 	auto& co = controlOwner();
 	co.getControl(_printerPresets, "printerPreset");
 	co.getControl(_logoutBttn, "logoutButton");
+	co.getControl(_updateBttn, "updateButton");
 
 	//get settings dir
 	auto printerPresetsDir = Hix::Application::ApplicationManager::getInstance().settings().deployInfo.printerPresetsDir();
@@ -42,6 +44,9 @@ Hix::Features::SettingMode::SettingMode()
 		auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
 		auth.logout();
 		auth.login();
+		});
+	QObject::connect(_updateBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		Hix::Application::ApplicationManager::getInstance().updater().forceCheckForUpdates();
 		});
 
 }
