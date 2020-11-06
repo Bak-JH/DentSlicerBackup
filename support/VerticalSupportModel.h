@@ -31,10 +31,17 @@ namespace Hix
 			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 		private:
 			QVector3D _basePt;
+			QVector3D _attachmentStartPt;
+			QVector3D _farthestOverhang;
+			std::unordered_set<FaceConstItr> _attachmentTris;
 			Overhang _overhang;
 			bool _hasBasePt = false;
+			void calculateAttachmentInfo(const QVector3D& supportNormal);
+
 			void generateMesh();
 			void generateSupportPath(float bottom, std::vector<float>& scales);
+			void generateModelAttachment(QVector3D supportEndPt, Hix::Engine3D::Mesh& mesh);
+
 			std::optional <std::array<QVector3D, 2>> _vertSeg;
 		};
 	}

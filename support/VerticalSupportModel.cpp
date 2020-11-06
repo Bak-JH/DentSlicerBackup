@@ -5,6 +5,9 @@
 #include "../glmodel.h"
 #include "../feature/Shapes2D.h"
 #include "../application/ApplicationManager.h"
+#include <unordered_map>
+#include "../DentEngine/src/mesh.h"
+#include "../Mesh/FaceSelectionUtils.h"
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
 constexpr  float SUPPORT_BOTTOM_MAX_MULT = 2.0f;
 constexpr  float SUPPORT_BOTTOM_MAX_LENGTH = 1.0f;
@@ -122,47 +125,124 @@ float getRadius(const QVector3D& origin, float bottomZ)
 }
 
 
-void getProjectedTris
 
 
 
+//Get set of triangles that projected circle, radius is minSupportRadius
+std::unordered_set<FaceConstItr> circleProjectedTris(const Mesh& mesh, const FaceConstItr& targetFace,
+	const QVector3D& circleNormal, const QVector3D& circleCenter, float radius)
+{
+	//cache for faster calc
+	std::unordered_map<Hix::Engine3D::VertexConstItr, float> vtxPrjDst;
+	constexpr auto MAXFIND = 15000;
+	auto insideProj = [&vtxPrjDst, circleCenter, circleNormal, radius](const FaceConstItr& nf)->bool {
+
+		if ((nf.worldFn() - circleNormal).lengthSquared() < 2.0)
+		{
+			auto vtcs = nf.meshVertices();
+			for (auto& v : vtcs)
+			{
+				//for optimized non-squarerooted distance, we subtract and find length
+				auto cached = vtxPrjDst.find(v);
+				float distance;
+				if (cached == vtxPrjDst.end())
+				{
+					distance = v.worldPosition().distanceToLine(circleCenter, circleNormal);
+					vtxPrjDst[v] = distance;
+				}
+				else
+				{
+					distance = cached->second;
+				}
+				if (distance > radius)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
+
+	};
+	return mesh.findNearFaces(targetFace, insideProj, MAXFIND);
+}
+
+
+std::vector<QVector3D>  projectToPlane(QVector3D normal, QVector3D plane, const std::deque<HalfEdgeConstItr>& path)
+{
+	std::vector<QVector3D> vec;
+	vec.reserve(path.size() * 2);
+	for (auto& e : path)
+	{
+		auto v0 = e.from().worldPosition();
+		auto v1 = e.to().worldPosition();
+		auto projDistv0 = v0.distanceToPlane(plane, normal);
+		auto projDistv1 = v1.distanceToPlane(plane, normal);
+		auto e0 = v0 - (projDistv0 * normal);
+		auto e1 = v1 - (projDistv1 * normal);
+		vec.emplace_back(e1);
+		vec.emplace_back(v0);
+		vec.emplace_back(v1);
+
+		vec.emplace_back(e1);
+		vec.emplace_back(e0);
+		vec.emplace_back(v0);
+		//mesh.addFace(e1, v0, v1);
+		//mesh.addFace(e1, e0, v0);
+	}
+	return vec;
+}
+
+
+void Hix::Support::VerticalSupportModel::generateModelAttachment(QVector3D supportEndPt, Hix::Engine3D::Mesh& mesh)
+{
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+	auto entity = _overhang.owner()->entity();
+	//auto attachmentLength = supportEndPt.distanceToPoint(_overhang.coord());
+	auto startingFace = _overhang.nearestFace();
+
+	auto validTris = circleProjectedTris(*_overhang.owner(), startingFace,
+		_overhang.normal(), _overhang.coord(), setting.supportRadiusMin);
+	//convert projected dist to 
+
+	//cylinder wall triangulation
+	auto paths = Hix::Engine3D::boundaryPath(validTris);
+	for (auto& path : paths)
+	{
+		//vtcs in model coord, extrude along attachment path
+		auto vtcs = projectToPlane(_overhang.normal(), supportEndPt, path);
+		mesh.addFaces(vtcs);
+	}
+	//cylinder endcap(only one side
+	for (auto& f : validTris)
+	{
+		auto mvs = f.meshVertices();
+		//mesh.addFace(mvs[0].worldPosition(), mvs[1].worldPosition(), mvs[2].worldPosition());
+		mesh.addFace(mvs[2].worldPosition(), mvs[1].worldPosition(), mvs[0].worldPosition());
+	}
+}
+
+
+QVector3D calcTipNormal(const QVector3D& overhangNormal)
+{
+	QVector3D tipNormal(overhangNormal);
+	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
+	constexpr float normalizedVectorZMax = -1.0f; //tan 45
+	QVector2D xy(tipNormal.x(), tipNormal.y());
+	auto zMax = normalizedVectorZMax * xy.length();
+	tipNormal.setZ(std::min(zMax, tipNormal.z()));
+	tipNormal.normalize();
+	return tipNormal;
+
+}
 
 
 void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::vector<float>& scales)
 {	 
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
 	float minSupportScale = setting.supportRadiusMin / setting.supportRadiusMax;
-
-	//calculate overlap distance
-	//float intoMeshLength = 0.0f; //120 micron
-
-	auto overhangModelCoordinates = _overhang.owner()->ptToLocal(_overhang.coord());
-	auto overhangModelNormal = _overhang.owner()->ptToLocal(_overhang.normal()).normalized();
-	auto overhangIntoModelNormal = -overhangModelNormal;
-	auto startingFace = _overhang.nearestFace();
-	//less than 90 degrees, so 2
-	//float maxNormSquaredDiff = 2.0f;
-	//auto overlapFaces = _overhang.owner()->findNearSimilarFaces(overhangModelCoordinates, overhangModelNormal, startingFace, maxNormSquaredDiff, 100, setting.supportRadiusMin);
-	//std::unordered_set<VertexConstItr> attachmentPts;
-	//for (auto& f : overlapFaces)
-	//{
-	//	auto vtcs = f.meshVertices();
-	//	for (auto& e : vtcs)
-	//	{
-	//		attachmentPts.insert(e);
-	//	}
-	//}
-	//for (auto& v : attachmentPts)
-	//{
-	//	auto local = v.localPosition();
-	//	auto dist = v.localPosition().distanceToPlane(overhangModelCoordinates, overhangIntoModelNormal);
-	//	if (dist > 0.0f)
-	//	{
-	//		intoMeshLength = std::max(intoMeshLength, dist);
-	//	}
-	//}
-	//constexpr float intoMeshLength = 0.120f; //120 micron
 	constexpr float coneLength = SUPPORT_CONE_LENGTH;
+	constexpr float doConeLength = coneLength * 2.0f;
 
 	float botNormalLength = 0.100f;
 	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
@@ -193,30 +273,28 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 		if (topMost.type == HitType::BackSide)
 			return;
 		auto gapLength = _overhang.coord().z() -  topMost.intersection.z();
-		auto doConeLength = coneLength * 2;
 		if (gapLength < doConeLength)
 		{
 			//just do normal cylinder between the areas
-			QVector3D extendedTip = _overhang.coord();
-			extendedTip[2] += intoMeshLength;
-			_contour.emplace_back(extendedTip);
-			_contour.emplace_back(topMost.intersection);
-			scales = { minSupportScale, minSupportScale};
+			//QVector3D extendedTip = _overhang.coord();
+			//extendedTip[2] += intoMeshLength;
+			//_contour.emplace_back(extendedTip);
+			//_contour.emplace_back(topMost.intersection);
+			//scales = { minSupportScale, minSupportScale};
+			QVector3D tipNormal = topMost.intersection - _overhang.coord();
+			tipNormal.normalize();
+			calculateAttachmentInfo(tipNormal);
+			_attachmentStartPt = topMost.intersection;
 			return;
 		}
 		else
 		{
-			QVector3D coneNarrow(_overhang.coord());
-			QVector3D tipNormal(_overhang.normal());
-			//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
-			constexpr float normalizedVectorZMax = -1.0f; //tan 45
-			QVector2D xy(tipNormal.x(), tipNormal.y());
-			auto zMax = normalizedVectorZMax * xy.length();
-			tipNormal.setZ(std::min(zMax, tipNormal.z()));
-			tipNormal.normalize();
+			QVector3D tipNormal = calcTipNormal(_overhang.normal());
+			calculateAttachmentInfo(tipNormal);
+			QVector3D coneNarrow(_farthestOverhang);
+			_attachmentStartPt = coneNarrow;
 
 			//because of float error, it's safer to overlap support and mesh a little bit, so extend endtip into mesh a bit
-			QVector3D extendedTip = coneNarrow - (intoMeshLength* tipNormal);
 			QVector3D upperZPath = coneNarrow + tipNormal * coneLength;
 
 			constexpr float cos30 = 0.86602540378;
@@ -226,14 +304,15 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 			std::vector<QVector3D> misses;
 			auto radiusMax = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax;
 			auto suppCSec = Hix::Shapes2D::generateCircle(radiusMax, 4);
-			auto pyramidRayCasts = rayCastBottomPyramid(_manager->supportRaycaster(), upperZPath, 0, getRadius(upperZPath, 0), suppCSec, misses);
+			auto pyramidRayCasts = rayCastBottomPyramid(_manager->supportRaycaster(), 
+				upperZPath, 0, getRadius(upperZPath, 0), suppCSec, misses);
 			if (!misses.empty())
 			{
 				_contour.emplace_back(misses.front());
 				_contour.emplace_back(upperZPath);
 				_contour.emplace_back(coneNarrow); //min
 				_contour.emplace_back(extendedTip);
-				scales = { 1.0f,1.0f, minSupportScale, minSupportScale};
+				scales = { 1.0f,1.0f, minSupportScale};
 				_hasBasePt = true;
 				_basePt = misses.front();
 				return;
@@ -284,8 +363,7 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 				_contour.emplace_back(bottomZPath); //max
 				_contour.emplace_back(upperZPath); //max
 				_contour.emplace_back(coneNarrow); //min
-				_contour.emplace_back(extendedTip); //min
-				scales = { minSupportScale, minSupportScale, 1.0f, 1.0f,  minSupportScale, minSupportScale};
+				scales = { minSupportScale, minSupportScale, 1.0f, 1.0f,  minSupportScale};
 				return;
 			}
 
@@ -295,17 +373,13 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 	{
 		//vertical support path should be very simple, cone pointy bit(endtip), cone ending bit, bottom bit.
 
-		QVector3D coneNarrow(_overhang.coord());
-		QVector3D tipNormal(_overhang.normal());
-		//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
-		constexpr float normalizedVectorZMax = -1.0f; //tan 45
-		QVector2D xy(tipNormal.x(), tipNormal.y());
-		auto zMax = normalizedVectorZMax * xy.length();
-		tipNormal.setZ(std::min(zMax, tipNormal.z()));
-		tipNormal.normalize();
+		QVector3D tipNormal = calcTipNormal(_overhang.normal());
+		calculateAttachmentInfo(tipNormal);
+		QVector3D coneNarrow(_farthestOverhang);
+
+		_attachmentStartPt = coneNarrow;
 
 		//because of float error, it's safer to overlap support and mesh a little bit, so extend endtip into mesh a bit
-		QVector3D extendedTip = coneNarrow - (intoMeshLength * tipNormal);
 
 		//cone of support is always in the direction of the overhang normal to minimize contact between support and mesh
 		QVector3D coneWidePart = coneNarrow +  (coneLength * tipNormal);
@@ -322,28 +396,57 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 		_contour.emplace_back(raftAttachEnd);
 		_contour.emplace_back(coneWidePart);
 		_contour.emplace_back(coneNarrow);
-		_contour.emplace_back(extendedTip);
 		_vertSeg = { raftAttachEnd, coneWidePart };
 		auto botMult = 1.0f;
 		if (setting.thickenFeet)
 			botMult = SUPPORT_BOTTOM_MAX_MULT;
-		scales = { botMult, botMult, 1.0f, 1.0f, minSupportScale, minSupportScale};
+		scales = { botMult, botMult, 1.0f, 1.0f, minSupportScale};
 		_hasBasePt = true;
 		_basePt = supportStart;
 	}
 
 
 	return;
-}	 
-	 
-
-	 
+}
 
 
 
 QVector4D Hix::Support::VerticalSupportModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
 {
 	return QVector4D();
+}
+
+
+
+void Hix::Support::VerticalSupportModel::calculateAttachmentInfo(const QVector3D& supportNormal)
+{
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+	auto startingFace = _overhang.nearestFace();
+
+	_attachmentTris = circleProjectedTris(*_overhang.owner(), startingFace,
+		_overhang.normal(), _overhang.coord(), setting.supportRadiusMin);
+	std::unordered_set<VertexConstItr> vtcs;
+	vtcs.reserve(_attachmentTris.size() * 3);
+	for (auto& f : _attachmentTris)
+	{
+		auto mvs = f.meshVertices();
+		vtcs.insert(mvs[0]);
+		vtcs.insert(mvs[1]);
+		vtcs.insert(mvs[2]);
+	}
+	float distFromPlane = std::numeric_limits<float>::lowest();
+	
+	for (auto& v : vtcs)
+	{
+		auto worldPos = v.worldPosition();
+		auto dist = worldPos.distanceToPlane(_overhang.coord(), supportNormal);
+		if (dist > distFromPlane)
+		{
+			_farthestOverhang = worldPos;
+			distFromPlane = dist;
+		}
+	}
+
 }
 
 void Hix::Support::VerticalSupportModel::generateMesh()
