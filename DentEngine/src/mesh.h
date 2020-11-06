@@ -143,6 +143,18 @@ namespace Hix
 			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
 			void clear();
+			template <typename ContainerType>
+			void addFaces(const ContainerType& cont)
+			{
+				if (cont.size() == 0 || cont.size() % 3 != 0)
+					throw std::runtime_error("vertices count invalid for addFaces");
+				auto itr = cont.cbegin();
+				auto cend = cont.cend();
+				while (itr != cend)
+				{
+					addFace(*itr++, *itr++, *itr++);
+				}
+			}
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
 			MeshDeleteGuard removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs);
@@ -193,15 +205,14 @@ namespace Hix
 			template <typename FaceCond>
 			std::unordered_set<FaceConstItr> findNearFaces(FaceConstItr startFace, FaceCond cond, size_t maxCount) const
 			{
-				auto radSquared = radius * radius;
 				std::unordered_set<FaceConstItr> result;
 				std::unordered_set<FaceConstItr> explored;
 				std::deque<FaceConstItr>q;
 				result.reserve(maxCount);
 				explored.reserve(maxCount);
-				q.emplace_back(mf);
-				result.emplace(mf);
-				explored.emplace(mf);
+				q.emplace_back(startFace);
+				result.emplace(startFace);
+				explored.emplace(startFace);
 				while (!q.empty())
 				{
 					auto curr = q.front();

@@ -264,6 +264,7 @@
     <ClCompile Include="common\mathUtil.cpp" />
     <ClCompile Include="common\platform\Process.cpp" />
     <ClCompile Include="common\Semaphore.cpp" />
+    <ClCompile Include="Mesh\FaceSelectionUtils.cpp" />
     <ClCompile Include="feature\cdt\HixCDT.cpp" />
     <ClCompile Include="cork\src\cork.cpp" />
     <ClCompile Include="cork\src\file_formats\files.cpp" />
@@ -935,6 +936,7 @@
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
+    <ClInclude Include="Mesh\FaceSelectionUtils.h" />
     <ClInclude Include="feature\cdt\HixCDT.h" />
     <ClInclude Include="cork\src\accel\aabvh.h" />
     <ClInclude Include="cork\src\cork.h" />
