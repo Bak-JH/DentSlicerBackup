@@ -81,32 +81,8 @@ std::vector<QVector3D>  Hix::Engine3D::extendAlongOutline(
 		vec.emplace_back(e0);
 		vec.emplace_back(v0);
 		//mesh.addFace(e1, v0, v1);
-		//mesh.addFace(e1, e0, v0);
+		//mesh.addFace(e1, e0, v0);on
 	}
 	return vec;
 }
 
-
-std::vector<QVector3D>  Hix::Engine3D::extendAlongOutline2(
-	QVector3D normal, double distance, const std::deque<HalfEdgeConstItr>& path)
-{
-	std::vector<QVector3D> vec;
-	vec.reserve(path.size() * 2);
-	for (auto& e : path)
-	{
-		auto v0 = e.from().worldPosition();
-		auto v1 = e.to().worldPosition();
-		auto e0 = v0 + distance * normal;
-		auto e1 = v1 + distance * normal;
-		vec.emplace_back(e1);
-		vec.emplace_back(v0);
-		vec.emplace_back(v1);
-
-		vec.emplace_back(e1);
-		vec.emplace_back(e0);
-		vec.emplace_back(v0);
-		//mesh.addFace(e1, v0, v1);
-		//mesh.addFace(e1, e0, v0);
-	}
-	return vec;
-}
