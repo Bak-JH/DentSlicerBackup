@@ -34,6 +34,20 @@ float area_subdiv = 20.0f;
 //}
 
 
+//since normals too horizontal can't be printed
+QVector3D calcPractivalNormal(const QVector3D& overhangNormal)
+{
+	QVector3D tipNormal(overhangNormal);
+	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
+	constexpr float normalizedVectorZMax = -1.0f; //tan 45
+	QVector2D xy(tipNormal.x(), tipNormal.y());
+	auto zMax = normalizedVectorZMax * xy.length();
+	tipNormal.setZ(std::min(zMax, tipNormal.z()));
+	tipNormal.normalize();
+	return tipNormal;
+
+}
+
 
 class XYzHasher
 {
@@ -43,11 +57,11 @@ public:
 	const float xyMinDist;
 	const float zMinDist;
 };
-Hix::OverhangDetect::Overhang::Overhang(const FaceConstItr& face, const QVector3D& coord) : _primitive(face), _coord(coord), _normal(face.worldFn())
+Hix::OverhangDetect::Overhang::Overhang(const FaceConstItr& face, const QVector3D& coord) : _primitive(face), _coord(coord), _primNormal(face.worldFn()), _normal(calcPractivalNormal(_primNormal))
 {
 }
 
-Hix::OverhangDetect::Overhang::Overhang(const VertexConstItr& vtx) : _primitive(vtx), _coord(vtx.worldPosition()), _normal(vtx.worldVn())
+Hix::OverhangDetect::Overhang::Overhang(const VertexConstItr& vtx) : _primitive(vtx), _coord(vtx.worldPosition()), _primNormal(vtx.worldVn()), _normal(calcPractivalNormal(_primNormal))
 {
 }
 
@@ -76,6 +90,11 @@ const Hix::Engine3D::Mesh* Hix::OverhangDetect::Overhang::owner() const
 const QVector3D& Hix::OverhangDetect::Overhang::normal() const
 {
 	return _normal;
+}
+
+const QVector3D& Hix::OverhangDetect::Overhang::primitiveOverhang() const
+{
+	return _primNormal;
 }
 
 FaceConstItr Hix::OverhangDetect::Overhang::nearestFace() const

@@ -40,7 +40,7 @@ namespace Hix
 
 			void generateMesh();
 			void generateSupportPath(float bottom, std::vector<float>& scales);
-			void generateModelAttachment(QVector3D supportEndPt, Hix::Engine3D::Mesh& mesh);
+			void generateModelAttachment(Hix::Engine3D::Mesh& mesh);
 
 			std::optional <std::array<QVector3D, 2>> _vertSeg;
 		};
