@@ -9,6 +9,7 @@
 #include "../DentEngine/src/mesh.h"
 #include "../Mesh/FaceSelectionUtils.h"
 #include "../feature/Plane3D.h"
+
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
 constexpr  float SUPPORT_BOTTOM_MAX_MULT = 2.0f;
 constexpr  float SUPPORT_BOTTOM_MAX_LENGTH = 1.0f;
@@ -169,37 +170,36 @@ std::unordered_set<FaceConstItr> circleProjectedTris(const Mesh& mesh, const Fac
 	return mesh.findNearFaces(targetFace, insideProj, MAXFIND);
 }
 
-void Hix::Support::VerticalSupportModel::calculateAttachmentInfo(const QVector3D& supportNormal)
+void calculateAttachmentInfo(const QVector3D& supportNormal, const Overhang& overhang)
 {
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
-	auto startingFace = _overhang.nearestFace();
+	auto startingFace = overhang.nearestFace();
 
-	auto projTris = circleProjectedTris(*_overhang.owner(), startingFace,
-		_overhang.normal(), _overhang.coord(), setting.supportRadiusMin);
+	auto projTris = circleProjectedTris(*overhang.owner(), startingFace,
+		overhang.normal(), overhang.coord(), setting.supportRadiusMin);
 	std::unordered_set<VertexConstItr> vtcs;
-	vtcs.reserve(_attachmentTris.size() * 3);
-	for (auto& f : _attachmentTris)
+	vtcs.reserve(projTris.size() * 3);
+	for (auto& f : projTris)
 	{
 		auto mvs = f.meshVertices();
 		vtcs.insert(mvs[0]);
 		vtcs.insert(mvs[1]);
 		vtcs.insert(mvs[2]);
 	}
+	auto bestFitPlane = Hix::Plane3D::bestFittingPlane(vtcs);
 	float distFromPlane = std::numeric_limits<float>::lowest();
 
 	for (auto& v : vtcs)
 	{
 		auto worldPos = v.worldPosition();
-		auto dist = worldPos.distanceToPlane(_overhang.coord(), supportNormal);
+		auto dist = worldPos.distanceToPlane(bestFitPlane.point, bestFitPlane.normal);
 		if (dist > distFromPlane)
 		{
 			//_farthestOverhang = worldPos;
 			distFromPlane = dist;
 		}
 	}
-	_farthestOverhang = _overhang.coord() + (_overhang.normal() * distFromPlane);
-
-
+	bestFitPlane.point += (bestFitPlane.normal * distFromPlane);
 }
 //
 //QVector3D calculateFarthest()
