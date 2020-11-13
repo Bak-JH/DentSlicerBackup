@@ -22,25 +22,30 @@ namespace Hix
 				return plane; // At least three points required
 			}
 
-			QVector3D sum = std::accumulate(points.begin(), points.end(), QVector3D())
-			for (auto& p : points)
-			{
-				sum += p;
-			}
-
+			QVector3D sum = std::reduce(points.begin(), points.end());
 			auto centroid = sum * (1.0 / points.size());
-			float xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
+			std::vector<QVector3D> rs;
+			std::vector<std::array<float, 6>> covMats;
+			rs.reserve(points.size());
+			covMats.reserve(points.size());
 			// Calc full 3x3 covariance matrix, excluding symmetries:
-			for (auto& p : points)
-			{
-				auto r = p - centroid;
-				xx += r.x() * r.x();
-				xy += r.x() * r.y();
-				xz += r.x() * r.z();
-				yy += r.y() * r.y();
-				yz += r.y() * r.z();
-				zz += r.z() * r.z();
-			}
+			std::transform(points.begin(), points.end(), std::back_inserter(rs), [&centroid](const QVector3D& e) { return e - centroid; });
+			std::transform(rs.begin(), rs.end(), std::back_inserter(covMats), [&centroid](const QVector3D& r) -> std::array<float,6> {
+
+				return {
+					r.x() * r.x(),
+					r.x() * r.y(),
+					r.x() * r.z(),
+					r.y() * r.y(),
+					r.y() * r.z(),
+					r.z() * r.z() };
+				});
+			auto covaSum = std::reduce(covMats.begin(), covMats.end(), std::array<float, 6>{}, [](const std::array<float, 6>& a, std::array<float, 6>& b) {
+				std::array<float, 6> result;
+				std::transform(a.begin(), a.end(), b.begin(), result.begin(), std::plus<float>());
+				return result;
+				});
+			float xx = covaSum[0], xy = covaSum[1], xz = covaSum[2], yy = covaSum[3], yz = covaSum[4], zz = covaSum[5];
 			auto det_x = yy * zz - yz * yz;
 			auto det_y = xx * zz - xz * xz;
 			auto det_z = xx * yy - xy * xy;

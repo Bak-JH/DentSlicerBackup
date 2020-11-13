@@ -4,6 +4,8 @@
 #include "ModelAttachedSupport.h"
 #include "BaseSupport.h"
 #include "ContourModel.h"
+#include "../feature/Plane3D.h"
+
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
@@ -35,7 +37,7 @@ namespace Hix
 			bool _hasBasePt = false;
 			void generateMesh();
 			void generateSupportPath(float bottom, std::vector<float>& scales);
-			void calculateAttachmentInfo(const QVector3D& supportNormal)
+			void calculateAttachmentInfo(const QVector3D& supportNormal);
 
 			std::optional <std::array<QVector3D, 2>> _vertSeg;
 		};
