@@ -59,7 +59,6 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
 	
 	//generate wall
-	std::vector<std::vector<QVector3D>> jointContours;
 	std::vector<QVector3D> path;
 	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
 	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
@@ -78,7 +77,8 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 			std::transform(curr->Contour.begin(), curr->Contour.end(), std::back_inserter(fContour), [](const IntPoint& intPt)-> QVector3D {
 				return QVector3D(toFloatPt(intPt));
 			});
-			extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), fContour, path, jointContours);
+			auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(path);
+			extrudeAlongPath(labelMesh, QVector3D(0, 0, 1), fContour, path, jointDir);
 		}
 		for (auto& each : curr->Childs)
 		{
