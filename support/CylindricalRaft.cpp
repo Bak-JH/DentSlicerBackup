@@ -64,10 +64,10 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 	path.emplace_back(QVector3D(0, 0, sSetting.raftThickness));
 
 	//create cylinder walls
-	std::vector<std::vector<QVector3D>> jointContours;
-	std::function<void(std::vector<QVector3D>&, float)> thicknessScaler(Hix::Shapes2D::scaleContourVtxNormal);
-	Hix::Features::Extrusion::extrudeAlongPath(
-		mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &thicknessScaler);
+	Hix::Features::Extrusion::VtxNormalScaler scaler(scales);
+	auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(path);
+	auto jointContours = Hix::Features::Extrusion::extrudeAlongPath(
+		mesh, QVector3D(0, 0, 1), contour, path, jointDir, &scaler);
 	//generate caps
 	if (jointContours.front().size() > 1)
 	{

@@ -14,7 +14,7 @@ using namespace Hix::Render;
 using namespace Hix::Support;
 using namespace Hix::OverhangDetect;
 using namespace Qt3DCore;
-
+using namespace Hix::Features::Extrusion;
 
 
 
@@ -49,15 +49,13 @@ void Hix::Support::DiagInterconnect::generateMesh()
 	_contour.emplace_back(_pts[1]); //min
 	auto dir = _pts[1] - _pts[0];
 	dir.normalize();
-	scales = { 1.0f, 1.0f};
 	if (!_contour.empty())
 	{
 		crossContour = generateCircle(radiusMax, 16);
 
-		std::vector<std::vector<QVector3D>> jointContours;
-		std::function<void(std::vector<QVector3D>&, float)> uniformScaler(Hix::Shapes2D::scaleContour);
-
-		Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0, 0, 1), crossContour, _contour, jointContours, &scales, &uniformScaler);
+		
+		auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(_contour);
+		auto jointContours = extrudeAlongPath(mesh, QVector3D(0, 0, 1), crossContour, _contour, jointDir);
 
 		//create endcaps using joint contours;
 		circleToTri(mesh, jointContours.front(), _contour.front(), true);
