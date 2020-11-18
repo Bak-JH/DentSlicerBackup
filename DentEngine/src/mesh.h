@@ -246,7 +246,6 @@ namespace Hix
 				return result;
 			}
 			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000)const;
-			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D pt, QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000, float radius = 5.0f)const;
 
 
 

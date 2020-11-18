@@ -2,7 +2,9 @@
 
 #include "DebugRenderObject.h"
 #include "../../glmodel.h"
+#include "../../render/SceneEntityWithMaterial.h"
 using namespace Qt3DCore;
+using namespace Hix::Render;
 
 void Hix::Debug::DebugRenderObject::initialize(QEntity* root)
 {
@@ -31,7 +33,7 @@ void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstIt
 	addLine(points, color);
 }
 
-void Hix::Debug::DebugRenderObject::registerDebugColorFaces(GLModel* owner, const std::unordered_set<FaceConstItr>& faces)
+void Hix::Debug::DebugRenderObject::registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces)
 {
 	_debugFaceMap.insert(std::make_pair(owner, faces));
 }
@@ -51,7 +53,7 @@ void Hix::Debug::DebugRenderObject::colorDebugFaces()
 	}
 }
 
-void Hix::Debug::DebugRenderObject::showGLModelAabb(GLModel* target)
+void Hix::Debug::DebugRenderObject::showGLModelAabb(SceneEntityWithMaterial* target)
 {
 	auto minX = target->recursiveAabb().xMin();
 	auto minY = target->recursiveAabb().yMin();
@@ -86,6 +88,11 @@ void Hix::Debug::DebugRenderObject::clear()
 {
 	_planes.clear();
 	_lines.clear();
+	for (auto& e : _debugFaceMap)
+	{
+		auto model = e.first;
+		model->selectedFaces.clear();
+	}
 	_debugFaceMap.clear();
 }
 
