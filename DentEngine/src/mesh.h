@@ -207,6 +207,7 @@ namespace Hix
 			{
 				std::unordered_set<FaceConstItr> result;
 				std::unordered_set<FaceConstItr> explored;
+				std::unordered_set<HalfEdgeConstItr> frontiers;
 				std::deque<FaceConstItr>q;
 				result.reserve(maxCount);
 				explored.reserve(maxCount);
