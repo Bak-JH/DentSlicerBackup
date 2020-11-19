@@ -73,13 +73,14 @@ std::vector<QVector3D>  Hix::Engine3D::extendAlongOutline(
 		auto v1 = e.to().localPosition();
 		auto e0 = v0 + distance * normal;
 		auto e1 = v1 + distance * normal;
-		vec.emplace_back(e1);
-		vec.emplace_back(v0);
 		vec.emplace_back(v1);
-
-		vec.emplace_back(e1);
-		vec.emplace_back(e0);
 		vec.emplace_back(v0);
+		vec.emplace_back(e1);
+
+		vec.emplace_back(v0);
+		vec.emplace_back(e0);
+		vec.emplace_back(e1);
+
 		//mesh.addFace(e1, v0, v1);
 		//mesh.addFace(e1, e0, v0);on
 	}

@@ -5,7 +5,7 @@
 #include "../../common/Debug.h"
 #include <list>
 #include <set>
-#include "../../render/SceneEntityWithMaterial.h"
+#include "../../render/SceneEntity.h"
 #include "Bounds3D.h"
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
@@ -699,11 +699,11 @@ std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, Fa
 		}
 	};
 	auto res = findNearFaces(mf, faceCond, maxCount);
-	auto entity = dynamic_cast<SceneEntityWithMaterial*>(const_cast<SceneEntity*> (this->entity()));
-	auto& debugger = Hix::Debug::DebugRenderObject::getInstance();
-	debugger.clear();
-	debugger.registerDebugColorFaces(entity, fails, Hix::Render::Colors::DebugRed);
-	debugger.colorDebugFaces();
+	//auto entity = dynamic_cast<SceneEntityWithMaterial*>(const_cast<SceneEntity*> (this->entity()));
+	//auto& debugger = Hix::Debug::DebugRenderObject::getInstance();
+	//debugger.clear();
+	//debugger.registerDebugColorFaces(entity, fails, Hix::Render::Colors::DebugRed);
+	//debugger.colorDebugFaces();
 	return res;
 }
 
