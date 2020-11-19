@@ -19,7 +19,10 @@ namespace Hix
 			const QVector4D Raft =					QVector4D(0.431f, 0.929f,0.196f, 1.0f);
 			const QVector4D OutOfBound =			QVector4D(0.1f	, 0.1f, 0.1f, 1.0f);
 			const QVector4D SupportHighlighted =	QVector4D(0.3108f,0.8988f, 0.96f, 1.0f);
-
+#ifdef _DEBUG
+			const QVector4D DebugRed =				QVector4D(1.0f, 0.0f, 0.00f, 1.0f);
+			const QVector4D DebugOrange =			QVector4D(1.0f, 0.5f, 0.00f, 1.0f);
+#endif
 
 		}
 	}

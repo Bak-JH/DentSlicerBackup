@@ -5,11 +5,12 @@
 #include "../../common/Debug.h"
 #include <list>
 #include <set>
-#include "../../render/SceneEntity.h"
+#include "../../render/SceneEntityWithMaterial.h"
 #include "Bounds3D.h"
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
+#include "../../common/Debug.h"
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
 #endif
 using namespace Hix::Utils::Math;
@@ -588,19 +589,19 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<size_t, 3> faceVertices,
 
 		//add "owning" face or face that the hEdge circuit creates
 		itr.ref().owningFace = faceIdx;
-		//for each vertices that the half edges are "leaving" from, add the half edge reference
-		vertices[faceVertices[vtxIdx % 3]].leavingEdges.insert(itr.index());
-		vertices[faceVertices[(vtxIdx + 1) % 3]].arrivingEdges.insert(itr.index());
+//for each vertices that the half edges are "leaving" from, add the half edge reference
+vertices[faceVertices[vtxIdx % 3]].leavingEdges.insert(itr.index());
+vertices[faceVertices[(vtxIdx + 1) % 3]].arrivingEdges.insert(itr.index());
 
-		//add circular relationship for all half edges
-		nextItr = itr + 1;
-		//since we can't use % on itrs
-		if (nextItr == halfEdges.end())
-		{
-			nextItr = firstAddedItr;
-		}
-		itr.ref().next = nextItr.index();
-		++vtxIdx;
+//add circular relationship for all half edges
+nextItr = itr + 1;
+//since we can't use % on itrs
+if (nextItr == halfEdges.end())
+{
+	nextItr = firstAddedItr;
+}
+itr.ref().next = nextItr.index();
+++vtxIdx;
 
 	}
 	faces[faceIdx].edge = firstAddedItr.index();
@@ -618,14 +619,14 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	for (auto leavingEdge : vtx.leavingEdges)
 	{
 		auto& modLeavingEdge = halfEdges[leavingEdge];
-		modLeavingEdge.from= newIdx;
+		modLeavingEdge.from = newIdx;
 		//get twin edges with opposite direction ie) arriving 
 	}
 	//update arrivingEdges
 	for (auto arrivingEdge : vtx.arrivingEdges)
 	{
 		auto& modArrEdge = halfEdges[arrivingEdge];
-		modArrEdge.to= newIdx;
+		modArrEdge.to = newIdx;
 	}
 	auto newIndexItr = vertices.cbegin() + newIdx;
 	//update hash value
@@ -637,7 +638,7 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 		if (curr->second == oldItr)
 		{
 			_verticesHash.erase(curr);
-			_verticesHash.insert({ hashVal , newIndexItr});
+			_verticesHash.insert({ hashVal , newIndexItr });
 			break;
 		}
 	}
@@ -660,7 +661,7 @@ void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
 void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
 	//halfEdge whose index has been changed
-	HalfEdgeItr hEdge(newIdx,this);
+	HalfEdgeItr hEdge(newIdx, this);
 	//update face that owns this half edge only if the itr owned by the face is this one
 	if (hEdge.owningFace()->edge == oldIdx)
 	{
@@ -684,10 +685,26 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf, float maxNormalDiff, size_t maxCount)const
 {
 	std::unordered_set<VertexConstItr> bannedVtcs;
-	auto faceCond = [normal, maxNormalDiff, maxCount](const FaceConstItr& nf)->bool {
-		return (nf.localFn() - normal).lengthSquared() < maxNormalDiff;
+	std::unordered_set<FaceConstItr> fails;
+
+	auto faceCond = [normal, maxNormalDiff, maxCount, &fails](const FaceConstItr& nf)->bool {
+
+		if ((nf.localFn() - normal).lengthSquared() < maxNormalDiff)
+		{
+			return true;
+		}
+		else
+		{
+			fails.insert(nf);
+		}
 	};
-	return findNearFaces(mf, faceCond, maxCount);
+	auto res = findNearFaces(mf, faceCond, maxCount);
+	auto entity = dynamic_cast<SceneEntityWithMaterial*>(const_cast<SceneEntity*> (this->entity()));
+	auto& debugger = Hix::Debug::DebugRenderObject::getInstance();
+	debugger.clear();
+	debugger.registerDebugColorFaces(entity, fails, Hix::Render::Colors::DebugRed);
+	debugger.colorDebugFaces();
+	return res;
 }
 
 
