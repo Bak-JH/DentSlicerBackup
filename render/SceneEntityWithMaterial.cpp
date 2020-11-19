@@ -12,6 +12,7 @@
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include "utils/utils.h"
+#include "common/Debug.h"
 
 
 
@@ -92,10 +93,22 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
 	size_t idx = 0;
 
+#ifdef _DEBUG
+	auto& debug = Hix::Debug::DebugRenderObject::getInstance();
+	auto faceOverrideSet = debug.getOverrideColors(this);
+#endif
+
 	for (auto itr = begin; itr != end; ++itr)
 	{
 		auto faceVertices = itr.meshVertices();
-		auto colorCode = getPrimitiveColorCode(mesh, itr);
+		QVector4D colorCode = getPrimitiveColorCode(mesh, itr);
+#ifdef _DEBUG
+		if (faceOverrideSet && faceOverrideSet->get().faces.find(itr) != faceOverrideSet->get().faces.cend())
+		{
+			colorCode = faceOverrideSet->get().color;
+		}
+#endif
+		
 
 		for (auto& vtxItr : faceVertices)
 		{

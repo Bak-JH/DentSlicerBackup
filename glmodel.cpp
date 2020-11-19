@@ -20,7 +20,6 @@
 #include "feature/interfaces/SelectFaceMode.h"
 #include "feature/move.h"
 #include "application/ApplicationManager.h"
-
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _STRICT_GLMODEL

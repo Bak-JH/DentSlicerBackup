@@ -5,6 +5,7 @@
 #include "../../render/SceneEntityWithMaterial.h"
 using namespace Qt3DCore;
 using namespace Hix::Render;
+using namespace Hix::Debug;
 
 void Hix::Debug::DebugRenderObject::initialize(QEntity* root)
 {
@@ -33,9 +34,9 @@ void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstIt
 	addLine(points, color);
 }
 
-void Hix::Debug::DebugRenderObject::registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces)
+void Hix::Debug::DebugRenderObject::registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces, const QVector4D& color)
 {
-	_debugFaceMap.insert(std::make_pair(owner, faces));
+	_debugFaceMap[owner] = { faces , color};
 }
 
 void Hix::Debug::DebugRenderObject::colorDebugFaces()
@@ -44,11 +45,11 @@ void Hix::Debug::DebugRenderObject::colorDebugFaces()
 	{
 		auto model = each.first;
 		model->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-		for (auto& face : each.second)
-		{
-			model->selectedFaces.insert(face);
+		//for (auto& face : each.second)
+		//{
+		//	model->selectedFaces.insert(face);
 
-		}
+		//}
 		model->updateMesh(true);
 	}
 }
@@ -88,12 +89,22 @@ void Hix::Debug::DebugRenderObject::clear()
 {
 	_planes.clear();
 	_lines.clear();
-	for (auto& e : _debugFaceMap)
-	{
-		auto model = e.first;
-		model->selectedFaces.clear();
-	}
+	//for (auto& e : _debugFaceMap)
+	//{
+	//	auto model = e.first;
+	//	model->selectedFaces.clear();
+	//}
 	_debugFaceMap.clear();
+}
+
+std::optional<std::reference_wrapper<const FaceColorSet>> Hix::Debug::DebugRenderObject::getOverrideColors(SceneEntityWithMaterial* owner) const
+{
+	const auto& set = _debugFaceMap.find(owner);
+	if (set != _debugFaceMap.end())
+	{
+		return std::ref(set->second);
+	}
+	return std::optional<std::reference_wrapper<const FaceColorSet>>();
 }
 
 Hix::Render::PlaneMeshEntity& Hix::Debug::DebugRenderObject::displayPlane(const Hix::Plane3D::PDPlane& pdplane)
