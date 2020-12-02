@@ -1,10 +1,14 @@
 #include "DrawingPlane.h"
 #include "FreeCutPtWidget.h"
+#include "../../application/ApplicationManager.h"
 
 using namespace Hix::Input;
 using namespace Hix::Features::Cut;
 
-DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner): Hix::Render::PlaneMeshEntity(owner)
+
+Hix::Features::Cut::DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner, QColor color, float alpha): Hix::Render::PlaneMeshEntity(owner,
+	Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX(),
+	Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY(),color, true, alpha)
 {
 	initHitTest();
 	setEnabled(false);

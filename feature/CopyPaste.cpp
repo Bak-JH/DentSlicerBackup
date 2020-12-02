@@ -42,12 +42,6 @@ void Hix::Features::CopyPaste::runImpl()
 			partManager.addPart(std::unique_ptr<GLModel>(rawModel));
 			std::get<GLModel*>(_model)->setHitTestable(true);
 		});
-
-	auto bound = std::get<GLModel*>(_model)->recursiveAabb();
-	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
-	if (printBound.contains(bound))
-	{
-		ApplicationManager::getInstance().taskManager().enqueTask(new AutoArrangeAppend(std::get<GLModel*>(_model)));
-	}
+	ApplicationManager::getInstance().taskManager().enqueTask(new AutoArrangeAppend(std::get<GLModel*>(_model)));
 }
 

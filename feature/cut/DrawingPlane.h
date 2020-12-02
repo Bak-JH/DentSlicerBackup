@@ -20,7 +20,8 @@ namespace Hix
 			class DrawingPlane : public Hix::Render::PlaneMeshEntity, public Hix::Input::HitTestAble, public Hix::Input::Clickable
 			{
 			public:
-				DrawingPlane(Qt3DCore::QEntity* owner);
+				DrawingPlane(Qt3DCore::QEntity* owner, QColor color = QColor(140,140,140), float alpha = 0.1f );
+
 				virtual ~DrawingPlane();
 				void enablePlane(bool isEnable);
 				void enableDrawing(bool isEnable);

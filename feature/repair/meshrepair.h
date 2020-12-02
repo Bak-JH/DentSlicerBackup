@@ -28,7 +28,7 @@ namespace Hix
 		void repair(Hix::Engine3D::Mesh& mesh);
 
 		// find hole edges(edges along the holes) and make contour from it
-		Hix::Engine3D::Paths3D identifyHoles(const  Hix::Engine3D::Mesh* mesh);
+		//Hix::Engine3D::Paths3D identifyHoles(const  Hix::Engine3D::Mesh* mesh);
 		bool isRepairNeeded(const  Hix::Engine3D::Mesh* mesh);
 		//get boundaries ie) half edges on the edge/hole of the mesh
 		std::vector<Hix::Engine3D::HalfEdgeConstItr> getBoundaryEdges(const Hix::Engine3D::Mesh* mesh);

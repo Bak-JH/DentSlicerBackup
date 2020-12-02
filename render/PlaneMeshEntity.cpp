@@ -1,6 +1,6 @@
 #include "PlaneMeshEntity.h"
 #include "../application/ApplicationManager.h"
-
+#include "../render/ModelMaterial.h"
 using namespace Hix::Render;
 
 PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided, float alpha):
@@ -11,16 +11,16 @@ PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, bool isDoubleSided, f
 
 Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color, bool isDoubleSided, float alpha) : Qt3DCore::QEntity(owner)
 {
+	QColor actualColor = color;
+	actualColor.setAlphaF(alpha);
 	size_t plnCnt = 1;
 	if (isDoubleSided)
 		++plnCnt;
 	for (size_t i = 0; i < plnCnt; ++i)
 	{
-		auto planeMaterial = new Qt3DExtras::QPhongAlphaMaterial(this);
-		planeMaterial->setAmbient(color);
-		planeMaterial->setDiffuse(color);
-		planeMaterial->setSpecular(color);
-		planeMaterial->setAlpha(alpha);
+		auto planeMaterial = new Hix::Render::ModelMaterial(this);
+		planeMaterial->setColor(actualColor);
+		planeMaterial->changeMode(Hix::Render::ShaderMode::SingleColor);
 		auto planeEntity = new Qt3DCore::QEntity(this);
 		//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
 		auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
@@ -32,7 +32,6 @@ Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float wi
 		planeEntity->addComponent(planeTransform); //jj
 		planeEntity->addComponent(planeMaterial);
 		planeEntity->setEnabled(true);
-
 		_meshTransformMap[planeEntity] = planeTransform;
 	}
 
@@ -53,5 +52,3 @@ void Hix::Render::PlaneMeshEntity::setPointNormal(const Hix::Plane3D::PDPlane& p
 	_transform.setTranslation(plane.point);
 	_transform.setRotation(QQuaternion::fromDirection(plane.normal,QVector3D(0,0,1)));
 }
-
-
