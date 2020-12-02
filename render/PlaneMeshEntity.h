@@ -26,7 +26,6 @@ namespace Hix
 		protected:
 			std::unordered_map<Qt3DCore::QEntity*, Qt3DCore::QTransform*> _meshTransformMap;
 			Qt3DCore::QTransform _transform;
-			Qt3DCore::QEntity* _owner = nullptr;
 
 		};
 

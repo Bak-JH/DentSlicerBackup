@@ -130,50 +130,57 @@ Hix::Features::AutoArrangeAppend::AutoArrangeAppend(GLModel* model): Move(model)
 void Hix::Features::AutoArrangeAppend::runImpl()
 {
 	//calculate inner fit polygon range
-	_to = QVector3D(0, 0, 0);
-	auto bound = _model->recursiveAabb();
+	auto origBound = _model->recursiveAabb();
+	auto bound = origBound.centred();
+	bound.setZMax(0.0f);
+	bound.setZMin(0.0f);
+	_to = -origBound.centre();
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
-	auto maxDisp = printBound.calculateMaxDisplacement(bound);
-	RandomGen random(0);
-	auto allModels = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
-	std::vector<Bounds3D> modelBounds;
-	modelBounds.reserve(allModels.size());
-	for (auto& m : allModels)
+	if (printBound.contains(bound))
 	{
-		if(m != _model)
-			modelBounds.emplace_back(m->recursiveAabb());
-	}
-	for (float mult = 0.01f; mult <= 1.0f; mult += 0.01f)
-	{
-		bool intersects = false;
-		float xMin = maxDisp[0] * mult;
-		float xMax = maxDisp[1] * mult;
-		float yMin = maxDisp[2] * mult;
-		float yMax = maxDisp[3] * mult;
-
-		for (size_t i = 0; i < 6000; ++i)
+		_to->setZ(0.0f);
+		auto maxDisp = printBound.calculateMaxDisplacement(bound);
+		RandomGen random(0);
+		auto allModels = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
+		std::vector<Bounds3D> modelBounds;
+		modelBounds.reserve(allModels.size());
+		for (auto& m : allModels)
 		{
-			QVector3D disp(random.getFloat(xMin, xMax), random.getFloat(yMin, yMax), 0);
-			auto curr = bound;
-			curr.translate(disp);
-			for (auto& b : modelBounds)
+			if (m != _model)
+				modelBounds.emplace_back(m->recursiveAabb());
+		}
+		for (float mult = 0.01f; mult <= 1.0f; mult += 0.01f)
+		{
+			bool intersects = false;
+			float xMin = maxDisp[0] * mult;
+			float xMax = maxDisp[1] * mult;
+			float yMin = maxDisp[2] * mult;
+			float yMax = maxDisp[3] * mult;
+
+			for (size_t i = 0; i < 6000; ++i)
 			{
-				if (b.intersects2D(curr))
+				QVector3D disp(random.getFloat(xMin, xMax), random.getFloat(yMin, yMax), 0);
+				auto curr = bound;
+				curr.translate(disp);
+				for (auto& b : modelBounds)
 				{
-					intersects = true;
+					if (b.intersects2D(curr))
+					{
+						intersects = true;
+						break;
+					}
+				}
+				if (!intersects)
+				{
+					*_to += disp;
 					break;
+					qDebug() << i << mult;
 				}
 			}
 			if (!intersects)
 			{
-				_to = disp;
 				break;
-				qDebug() << i << mult;
 			}
-		}
-		if (!intersects)
-		{
-			break;
 		}
 	}
 	__super::runImpl();

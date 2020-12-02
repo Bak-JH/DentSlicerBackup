@@ -28,9 +28,8 @@ const QUrl PER_PRIMITIVE_GEOM_URL = QUrl("qrc:/shaders/perPrimitive.geom");
 const QUrl LAYERVIEW_FRAG_URL = QUrl("qrc:/shaders/layerview.frag");
 const QUrl LAYERVIEW_GEOM_URL = QUrl("qrc:/shaders/layerview.geom");
 
-Hix::Render::ModelMaterial::ModelMaterial():
-	_ambientParameter(QStringLiteral("ambient"), QColor(70, 70, 70)),
-	_diffuseParameter(QStringLiteral("diffuse"), QColor(140, 140, 140))
+Hix::Render::ModelMaterial::ModelMaterial(Qt3DCore::QNode* parent):
+	Qt3DRender::QMaterial(parent)
 {
 
 	//GLSL in this context can use following uniforms
@@ -44,11 +43,20 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	auto cullFace = new QCullFace();
 	cullFace->setMode(QCullFace::CullingMode::Back);
 	_renderPass.addRenderState(cullFace);
+	
+	auto aBlending = new QBlendEquation();
+	aBlending->setBlendFunction(QBlendEquation::BlendFunction::Add);
+	_renderPass.addRenderState(aBlending);
+
+	auto aBlendingState = new QBlendEquationArguments();
+	aBlendingState->setSourceRgba(QBlendEquationArguments::SourceAlpha);
+	aBlendingState->setDestinationRgba(QBlendEquationArguments::OneMinusSourceAlpha);
+
+	_renderPass.addRenderState(aBlendingState);
 
 	auto depthTest = new QDepthTest();
 	depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
 	_renderPass.addRenderState(depthTest);
-
 	_renderTechnique.addRenderPass(&_renderPass);
 	_renderTechnique.graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
 	_renderTechnique.graphicsApiFilter()->setMajorVersion(4);
@@ -59,14 +67,8 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_renderTechnique.addFilterKey(&_filterKey);
 	_effect.addTechnique(&_renderTechnique);
 	//establish color look up table
-
-
-
 	_singleColorParameter.setName(QStringLiteral("singleColor"));
 	_singleColorParameter.setValue(QVector4D(0,0,0,0));
-
-	_effect.addParameter(&_ambientParameter);
-	_effect.addParameter(&_diffuseParameter);
 
 	//coloring faces
 	_effect.addParameter(&_singleColorParameter);
@@ -81,8 +83,6 @@ Hix::Render::ModelMaterial::~ModelMaterial()
 	_renderPass.setParent((QNode*)nullptr);
 	_renderTechnique.setParent((QNode*)nullptr);
 	_filterKey.setParent((QNode*)nullptr);
-	_effect.removeParameter(&_ambientParameter);
-	_effect.removeParameter(&_diffuseParameter);
 	_effect.removeParameter(&_singleColorParameter);
 	_effect.removeTechnique(&_renderTechnique);
 
@@ -91,17 +91,6 @@ Hix::Render::ModelMaterial::~ModelMaterial()
 		auto ptr = &each.second;
 		_effect.removeParameter(ptr);
 	}
-}
-
-void Hix::Render::ModelMaterial::setDiffuse(const QColor& diffuse)
-{
-	_diffuseParameter.setValue(diffuse);
-}
-
-void Hix::Render::ModelMaterial::setAmbient(const QColor& ambient)
-{
-	_ambientParameter.setValue(ambient);
-
 }
 
 void Hix::Render::ModelMaterial::addParameterWithKey(const std::string& key)
@@ -185,10 +174,17 @@ void Hix::Render::ModelMaterial::setColor(QVector4D color)
 {
 #ifdef _MODEL_MATERIAL_STRICT
 	if (_mode != ShaderMode::SingleColor)
+
 	{
 		throw std::runtime_error("Attempted to set entire mesh material color when per primitive color is used");
 	}
 #endif
 
 	_singleColorParameter.setValue(color);
+}
+
+void Hix::Render::ModelMaterial::setColor(QColor color)
+{
+	QVector4D fColor(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+	setColor(fColor);
 }

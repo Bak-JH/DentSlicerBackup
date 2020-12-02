@@ -39,7 +39,6 @@ Entity {
         upVector: defaultUp
 
         viewCenter: inputViewCenter
-        property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
         components:[
             CameraLens{
                 id: cameraLens
@@ -67,7 +66,9 @@ Entity {
                             camera:camera
                             ClearBuffers {
                                 buffers: ClearBuffers.ColorDepthBuffer
-                                clearColor: "#E5E5E5"
+                                clearColor: "#00000000"
+                                // clearColor: "#FF0000FF"
+
                             }
                             // RenderStateSet {
                             //     renderStates: [

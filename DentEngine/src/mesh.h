@@ -98,14 +98,6 @@ namespace Hix
 
 		typedef std::array<QVector3D,3> Plane;
 
-		class Path3D : public std::vector<MeshVertex> {
-		public:
-			ClipperLib::Path projection;
-			std::vector<Path3D> inner;
-			std::vector<Path3D> outer;
-		};
-
-		typedef std::vector<Path3D> Paths3D;
 
 		struct MeshDeleteGuard
 		{
@@ -191,11 +183,7 @@ namespace Hix
 			QVector3D vectorToWorld(const QVector3D& local)const;
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
-
 			VertexConstItr getVtxAtLocalPos(const QVector3D& pos)const;
-			std::unordered_map<FaceConstItr, QVector3D> cacheWorldFN()const;
-			std::unordered_map<VertexConstItr, QVector3D> cacheWorldPos()const;
-			std::unordered_map<VertexConstItr, QVector3D> cacheWorldVN()const;
 
 			
 
@@ -273,17 +261,6 @@ namespace Hix
 			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;			
 
 		};
-
-		QHash<uint32_t, ClipperLib::Path>::iterator findSmallestPathHash(QHash<uint32_t, ClipperLib::Path> pathHash);
-
-		// construct closed contour using segments created from identify step
-		Paths3D contourConstruct3D(Paths3D hole_edges);
-
-		bool intPointInPath(ClipperLib::IntPoint ip, ClipperLib::Path p);
-		bool pathInpath(Path3D target, Path3D in);
-
-		std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
-
 	};
 
 	namespace Debug

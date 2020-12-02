@@ -63,13 +63,13 @@ Entity {
 
         /* Grid Mesh */
 
-        PhongMaterial{
-            id : meshMaterial
-            ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
-            diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
-            specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
-            shininess: 0
-        }
+        // PhongMaterial{
+        //     id : meshMaterial
+        //     ambient: Qt.rgba(100/255, 100/255, 100/255, 0)
+        //     diffuse: Qt.rgba(100/255, 100/255, 100/255, 0)
+        //     specular: Qt.rgba(100/255, 100/255, 100/255, 0)
+        //     shininess: 0
+        // }
 		Entity{
             id: models
             //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"

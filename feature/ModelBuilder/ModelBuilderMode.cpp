@@ -73,9 +73,9 @@ void Hix::Features::ModelBuilderMode::build()
 {
 	auto cuttingPlane = _topPlane.transform().translation().z();
 	auto bottomPlane = _bottPlane.transform().translation().z();
-	auto aabb0 = _model->aabb();
+	//auto aabb0 = _model->aabb();
 	_model->flushTransform();
-	auto aabb1 = _model->aabb();
+	//auto aabb1 = _model->aabb();
 	TwoManifoldBuilder* builder = new TwoManifoldBuilder(*_model->getMeshModd(), _model->modelName(), cuttingPlane, bottomPlane);
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(builder);
 	_model->setMesh(nullptr);
@@ -112,9 +112,15 @@ void Hix::Features::MBPrep::run()
 		FileLoader::loadMeshOBJ(mesh, file);
 	}
 	fileName = GLModel::filenameToModelName(fileName.toStdString());
-	mesh->centerMesh();
+	//mesh->centerMesh();
 	postUIthread([this, &mesh, &fileName]() {
 		_mode->_model.reset(new GLModel(Hix::Application::ApplicationManager::getInstance().partManager().modelRoot(), mesh, fileName, nullptr));
+		auto centredBound = _mode->_model->recursiveAabb().centred();
+		_mode->_model->moveModel(centredBound.centre());
+		//auto bound = origBound.centred();
+		//bound.set ZMax(0.0f);
+		//bound.setZMin(0.0f);
+		//_to = -origBound.centre();
 
 	});
 	float cutPlane, botPlane;

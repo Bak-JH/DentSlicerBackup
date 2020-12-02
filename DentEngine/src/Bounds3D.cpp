@@ -304,3 +304,10 @@ bool Hix::Engine3D::Bounds3D::intersects2D(const Hix::Engine3D::Bounds3D& other)
 	return true;
 }
 
+Bounds3D Hix::Engine3D::Bounds3D::centred() const
+{
+	auto ret = *this;
+	ret.translate(-centre());
+	return ret;
+}
+
