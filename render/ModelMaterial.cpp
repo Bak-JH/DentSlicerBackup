@@ -29,7 +29,9 @@ const QUrl LAYERVIEW_FRAG_URL = QUrl("qrc:/shaders/layerview.frag");
 const QUrl LAYERVIEW_GEOM_URL = QUrl("qrc:/shaders/layerview.geom");
 
 Hix::Render::ModelMaterial::ModelMaterial(Qt3DCore::QNode* parent):
-	Qt3DRender::QMaterial(parent)
+	Qt3DRender::QMaterial(parent),
+	_ambientParameter(QStringLiteral("ambient"), QColor(70, 70, 70)),
+	_diffuseParameter(QStringLiteral("diffuse"), QColor(140, 140, 140))
 {
 
 	//GLSL in this context can use following uniforms
@@ -70,6 +72,8 @@ Hix::Render::ModelMaterial::ModelMaterial(Qt3DCore::QNode* parent):
 	_singleColorParameter.setName(QStringLiteral("singleColor"));
 	_singleColorParameter.setValue(QVector4D(0,0,0,0));
 
+	_effect.addParameter(&_ambientParameter);
+	_effect.addParameter(&_diffuseParameter);
 	//coloring faces
 	_effect.addParameter(&_singleColorParameter);
 	setEffect(&_effect);
@@ -83,6 +87,8 @@ Hix::Render::ModelMaterial::~ModelMaterial()
 	_renderPass.setParent((QNode*)nullptr);
 	_renderTechnique.setParent((QNode*)nullptr);
 	_filterKey.setParent((QNode*)nullptr);
+	_effect.removeParameter(&_ambientParameter);
+	_effect.removeParameter(&_diffuseParameter);
 	_effect.removeParameter(&_singleColorParameter);
 	_effect.removeTechnique(&_renderTechnique);
 
@@ -91,6 +97,16 @@ Hix::Render::ModelMaterial::~ModelMaterial()
 		auto ptr = &each.second;
 		_effect.removeParameter(ptr);
 	}
+}
+void Hix::Render::ModelMaterial::setDiffuse(const QColor& diffuse)
+{
+	_diffuseParameter.setValue(diffuse);
+}
+
+void Hix::Render::ModelMaterial::setAmbient(const QColor& ambient)
+{
+	_ambientParameter.setValue(ambient);
+
 }
 
 void Hix::Render::ModelMaterial::addParameterWithKey(const std::string& key)
