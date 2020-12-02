@@ -15,8 +15,8 @@ in EyeSpaceVertex {
 
 //since flat shader, all fragments are colored with same color
 flat out vec4 VertexColor;
-// uniform vec3 ambient;
-// uniform vec3 diffuse;
+uniform vec3 ambient;
+uniform vec3 diffuse;
 
 //only use single color for all faces
 #pragma include light.inc.frag
@@ -24,9 +24,6 @@ flat out vec4 VertexColor;
 //run once per primitive
 vec4 calcLights(in vec3 position, in vec3 norm, in vec4 primitiveColor)
 {
-    vec3 ambient = primitiveColor.xyz;
-    vec3 diffuse = primitiveColor.xyz;
-
     vec3 diffTotal = vec3(0,0,0);
     vec3 s;
     float dotSN;

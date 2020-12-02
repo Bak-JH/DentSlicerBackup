@@ -44,7 +44,8 @@ namespace Hix
 			//color for single color mode
 			void setColor(QVector4D color);
 			void setColor(QColor color);
-
+			void setDiffuse(const QColor& diffuse);
+			void setAmbient(const QColor& ambient);
 		private:
 			ShaderMode _mode = ShaderMode::None;
 			//custom parameters
@@ -54,7 +55,8 @@ namespace Hix
 
 			//default parameters
 			Qt3DRender::QParameter _singleColorParameter;
-
+			Qt3DRender::QParameter _ambientParameter;
+			Qt3DRender::QParameter _diffuseParameter;
 			Qt3DRender::QFilterKey _filterKey;
 			Qt3DRender::QRenderPass _renderPass;
 			Qt3DRender::QShaderProgram _shaderProgram;
