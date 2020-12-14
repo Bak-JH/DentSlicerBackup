@@ -17,7 +17,9 @@
 #include <Wincrypt.h>
 using frozen::operator"" _fstr;
 
-
+#ifdef _DEBUG
+//#define DISABLE_AUTH
+#endif
 //constexpr auto HOST = "127.0.0.1"_fstr;
 //constexpr auto PORT = "8000"_fstr;
 //constexpr auto ADDRESS = HOST + ":" + PORT;
@@ -162,6 +164,19 @@ void Hix::Auth::AuthManager::acquireAuth(Hix::Settings::Liscense license)
 
 void Hix::Auth::AuthManager::login()
 {
+#ifdef DISABLE_AUTH
+    auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+    moddableSetting.liscense = Hix::Settings::PRO;
+    for (auto item : Hix::Application::ApplicationManager().getInstance().featureManager().featureItems()->childItems())
+    {
+        item->deleteLater();
+    }
+    auto menu = dynamic_cast<Hix::QML::FeatureMenu*>(Hix::Application::ApplicationManager::getInstance().featureManager().menu());
+    Hix::Features::FeaturesLoader loader(&Hix::Application::ApplicationManager::getInstance().engine(), menu);
+    loader.loadFeatureButtons();
+    unblockApp();
+    return;
+#endif
     setWebview();
 
     //load json saved encrypted cookies from previous login
@@ -286,6 +301,9 @@ void Hix::Auth::AuthManager::logout()
 
 void Hix::Auth::AuthManager::blockApp()
 {
+#ifdef DISABLE_AUTH
+    return;
+#endif
     _mainWindow->setProperty("visible", false);
 }
 

@@ -14,10 +14,6 @@
 #include "utils/utils.h"
 #include "common/Debug.h"
 
-
-
-#define ATTRIBUTE_SIZE_INCREMENT 200
-
 using namespace Qt3DCore;
 using namespace Hix::Utils::Math;
 using namespace Hix::Engine3D;
@@ -150,4 +146,10 @@ void Hix::Render::SceneEntityWithMaterial::setMaterialParamter(const std::string
 {
 	_meshMaterial.setParameterValue(key, value);
 	callRecursive(this, &SceneEntityWithMaterial::setMaterialParamter, key, value);
+}
+
+
+void Hix::Render::SceneEntityWithMaterial::unselectMeshFaces() {
+	selectedFaces.clear();
+	callRecursive(this, &Hix::Render::SceneEntityWithMaterial::unselectMeshFaces);
 }

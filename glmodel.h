@@ -69,7 +69,6 @@ public:
 	GLModel* getRootModel();
 	const GLModel* getRootModel()const;
 
-	void unselectMeshFaces();
 
 protected:
 	void initHitTest()override;
