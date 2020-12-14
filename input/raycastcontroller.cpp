@@ -363,6 +363,10 @@ void RayCastController::hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::H
 					_hovered = hovered;
 					_hovered->onEntered();
 				}
+				if (hovered->mouseMovementEnabled())
+				{
+					hovered->onMouseMovement(hit);
+				}
 				break;
 			}
 		}

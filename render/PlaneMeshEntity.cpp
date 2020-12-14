@@ -18,9 +18,7 @@ Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float wi
 		++plnCnt;
 	for (size_t i = 0; i < plnCnt; ++i)
 	{
-		auto planeMaterial = new Hix::Render::ModelMaterial(this);
-		planeMaterial->setColor(actualColor);
-		planeMaterial->changeMode(Hix::Render::ShaderMode::SingleColor);
+
 		auto planeEntity = new Qt3DCore::QEntity(this);
 		//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
 		auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
@@ -29,14 +27,21 @@ Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float wi
 		auto planeTransform = new Qt3DCore::QTransform();
 		planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90 + 180 * i));
 		planeEntity->addComponent(clipPlane);
-		planeEntity->addComponent(planeTransform); //jj
-		planeEntity->addComponent(planeMaterial);
+		planeEntity->addComponent(planeTransform);
+		if (alpha != 0.0f)
+		{
+			auto planeMaterial = new Hix::Render::ModelMaterial(this);
+			planeMaterial->setColor(actualColor);
+			planeMaterial->changeMode(Hix::Render::ShaderMode::SingleColor);
+			planeEntity->addComponent(planeMaterial);
+		}
 		planeEntity->setEnabled(true);
 		_meshTransformMap[planeEntity] = planeTransform;
 	}
 
 	addComponent(&_transform);
 }
+
 
 PlaneMeshEntity::~PlaneMeshEntity()
 {
@@ -51,4 +56,10 @@ void Hix::Render::PlaneMeshEntity::setPointNormal(const Hix::Plane3D::PDPlane& p
 {
 	_transform.setTranslation(plane.point);
 	_transform.setRotation(QQuaternion::fromDirection(plane.normal,QVector3D(0,0,1)));
+}
+
+Hix::Plane3D::PDPlane Hix::Render::PlaneMeshEntity::pointNormal() const
+{
+	return{_transform.translation(), _transform.rotation().rotatedVector(QVector3D(0,0,1))};
+
 }

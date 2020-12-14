@@ -80,7 +80,8 @@ double Hix::UI::RotateWidget::calculateRot()
 
 	//find angle between (vector into camera) and (rotating axis)
 	auto axisWorldVector = Hix::Application::ApplicationManager::getInstance().sceneManager().systemTransform()->rotation().rotatedVector(_axis);
-	auto cameraVector = Hix::Application::ApplicationManager::getInstance().sceneManager().cameraViewVector();
+	//auto cameraVector = Hix::Application::ApplicationManager::getInstance().sceneManager().cameraViewVector();
+	auto cameraVector = -Hix::Application::ApplicationManager::getInstance().sceneManager().camera()->viewVector();
 
 	auto cosAngle = QVector3D::dotProduct(axisWorldVector, cameraVector)
 		/(axisWorldVector.length() + cameraVector.length()) ;

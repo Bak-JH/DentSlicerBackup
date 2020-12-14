@@ -10,10 +10,12 @@ namespace Hix
 		class PPShaderMode : virtual public Mode
 		{
 		public:
+			PPShaderMode();
 			PPShaderMode(const std::unordered_set<GLModel*>& selectedModels);
+			void initPPShader(GLModel& model);
 			void colorFaces(GLModel* model, const std::unordered_set <Hix::Engine3D::FaceConstItr > & faces);
 			virtual ~PPShaderMode();
-		protected:
+		private:
 			std::unordered_set<GLModel*> _subjects;
 		};
 

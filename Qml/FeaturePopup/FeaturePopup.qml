@@ -12,7 +12,8 @@ Hix.FeaturePopupShell
 	property var title
 	property var myPadding: 16
 	property var enableApply: true
-	
+    property alias applyButton: applyButton
+	property var bottomMargin: applyButton.height + applyButton.anchors.bottomMargin
 	MouseArea{
 		id: blockingArea
 		anchors.fill: parent

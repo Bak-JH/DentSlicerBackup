@@ -391,10 +391,7 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int fac
 }
 // for extension
 
-void GLModel:: unselectMeshFaces(){
-	selectedFaces.clear();
-	callRecursive(this, &GLModel::unselectMeshFaces);
-}
+
 
 
 

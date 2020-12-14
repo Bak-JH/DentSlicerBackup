@@ -53,6 +53,7 @@ Entity {
         objectName:"total"
         Transform{
             id: systemTransform
+            translation: Qt.vector3d(0,0,0)
             scale3D: Qt.vector3d(0.004,0.004,0.004)
             rotationX : -70
             rotationY : 0

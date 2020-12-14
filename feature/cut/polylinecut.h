@@ -1,5 +1,4 @@
-#ifndef MODELCUT_H
-#define MODELCUT_H
+#pragma once
 #include <QVector3D>
 #include "feature/interfaces/FlushSupport.h"
 
@@ -38,4 +37,3 @@ namespace Hix
 		}
 	}
 }
-#endif // MODELCUT_H
