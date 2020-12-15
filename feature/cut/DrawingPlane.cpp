@@ -99,20 +99,15 @@ std::vector<QVector3D> Hix::Features::Cut::DrawingPlane::contour() const
 	path.reserve(_ptWidgets.size());
 	if (!_ptWidgets.empty())
 	{
-		auto beginOfPath = _ptWidgets.begin();
-		for (; beginOfPath != _ptWidgets.end(); ++beginOfPath)
+		auto curr = _lastPt;
+		//we use count instead of null check due to possible circular contour
+		while (path.size() < _ptWidgets.size())
 		{
-			if ((*beginOfPath)->prev == nullptr)
-			{
-				break;
-			}
+			path.push_back(curr->translation());
+			curr = curr->prev;
 		}
-		FreeCutPtWidget* curr = &**beginOfPath;
-		while (curr != nullptr)
-		{
-			path.emplace_back(curr->translation());
-			curr = curr->next;
-		}
+		std::reverse(path.begin(), path.end());
+
 	}
 	return path;
 }
