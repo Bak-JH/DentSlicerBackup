@@ -27,7 +27,8 @@ namespace Hix
 		};
 		enum class SelectionState
 		{
-			Selecting = 0,
+			None = 0,
+			Selecting,
 			Selected
 		};
 		class TwoManifoldBuilder;
@@ -63,7 +64,7 @@ namespace Hix
 			bool select();
 			void erase();
 			MBEditMode _edit;
-			SelectionState _selectionState;
+			SelectionState _selectionState = SelectionState::None;
 			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
 			Hix::Render::PlaneMeshEntity _topPlane;
 			Hix::Render::PlaneMeshEntity _bottPlane;

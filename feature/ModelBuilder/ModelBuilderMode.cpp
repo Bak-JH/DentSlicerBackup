@@ -86,7 +86,9 @@ void Hix::Features::ModelBuilderMode::updatePosition()
 			normal.normalize();
 			//qDebug() << normal << pt;
 			_selectionPlane.setPointNormal({ pt, normal });
-			//setSelectionState(SelectionState::Selecting);
+
+			_selectionPlane.clearPt();
+			setSelectionState(SelectionState::Selecting);
 			//qDebug() << "cam pos orig" << cam->position();
 			//qDebug() << "cam pos" << position;
 			//qDebug() << normal << pt;
@@ -115,6 +117,7 @@ void Hix::Features::ModelBuilderMode::setMode(MBEditMode mode)
 		slider().setVisible(false);
 		_selectionPlane.enablePlane(false);
 		setModeTxts(_edit);
+		setSelectionState(SelectionState::None);
 		//_button0->setEnabled(false);
 		//_button0->setVisible(false);
 		//_button1->setEnabled(false);
@@ -188,6 +191,8 @@ void Hix::Features::ModelBuilderMode::setSelectionState(SelectionState state)
 		case Hix::Features::SelectionState::Selected:
 		{
 		}
+			break;
+		default:
 			break;
 		}
 		colorFaces(_model.get(), _selectedFaces);
@@ -457,7 +462,7 @@ std::unordered_set<VertexConstItr> Hix::Features::FaceSelector::doSelection(cons
 
 	//do comparison
 	CorkTriMesh output;
-	computeUnion(selectionCorkMesh, _subject, &output);
+	computeIntersection(selectionCorkMesh, _subject, &output);
 	freeCorkTriMesh(&output);
 	//we check which vertex is maintained in union and compare with original mesh. therefore float error is detrimental here.
 	auto unionResult = toHixMesh(output);

@@ -18,6 +18,7 @@ namespace Hix
 			void clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)override;
 			void removePt(Hix::Features::Cut::FreeCutPtWidget* pt)override;
 			void clearPt()override;
+
 		private:
 			Hix::Features::Cut::FreeCutPtWidget* _firstPt = nullptr;
 

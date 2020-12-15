@@ -31,7 +31,7 @@ void Hix::Features::WidgetMode::updateTransform(Qt3DCore::QTransform& transform)
 	transform.setScale3D(QVector3D(0.01 / syszoom.x(), 0.01 / syszoom.y(), 0.01 / syszoom.z()));
 	auto theta = sysTransform->rotationX() / 180.0 * M_PI;
 	auto alpha = sysTransform->rotationZ() / 180.0 * M_PI;
-	qDebug() << "camera angle x:" << sysTransform->rotationX() << "  y:" << sysTransform->rotationY() << "  z:" << sysTransform->rotationZ();
+	//qDebug() << "camera angle x:" << sysTransform->rotationX() << "  y:" << sysTransform->rotationY() << "  z:" << sysTransform->rotationZ();
 	transform.setTranslation(QVector3D(
 		centre.x() + 100 * std::sin(theta) * std::sin(alpha),
 		centre.y() + 100 * std::sin(theta) * std::cos(alpha),

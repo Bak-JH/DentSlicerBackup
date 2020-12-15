@@ -44,9 +44,6 @@ Qt3DCore::QEntity* Hix::Application::SceneManager::total()
 QVector3D Hix::Application::SceneManager::cameraViewVector()const
 {
 	return _camera->position() - _systemTransform->translation();
-
-	
-	//return _camera->position() - _systemTransform->translation();
 }
 
 Qt3DCore::QTransform* Hix::Application::SceneManager::systemTransform()
