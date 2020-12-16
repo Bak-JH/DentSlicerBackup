@@ -32,11 +32,14 @@ Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float wi
 		{
 			auto planeMaterial = new Hix::Render::ModelMaterial(this);
 			planeMaterial->setColor(actualColor);
+			planeMaterial->setDiffuse(actualColor);
+			planeMaterial->setAmbient(actualColor);
 			planeMaterial->changeMode(Hix::Render::ShaderMode::SingleColor);
 			planeEntity->addComponent(planeMaterial);
 		}
 		planeEntity->setEnabled(true);
 		_meshTransformMap[planeEntity] = planeTransform;
+		_entityOrder.push_back(planeEntity);
 	}
 
 	addComponent(&_transform);
@@ -51,6 +54,23 @@ Qt3DCore::QTransform& PlaneMeshEntity::transform()
 {
 	return _transform;
 }
+
+Qt3DCore::QTransform& Hix::Render::PlaneMeshEntity::planeTransform(size_t index)
+{
+	return *_meshTransformMap.at(_entityOrder[index]);
+}
+
+const Qt3DCore::QTransform& Hix::Render::PlaneMeshEntity::transform() const
+{
+	return _transform;
+}
+
+const Qt3DCore::QTransform& Hix::Render::PlaneMeshEntity::planeTransform(size_t index) const
+{
+	return *_meshTransformMap.at(_entityOrder[index]);
+}
+
+
 
 void Hix::Render::PlaneMeshEntity::setPointNormal(const Hix::Plane3D::PDPlane& plane)
 {

@@ -281,6 +281,63 @@ void cuntourConcaveFill(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>&
 
 }
 
+
+void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
+{
+	if (boundary.size() < 2)
+		return;
+
+	std::vector<QVector3D> cylinder;
+	std::vector<QVector3D> newCylinder;
+	auto edgeCnt = boundary.size()-1;
+	cylinder.reserve(edgeCnt);
+	newCylinder.reserve(edgeCnt);
+	auto boundEnd = boundary.cend() - 1;
+	std::transform(std::cbegin(boundary), boundEnd, std::back_inserter(cylinder), [](const HalfEdgeConstItr& itr) {
+		return itr.from().localPosition();
+	});
+
+	float zStep = 0.1f;
+	if (isBottEmpty)
+	{
+		zStep = -zStep;
+	}
+
+	constexpr size_t count = 10;
+	for (auto currCnt = 0; currCnt < count; ++currCnt)
+	{
+		//form new smoothed edges;
+		for (auto i = 0; i < edgeCnt; ++i)
+		{
+			auto pt0 = cylinder[(i - 1) % edgeCnt];
+			auto pt1 = cylinder[i];
+			auto pt2 = cylinder[(i + 1) % edgeCnt];
+			auto smoothed = (0.5 * pt1) + (0.25 * (pt0 + pt2));
+			smoothed.setZ(smoothed.z() + zStep);
+			newCylinder.emplace_back(smoothed);
+		}
+		//create new cylinder to smoothed edges
+		for (auto i = 0; i < edgeCnt; ++i)
+		{
+			auto pt1 = cylinder[i];
+			auto pt2 = cylinder[(i + 1) % edgeCnt];
+			auto npt1 = newCylinder[i];
+			auto npt2 = newCylinder[(i + 1) % edgeCnt];
+
+			mesh.addFace(pt1, npt1, pt2);
+			auto fIdcs = mesh.addFace(pt2, npt1, npt2).value();
+			auto latestFace = mesh.getFaces().cend() - 1;
+			const auto& vtcs = mesh.getVertices();
+			HalfEdgeConstItr itr;
+			bool isworking = latestFace.getEdgeWithVertices(itr, vtcs.itrAt(fIdcs[1]), vtcs.itrAt(fIdcs[2]));
+			boundary[i] = itr;
+		}
+		//now reset
+		std::swap(cylinder, newCylinder);
+		newCylinder.clear();
+	}
+	boundary[edgeCnt] = boundary.front();
+}
 bool isDownard(const FaceConstItr& face)
 {
 	constexpr float MIN_Z_NORMAL = 0.1f;
@@ -799,10 +856,31 @@ void Hix::Features::TwoManifoldBuilder::redoImpl()
 
 void Hix::Features::TwoManifoldBuilder::runImpl()
 {
+	auto connected = seperateConnectedFaceSet(_model);
+	size_t currSize = 0;
+	std::unordered_set<FaceConstItr>* max = nullptr;
+	for (auto& e : connected)
+	{
+		if (currSize < e.size())
+		{
+			currSize = e.size();
+			max = &e;
+		}
+	}
+	std::unordered_set<FaceConstItr> unwanted;
+	for (auto& e : connected)
+	{
+		if (&e != max)
+		{
+			unwanted.insert(e.cbegin(), e.cend());
+		}
+	}
+	_model.removeFaces(unwanted);
 	auto boundary = getLongestBoundary(_model);
 	Hix::Plane3D::PDPlane bestFitPlane{ QVector3D(0,0, _cuttingPlane), QVector3D(0,0,1) };
 	auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
 	cuntourConcaveFill(_model, boundary, true);
+	contourSmoothing(_model, boundary, true);
 	zCylinder(_model, boundary, true, _bottomPlane);
 	buildBott(_model, boundary, true, _bottomPlane);
 	delFaces.flush();

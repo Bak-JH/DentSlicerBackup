@@ -296,18 +296,18 @@ void Hix::Engine3D::Mesh::clear()
 	faces.clear();
 }
 
-bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
+std::optional<std::array<size_t, 3>> Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
 	std::array<size_t, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0);
 	fVtx[1] = addOrRetrieveFaceVertex(v1);
 	fVtx[2] = addOrRetrieveFaceVertex(v2);
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
-		return false;
+		return {};
     Hix::Engine3D::MeshFace mf;
 	faces.emplace_back(mf);
 	addHalfEdgesToFace(fVtx, faces.size() - 1);
-	return true;
+	return fVtx;
 }
 
 bool Mesh::addFace(const FaceConstItr& face)

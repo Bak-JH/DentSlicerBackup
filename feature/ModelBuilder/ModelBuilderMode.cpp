@@ -17,6 +17,11 @@
 #include "../widget/RotateWidget.h"
 #include "../../DentEngine/src/mesh.h"
 
+#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/point.hpp>
+#include <boost/geometry/geometries/box.hpp>
+#include <boost/geometry/index/rtree.hpp>
+
 
 using namespace Hix;
 using namespace Hix::Features;
@@ -38,6 +43,7 @@ const static std::unordered_map<MBEditMode, std::string> __modeNames = {
 
 
 const static std::unordered_map<SelectionState, std::string> __selectionTxt = {
+	{SelectionState::None, ""},
 	{SelectionState::Selecting, "Select faces"},
 	{SelectionState::Selected, "Erase selected faces"}
 };
@@ -67,8 +73,6 @@ void Hix::Features::ModelBuilderMode::updatePosition()
 {
 	if (_model)
 	{
-		//auto& planeTrs = _selectionPlane.transform();
-		//Hix::Features::WidgetMode::updateTransform(planeTrs);
 		if (_edit == MBEditMode::FaceSelection)
 		{
 			//model root transform
@@ -84,28 +88,40 @@ void Hix::Features::ModelBuilderMode::updatePosition()
 			auto normal = QVector3D(sysTransform->matrix().inverted() * QVector4D(camNormal,0));
 			auto pt = QVector3D(sysTransform->matrix().inverted() * QVector4D(camPt,1));
 			normal.normalize();
-			//qDebug() << normal << pt;
 			_selectionPlane.setPointNormal({ pt, normal });
 
 			_selectionPlane.clearPt();
 			setSelectionState(SelectionState::Selecting);
-			//qDebug() << "cam pos orig" << cam->position();
-			//qDebug() << "cam pos" << position;
-			//qDebug() << normal << pt;
-
-			//auto normalLength = normal.length();
-			//normal.normalize();
-			//qDebug() << normal << normalLength;
-			////auto pointOnPlane = _widget.transform()->translation();
-			//auto pointOnPlane = sysTransform->translation() + (normal * (normalLength * 0.8));
-			//_selectionPlane.setPointNormal({ pointOnPlane, normal });
-			//setSelectionState(SelectionState::Selecting);
 		}
 		else
 		{
 			Hix::Features::WidgetMode::updatePosition();
 		}
 	}
+}
+
+void Hix::Features::ModelBuilderMode::applyOrientationGuess(float& cutPlane, float& botPlane, QQuaternion& rotation)
+{
+	_model->transform().setRotation(rotation);
+	_model->updateRecursiveAabb();
+	auto zTranslate = _model->setZToBed();
+
+	_model->moveModel(QVector3D(0, 0, ZMARGIN));
+	zTranslate += ZMARGIN;
+	_model->updateRecursiveAabb();
+	initPPShader(*_model.get());
+	auto rAABB = _model->recursiveAabb();
+	auto modelMaxRadius = rAABB.bbMaxRadius();
+	auto modelCentre = rAABB.centre();
+	slider().setMin(modelCentre.z() - modelMaxRadius);
+	slider().setMax(modelCentre.z() + modelMaxRadius);
+	auto upSliderVal = cutPlane + zTranslate;
+	auto lowSliderVal = botPlane + zTranslate;
+
+	slider().setUpperValue(upSliderVal);
+	slider().setLowerValue(lowSliderVal);
+	_topPlane.transform().setTranslation(QVector3D(0, 0, upSliderVal));
+	_bottPlane.transform().setTranslation(QVector3D(0, 0, lowSliderVal));
 }
 
 void Hix::Features::ModelBuilderMode::setMode(MBEditMode mode)
@@ -118,15 +134,12 @@ void Hix::Features::ModelBuilderMode::setMode(MBEditMode mode)
 		_selectionPlane.enablePlane(false);
 		setModeTxts(_edit);
 		setSelectionState(SelectionState::None);
-		//_button0->setEnabled(false);
-		//_button0->setVisible(false);
-		//_button1->setEnabled(false);
-		//_button1->setVisible(false);
 		_topPlane.setEnabled(false);
 		_bottPlane.setEnabled(false);
 		_button0->setProperty("visible", false);
 		_button1->setProperty("visible", false);
-		//_selectionPlane.setParent((Qt3DCore::QNode*)nullptr);
+		_button2->setProperty("visible", false);
+
 		switch (_edit)
 		{
 		case Hix::Features::MBEditMode::Rotation:
@@ -138,10 +151,6 @@ void Hix::Features::ModelBuilderMode::setMode(MBEditMode mode)
 		case Hix::Features::MBEditMode::FaceSelection:
 		{
 			_selectionPlane.enablePlane(true);
-			//_button0->setEnabled(true);
-			//_button0->setVisible(true);
-			//_button1->setEnabled(true);
-			//_button1->setVisible(true);
 			_button0->setProperty("visible", true);
 			_button1->setProperty("visible", true);
 
@@ -178,11 +187,13 @@ void Hix::Features::ModelBuilderMode::setSelectionState(SelectionState state)
 {
 	if (state != _selectionState)
 	{
+
 		_selectionState = state;
 		switch (_selectionState)
 		{
 		case Hix::Features::SelectionState::Selecting:
 		{
+			_button2->setProperty("visible", false);
 			_selectionPlane.clearPt();
 			_selectedFaces.clear();
 			_model->unselectMeshFaces();
@@ -190,6 +201,7 @@ void Hix::Features::ModelBuilderMode::setSelectionState(SelectionState state)
 			break;
 		case Hix::Features::SelectionState::Selected:
 		{
+			_button2->setProperty("visible", true);
 		}
 			break;
 		default:
@@ -207,7 +219,7 @@ bool Hix::Features::ModelBuilderMode::select()
 	auto contour = _selectionPlane.contour();
 	if (!contour.empty())
 	{
-		auto selectedVtcs = _faceSelector->doSelection(_selectionPlane.pointNormal(), contour);
+		auto selectedVtcs = _faceSelector->doSelection(_selectionPlane, contour);
 		auto fEnd = _model->getMesh()->getFaces().cend();
 		auto itr = _model->getMesh()->getFaces().cbegin();
 		for (; itr != fEnd; ++itr)
@@ -239,7 +251,7 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 	DialogedMode(MB_POPUP), RangeSliderMode(0, 1),
 	_topPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true),
 	_bottPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true),
-	_selectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), 100000, 100000, QColor(140,140,140), 0.0f),
+	_selectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), 100000, 100000, QColor(140,140,140), 0.0f, false),
 	_edit(MBEditMode::PlaneCut)
 {
 	auto& co = controlOwner();
@@ -247,7 +259,9 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 	co.getControl(_nextButton, "nextButton");
 	co.getControl(_button0, "button0");
 	co.getControl(_button1, "button1");
+	co.getControl(_button2, "button2");
 	_button1->setProperty("buttonText", "Undo selection");
+	_button2->setProperty("buttonText", "Reverse selection");
 
 
 	QObject::connect(_button0, &Hix::QML::Controls::Button::clicked, [this]() {
@@ -266,14 +280,29 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 		{
 			erase();
 			setSelectionState(Hix::Features::SelectionState::Selecting);
-
 		}
 		break;
 		}
 		});
 
 	QObject::connect(_button1, &Hix::QML::Controls::Button::clicked, [this]() {
+		_selectionPlane.clearPt();
 		setSelectionState(SelectionState::Selecting);
+		});
+	QObject::connect(_button2, &Hix::QML::Controls::Button::clicked, [this]() {
+		auto& faces = _model->getMesh()->getFaces();
+		std::unordered_set<Hix::Engine3D::FaceConstItr> unselected;
+		unselected.reserve(faces.size() - _selectedFaces.size());
+		for (auto itr = faces.cbegin(); itr != faces.cend(); ++itr)
+		{
+			if (_selectedFaces.find(itr) == _selectedFaces.cend())
+			{
+				unselected.insert(itr);
+			}
+		}
+		std::swap(_selectedFaces, unselected);
+		_model->unselectMeshFaces();
+		colorFaces(_model.get(), _selectedFaces);
 		});
 
 	QObject::connect(_prevButton, &Hix::QML::Controls::Button::clicked, [this]() {
@@ -393,35 +422,14 @@ void Hix::Features::MBPrep::run()
 	QQuaternion rotation;
 	guessOrientation(*_mode->_model->getMeshModd(), cutPlane, botPlane, rotation);
 	postUIthread([this, &cutPlane, &botPlane, &rotation]() {
-		_mode->_model->transform().setRotation(rotation);
-		_mode->_model->updateRecursiveAabb();
-		auto zTranslate = _mode->_model->setZToBed();
-
-		_mode->_model->moveModel(QVector3D(0, 0, ZMARGIN));
-		zTranslate += ZMARGIN;
-		_mode->_model->updateRecursiveAabb();
-		_mode->initPPShader(*_mode->_model.get());
-		auto rAABB = _mode->_model->recursiveAabb();
-		auto modelMaxRadius = rAABB.bbMaxRadius();
-		auto modelCentre = rAABB.centre();
-		_mode->slider().setMin(modelCentre.z() -modelMaxRadius);
-		_mode->slider().setMax(modelCentre.z() + modelMaxRadius);
-		auto upSliderVal = cutPlane + zTranslate;
-		auto lowSliderVal = botPlane + zTranslate;
-		
-		_mode->slider().setUpperValue(upSliderVal);
-		_mode->slider().setLowerValue(lowSliderVal);
-		_mode->_topPlane.transform().setTranslation(QVector3D(0, 0, upSliderVal));
-		_mode->_bottPlane.transform().setTranslation(QVector3D(0, 0, lowSliderVal));
+		_mode->applyOrientationGuess(cutPlane, botPlane, rotation);
 		std::unordered_set<GLModel*> models{ _mode->_model.get() };
 		//widget stuff
 		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_mode->_widget, models));
 		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_mode->_widget, models));
 		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_mode->_widget, models));
-
 		_mode->updatePosition();
 		_mode->setMode(Hix::Features::MBEditMode::Rotation);
-
 		});
 }
 
@@ -429,52 +437,47 @@ Hix::Features::FaceSelector::FaceSelector(const Hix::Render::SceneEntity& subjec
 {
 }
 
-std::unordered_set<VertexConstItr> Hix::Features::FaceSelector::doSelection(const Hix::Plane3D::PDPlane& selectionPlane, const std::vector<QVector3D>& polyline)
+
+namespace bg = boost::geometry;
+typedef bg::model::point<float, 2, bg::cs::cartesian> point;
+typedef bg::model::polygon<point, false, false> polygon; // ccw, open polygon
+
+polygon toPolygon(const std::vector<QVector3D>& polyline)
 {
-	Mesh selectionMesh;
+	polygon poly;
+	poly.outer().reserve(polyline.size());
+	std::transform(std::begin(polyline), std::end(polyline), std::back_inserter(poly.outer()), [](const QVector3D& qvec) {
+		return point(qvec.x(), qvec.y());
+	});
+	return poly;
+}
 
-	//polyline must be 2d points, based on coordinate system of the plane, z = 0
-	QVector3D planeFar = selectionPlane.normal * -2000.0f + selectionPlane.point;
-	std::vector<QVector3D> path;
-	path.reserve(2);
-	path.emplace_back(selectionPlane.point);
-	path.emplace_back(planeFar);
-	auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(path);
-	auto jointContours = Hix::Features::Extrusion::extrudeAlongPath(&selectionMesh, QVector3D(0, 0, 1), polyline, path, jointDir);
-	//generate caps
-	if (jointContours.front().size() > 1)
-	{
-		Hix::CDT::MeshCDT cdt(&selectionMesh, true);
-		cdt.insertSolidContourZAxis(jointContours.front());
-		cdt.triangulateAndAppend();
-	}
+std::unordered_set<VertexConstItr> Hix::Features::FaceSelector::doSelection(const Hix::Features::SelectionPlane& selectionPlane, const std::vector<QVector3D>& polyline)
+{
 
-	if (jointContours.back().size() > 1)
-	{
-		Hix::CDT::MeshCDT cdt(&selectionMesh, false);
-		cdt.insertSolidContourZAxis(jointContours.back());
-		cdt.triangulateAndAppend();
-	}
-	//do transformation from camera space to model space
+	auto transform = selectionPlane.transform().matrix().inverted();
 
-
-	auto selectionCorkMesh = toCorkMesh(selectionMesh);
-
-	//do comparison
-	CorkTriMesh output;
-	computeIntersection(selectionCorkMesh, _subject, &output);
-	freeCorkTriMesh(&output);
-	//we check which vertex is maintained in union and compare with original mesh. therefore float error is detrimental here.
-	auto unionResult = toHixMesh(output);
+	polygon selectionPoly = toPolygon(polyline);
 	std::unordered_set<VertexConstItr> selectedVtcs;
-	auto vEnd = unionResult->getVertices().cend();
-	for (auto vItr = unionResult->getVertices().cbegin(); vItr != vEnd; ++vItr)
+	auto& vtcs = _subjectOrig.getVertices();
+	std::unordered_set<VertexConstItr> discard;
+	auto vEnd = vtcs.cend();
+	for (auto itr = vtcs.cbegin(); itr != vEnd; ++itr)
 	{
-		auto found = _subjectOrig.getVtxAtLocalPos(vItr.localPosition());
-		if (found.initialized())
+		auto coord = transform * itr.worldPosition();
+		point pt(coord.x(), coord.y());
+		if (boost::geometry::within(pt, selectionPoly))
 		{
-			selectedVtcs.insert(found);
+			selectedVtcs.insert(itr);
 		}
+		//else
+		//{
+		//	discard.insert(itr);
+		//}
+
+
 	}
+
+	
 	return selectedVtcs;
 }

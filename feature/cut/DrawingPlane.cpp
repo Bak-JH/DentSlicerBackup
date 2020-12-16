@@ -5,8 +5,8 @@ using namespace Hix::Input;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner, float width, float height, QColor color, float alpha):
-	Hix::Render::PlaneMeshEntity(owner, width, height, color, true, alpha)
+Hix::Features::Cut::DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner, float width, float height, QColor color, float alpha, bool isDoubleSided):
+	Hix::Render::PlaneMeshEntity(owner, width, height, color, isDoubleSided, alpha)
 {
 	initHitTest();
 	setEnabled(false);
