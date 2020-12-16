@@ -33,5 +33,7 @@ namespace Hix
 		//get boundaries ie) half edges on the edge/hole of the mesh
 		std::vector<Hix::Engine3D::HalfEdgeConstItr> getBoundaryEdges(const Hix::Engine3D::Mesh* mesh);
 		std::vector<Engine3D::Mesh*> seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh);
+		std::deque<std::unordered_set<Hix::Engine3D::FaceConstItr>>  seperateConnectedFaceSet(const Hix::Engine3D::Mesh& mesh);
+
 	}
 }

@@ -6,6 +6,7 @@
 #include <QTime>
 #include <array>
 #include <variant>
+#include <optional>
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
 #define cos50 0.64278761
@@ -147,7 +148,7 @@ namespace Hix
 					addFace(*itr++, *itr++, *itr++);
 				}
 			}
-            bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
+			std::optional<std::array<size_t, 3>> addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
 			MeshDeleteGuard removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs);
 			void removeFaces(const std::unordered_set<FaceConstItr>& faceItrs);

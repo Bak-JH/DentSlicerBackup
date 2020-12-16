@@ -8,7 +8,7 @@ import "../Controls"
 FeaturePopup {
 	id: leftpopupshell
 	title: qsTr("Model Build")
-	height: 395
+	height: 430
 	function setModeText(modeName, text)
 	{
 		currentMode.text = modeName;
@@ -152,6 +152,15 @@ FeaturePopup {
 			source: canvas
 		}
 	
+	}
+
+	CtrTextButton {
+		visible: false
+		id: button2
+		anchors.bottomMargin: 5
+		anchors.bottom: button0.top
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: ""
 	}
 
 	CtrTextButton {

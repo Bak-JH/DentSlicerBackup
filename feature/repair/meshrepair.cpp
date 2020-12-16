@@ -396,19 +396,16 @@ std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::getBoundaryEdges(co
 
 
 
-std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
+std::deque<std::unordered_set<FaceConstItr>>  Hix::Features::seperateConnectedFaceSet(const Hix::Engine3D::Mesh& mesh)
 {
-	std::vector<Hix::Engine3D::Mesh*> meshes;
 	std::deque<std::unordered_set<FaceConstItr>> connected;
 	std::unordered_set<size_t> unexplored;
-	auto meshFaces = mesh->getFaces();
+
+	auto meshFaces = mesh.getFaces();
 	size_t totalFaceCnt = meshFaces.size();
 	unexplored.reserve(totalFaceCnt);
 	for (size_t i = 0; i < totalFaceCnt; ++i)
-	{
 		unexplored.insert(i);
-	}
-
 	while (!unexplored.empty())
 	{
 		auto& current = connected.emplace_back();
@@ -436,6 +433,14 @@ std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix:
 			}
 		}
 	}
+	return connected;
+}
+
+std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
+{
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	auto connected = seperateConnectedFaceSet(*mesh);
+
 	//if there are indeed multiple meshes, allocate new meshs
 	if (connected.size() > 1)
 	{

@@ -12,7 +12,7 @@
 #include "../interfaces/PPShaderMode.h"
 
 class GLModel;
-
+class QQuaternion;
 namespace Hix
 {
 
@@ -36,7 +36,7 @@ namespace Hix
 		{
 		public:
 			FaceSelector(const Hix::Render::SceneEntity& subject);
-			std::unordered_set<Hix::Engine3D::VertexConstItr> doSelection(const Hix::Plane3D::PDPlane& selectionPlane, const std::vector<QVector3D>& polyline);
+			std::unordered_set<Hix::Engine3D::VertexConstItr> doSelection(const Hix::Features::SelectionPlane& selectionPlane, const std::vector<QVector3D>& polyline);
 
 		private:
 			//cached subject mesh
@@ -55,7 +55,7 @@ namespace Hix
 			void featureEnded()override;
 			QVector3D getWidgetPosition()override;
 			void updatePosition()override;
-
+			void applyOrientationGuess(float& cuttingPlane, float& bottomPlane, QQuaternion& rotation);
 
 		private:
 			void setMode(MBEditMode mode);
@@ -72,6 +72,7 @@ namespace Hix
 
 			Hix::QML::Controls::Button* _button0;
 			Hix::QML::Controls::Button* _button1;
+			Hix::QML::Controls::Button* _button2;
 			Hix::QML::Controls::Button* _prevButton;
 			Hix::QML::Controls::Button* _nextButton;
 			//Hix::QML::Controls::ToggleSwitch* _faceSelectionSwtch;
