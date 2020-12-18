@@ -18,9 +18,9 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	constexpr float EPSILON = std::numeric_limits<float>::epsilon();
 	auto mvs = tri.meshVertices();
 
-	QVector3D v0 = _accelerator->getWorldPos(mvs[0]);
-	QVector3D v1 = _accelerator->getWorldPos(mvs[1]);
-	QVector3D v2 = _accelerator->getWorldPos(mvs[2]);
+	QVector3D v0 = _accelerator->getCachedPos(mvs[0]);
+	QVector3D v1 = _accelerator->getCachedPos(mvs[1]);
+	QVector3D v2 = _accelerator->getCachedPos(mvs[2]);
 	QVector3D v0v1 = v1 - v0;
 	QVector3D v0v2 = v2 - v0;
 	QVector3D pvec = QVector3D::crossProduct(rayDirection, v0v2);
@@ -47,6 +47,7 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 		return hit;
 
 	auto t = QVector3D::dotProduct(v0v2, qvec) * invDet;
+	hit.distance = t;
 	hit.intersection = rayOrigin + rayDirection * t;
 	if (isBackside)
 		hit.type = HitType::BackSide;

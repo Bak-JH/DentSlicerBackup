@@ -176,7 +176,7 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidatesDirection(const QVe
 	return intersected_objects;
 }
 
-QVector3D Hix::Engine3D::BVH::getWorldPos(const VertexConstItr& vtx)const
+QVector3D Hix::Engine3D::BVH::getCachedPos(const VertexConstItr& vtx)const
 {
 	return _wPosCache.at(vtx);
 }
@@ -215,7 +215,7 @@ bool Hix::Engine3D::BVH::rayIntersectsAABB(const QVector3D& dirFrac, const QVect
 	return true;
 }
 
-Hix::Engine3D::BVH::BVH(const GLModel& model)
+Hix::Engine3D::BVH::BVH(const GLModel& model, bool isWorld) : _isWorld(isWorld)
 {
 	//cache world vertex positions and triangle bounding boxes
 	std::unordered_set<const GLModel*> allModels;
@@ -232,7 +232,7 @@ Hix::Engine3D::BVH::BVH(const GLModel& model)
 
 }
 
-Hix::Engine3D::BVH::BVH(const std::unordered_set<const GLModel*>& model)
+Hix::Engine3D::BVH::BVH(const std::unordered_set<const GLModel*>& model, bool isWorld) : _isWorld(isWorld)
 {
 	//cache world vertex positions and triangle bounding boxes
 	for (auto each : model)
@@ -252,7 +252,15 @@ void Hix::Engine3D::BVH::initModel(const GLModel& model)
 	auto vtxEnd = model.getMesh()->getVertices().cend();
 	for (auto vtxItr = model.getMesh()->getVertices().cbegin(); vtxItr != vtxEnd; ++vtxItr)
 	{
-		_wPosCache[vtxItr] = vtxItr.worldPosition();
+		if (_isWorld)
+		{
+			_wPosCache[vtxItr] = vtxItr.worldPosition();
+
+		}
+		else
+		{
+			_wPosCache[vtxItr] = vtxItr.localPosition();
+		}
 	}
 }
 
