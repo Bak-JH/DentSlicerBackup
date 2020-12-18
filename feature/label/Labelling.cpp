@@ -1,6 +1,7 @@
 #include "Labelling.h"
 #include "Qml/components/Inputs.h"
 #include "Qml/components/Buttons.h"
+#include <algorithm>
 
 #include "../qml/components/ControlOwner.h"
 
@@ -12,7 +13,8 @@
 //engrave CSG
 #include "../CSG/CSG.h"
 #include "../cdt/HixCDT.h"
-
+#include "../Mesh/BVH.h"
+#include "../Mesh/MTRayCaster.h"
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;
@@ -24,8 +26,8 @@ using namespace Hix::Features::CSG;
 
 //Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
 const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
-
-GLModel* Hix::Features::LabellingMode::generatePreviewModel()
+constexpr float LABEL_SCALE = 0.05f;
+GLModel* Hix::Features::LabellingMode::generatePreviewModel(const QMatrix4x4& transformMat)
 {
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
@@ -58,10 +60,53 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
 	
+	auto depth = _labelDepth->getValue() / LABEL_SCALE;
+
+	// triangulate
+	Hix::CDT::PolytreeCDT polycdt(&polytree);
+	auto trigMap = polycdt.triangulate();
+
+	//raycast 
+	constexpr float RAY_Z = 20;
+	QVector4D rayDir4D(0, 0, -1, 0);
+	rayDir4D = transformMat * rayDir4D;
+	QVector3D rayDir(rayDir4D);
+	rayDir.normalize();
+	std::unordered_map<QVector2D, std::optional<float>> rayCastResult;
+	for (auto& node : trigMap)
+	{
+		for (auto& trig : node.second)
+		{
+			rayCastResult[trig[0]] = {};
+			rayCastResult[trig[1]] = {};
+			rayCastResult[trig[2]] = {};
+
+		}
+	}
+	auto* rayAccel = _rayAccels[_targetModel].get();
+	_rayCaster->addAccelerator(rayAccel);
+	for (auto& rayTarget : rayCastResult)
+	{
+		QVector4D origin4D(rayTarget.first.x(), rayTarget.first.y(), RAY_Z, 1);
+		origin4D = transformMat * origin4D;
+		QVector3D origin(origin4D);
+
+		auto hits = _rayCaster->rayIntersectDirection(origin, rayDir);
+		auto nearest = _rayCaster->getFirstFront(hits);
+		if (nearest)
+		{
+			auto distLocal = nearest.value().distance / LABEL_SCALE;
+			rayTarget.second = distLocal;
+		}
+	}
+
+
+
+
 	//generate wall
 	std::vector<QVector3D> path;
-	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
-	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
+	path.emplace_back(0, 0, -depth);
+	path.emplace_back(0, 0, depth);
 	//DFS polytree
 
 	std::deque<PolyNode*> s;
@@ -87,45 +132,99 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	}
 
 
-	// triangulate
-	Hix::CDT::PolytreeCDT polycdt(&polytree);
-	auto trigMap = polycdt.triangulate();
 
 	//generate front & back mesh
-	for (auto node : trigMap)
+	for (auto& node : trigMap)
 	{
-		for (auto trig : node.second)
+		for (auto& trig : node.second)
 		{
-			labelMesh->addFace(
-				QVector3D(trig[0].x(), trig[0].y(), path.back().z()),
-				QVector3D(trig[1].x(), trig[1].y(), path.back().z()),
-				QVector3D(trig[2].x(), trig[2].y(), path.back().z())
-			);
+			//std::array<float, 3> zProtrude;
+			//std::array<float, 3> zDig;
 
+			//for (auto i = 0; i < 3; ++i)
+			//{
+			//	auto& result = rayCastResult[trig[i]];
+			//	if (result)
+			//	{
+			//		auto actualDist = result.value() - RAY_Z;
+			//		zProtrude[i] = -actualDist + depth;
+			//		zDig[i] = -actualDist - depth;
+			//	}
+			//	else
+			//	{
+			//		zProtrude[i] = depth;
+			//		zDig[i] = -depth;
+			//	}
+			//}
+
+
+			//protruded end
 			labelMesh->addFace(
-				QVector3D(trig[2].x(), trig[2].y(), path.front().z()),
-				QVector3D(trig[1].x(), trig[1].y(), path.front().z()),
-				QVector3D(trig[0].x(), trig[0].y(), path.front().z()));
+				QVector3D(trig[0].x(), trig[0].y(), depth),
+				QVector3D(trig[1].x(), trig[1].y(), depth),
+				QVector3D(trig[2].x(), trig[2].y(), depth)
+			);
+			//dug in end
+			//need to raycast in order to dig deep enough
+			labelMesh->addFace(
+				QVector3D(trig[2].x(), trig[2].y(), -depth),
+				QVector3D(trig[1].x(), trig[1].y(), -depth),
+				QVector3D(trig[0].x(), trig[0].y(), -depth));
 		}
 	}
 
-	return new GLModel(_targetModel, labelMesh, "label", 0);
+
+	auto& vertices = labelMesh->getVertices();
+	for (auto itr = vertices.begin(); itr != vertices.end(); ++itr)
+	{
+		QVector2D xy(itr.localPosition());
+		auto& result = rayCastResult[xy];
+		if (result)
+		{
+			auto actualDist = result.value() - RAY_Z;
+			itr->position.setZ(itr->position.z() - actualDist);
+		}
+		else
+		{
+		}
+
+	}
+
+	auto preview =  new GLModel(_targetModel, labelMesh, "label", 0);
+	preview->transform().setMatrix(transformMat);
+	return preview;
 }
 
 
 
 Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 {
-	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	auto selected = Hix::Application::ApplicationManager::getInstance().partManager().selectedModels();
+	if (selected.empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
 		return;
 	}
+	std::unordered_set<const GLModel*> childs;
+
+	for (auto model : selected)
+	{
+		model->getChildrenModels(childs);
+		childs.insert(model);
+	}
+
+	_rayCaster.reset(new MTRayCaster());
+	std::for_each(
+		std::begin(childs),
+		std::end(childs),
+		[this](const GLModel* model) {  // copies are safer, and the resulting code will be as quick.
+			_rayAccels[model] = std::make_unique<Hix::Engine3D::BVH>(*model, false);
+		});	
 	auto& co = controlOwner();
 	co.getControl(_inputText, "labeltext");
 	co.getControl(_fontStyle, "labelfont");
 	co.getControl(_fontSize, "labelfontsize");
-	co.getControl(_labelHeight, "labelheight");
+	co.getControl(_labelDepth, "labelDepth");
 	co.getControl(_isEmboss, "labeltype");
 }
 
@@ -144,17 +243,7 @@ void Hix::Features::LabellingMode::faceSelected(GLModel* selected, const Hix::En
 
 void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localIntersection, const Hix::Engine3D::FaceConstItr& face)
 {
-	//setMaterialColor(Hix::Render::Colors::Support);
-	if (_isDirty)
-	{
-		_previewModel.reset(generatePreviewModel());
-	}
-	//auto worldIntersection = _targetModel->ptToRoot(localIntersection);
-	auto worldZ = _targetModel->ptToRoot(localIntersection).z();
-	auto width = _previewModel->aabb().lengthX();
-	auto height = _previewModel->aabb().lengthY();
-	//float zHeight = acos()
-	//move model
+
 	auto rotation = QQuaternion::fromDirection(face.worldFn(), QVector3D(0, 0, 1));
 	Qt3DCore::QTransform worldTrans;
 	worldTrans.setRotation(rotation);
@@ -165,11 +254,16 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	Qt3DCore::QTransform newTransform;
 	newTransform.setRotation(finalTrans.rotation());
 	newTransform.setTranslation(localIntersection);
-	newTransform.setScale(0.05f);
-	_previewModel->transform().setMatrix(newTransform.matrix());
+	newTransform.setScale(LABEL_SCALE);
+
+
+
+	_previewModel.reset(generatePreviewModel(newTransform.matrix()));
 	_previewModel->updateAABBScale(newTransform.scale3D());
 	_matrix = newTransform.matrix();
 	_scale = newTransform.scale3D();
+
+
 }
 
 void Hix::Features::LabellingMode::applyButtonClicked()

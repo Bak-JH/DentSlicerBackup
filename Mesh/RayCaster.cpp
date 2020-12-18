@@ -8,7 +8,7 @@ Hix::Engine3D::RayCaster::~RayCaster()
 }
 void Hix::Engine3D::RayCaster::addAccelerator(RayAccelerator* accelerator)
 {
-	_accelerator.reset(accelerator);
+	_accelerator = accelerator;
 }
 
 RayHits Hix::Engine3D::RayCaster::rayIntersect(const QVector3D& rayOrigin, const QVector3D& rayEnd)
@@ -36,6 +36,25 @@ RayHits Hix::Engine3D::RayCaster::rayIntersectDirection(const QVector3D& rayFrom
 		rayHits.push_back(rayIntersectTri(rayFrom, rayDirection, each));
 	}
 	return rayHits;
+}
+
+std::optional<RayHit> Hix::Engine3D::RayCaster::getFirstFront(RayHits& hits)
+{
+	RayHits onlyFronts;
+	std::for_each(std::begin(hits), std::end(hits), [&onlyFronts](const RayHit& hit) {
+		if (hit.type == HitType::FrontSide)
+		{
+			onlyFronts.emplace_back(hit);
+		}
+		});
+	if (onlyFronts.empty())
+		return {};
+	auto min = std::min_element(std::begin(onlyFronts), std::end(onlyFronts), [](const RayHit& a, const RayHit& b) {
+		return a.distance < b.distance;
+		
+		});
+	return *min;
+
 }
 
 

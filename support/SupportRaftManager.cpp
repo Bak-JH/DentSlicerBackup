@@ -358,7 +358,8 @@ void Hix::Support::SupportRaftManager::prepareRaycasterSelected()
 		models.emplace(e);
 	}
 	_rayCaster.reset(new MTRayCaster());
-	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(models));
+	_rayAccel.reset(new Hix::Engine3D::BVH(models));
+	_rayCaster->addAccelerator(_rayAccel.get());
 }
 
 
@@ -366,7 +367,8 @@ void Hix::Support::SupportRaftManager::prepareRaycasterSelected()
 void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
 {
 	_rayCaster.reset( new MTRayCaster());
-	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(model));
+	_rayAccel.reset(new Hix::Engine3D::BVH(model));
+	_rayCaster->addAccelerator(_rayAccel.get());
 }
 
 RaftModel* Hix::Support::SupportRaftManager::raftModel() 
