@@ -282,6 +282,10 @@ void cuntourConcaveFill(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>&
 }
 
 
+inline int getmod(int val, int mod) {
+	return ((val % mod) + mod) % mod;
+}
+
 void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
 {
 	if (boundary.size() < 2)
@@ -289,10 +293,10 @@ void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 
 	std::vector<QVector3D> cylinder;
 	std::vector<QVector3D> newCylinder;
-	auto edgeCnt = boundary.size()-1;
+	int edgeCnt = boundary.size();
 	cylinder.reserve(edgeCnt);
 	newCylinder.reserve(edgeCnt);
-	auto boundEnd = boundary.cend() - 1;
+	auto boundEnd = boundary.cend();
 	std::transform(std::cbegin(boundary), boundEnd, std::back_inserter(cylinder), [](const HalfEdgeConstItr& itr) {
 		return itr.from().localPosition();
 	});
@@ -303,26 +307,50 @@ void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 		zStep = -zStep;
 	}
 
-	constexpr size_t count = 10;
+	constexpr size_t count = 10; 
 	for (auto currCnt = 0; currCnt < count; ++currCnt)
 	{
+		for (auto i = 0; i < edgeCnt; ++i)
+		{
+			auto pt0 = cylinder[getmod(i - 1, edgeCnt)];
+			qDebug() << getmod(i - 1, edgeCnt);
+			//qDebug() << pt0;
+		}
+		qDebug() << "pt0 done";
+		for (auto i = 0; i < edgeCnt; ++i)
+		{
+			auto pt1 = cylinder[i];
+			qDebug() << pt1;
+		}
+		qDebug() << "pt1 done";
+
+		for (auto i = 0; i < edgeCnt; ++i)
+		{
+			auto pt2 = getmod(i + 1, edgeCnt);
+			qDebug() << pt2;
+		}
+		qDebug() << "pt2 done";
 		//form new smoothed edges;
 		for (auto i = 0; i < edgeCnt; ++i)
 		{
-			auto pt0 = cylinder[(i - 1) % edgeCnt];
+			auto pt0 = cylinder[getmod(i - 1, edgeCnt)];
 			auto pt1 = cylinder[i];
-			auto pt2 = cylinder[(i + 1) % edgeCnt];
+			auto pt2 = cylinder[getmod(i + 1, edgeCnt)];
 			auto smoothed = (0.5 * pt1) + (0.25 * (pt0 + pt2));
 			smoothed.setZ(smoothed.z() + zStep);
 			newCylinder.emplace_back(smoothed);
+			qDebug() << smoothed;
+
 		}
+		qDebug() << "pt generation done";
+
 		//create new cylinder to smoothed edges
 		for (auto i = 0; i < edgeCnt; ++i)
 		{
 			auto pt1 = cylinder[i];
-			auto pt2 = cylinder[(i + 1) % edgeCnt];
+			auto pt2 = cylinder[getmod(i + 1, edgeCnt)];
 			auto npt1 = newCylinder[i];
-			auto npt2 = newCylinder[(i + 1) % edgeCnt];
+			auto npt2 = newCylinder[getmod(i + 1, edgeCnt)];
 
 			mesh.addFace(pt1, npt1, pt2);
 			auto fIdcs = mesh.addFace(pt2, npt1, npt2).value();
@@ -330,13 +358,19 @@ void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 			const auto& vtcs = mesh.getVertices();
 			HalfEdgeConstItr itr;
 			bool isworking = latestFace.getEdgeWithVertices(itr, vtcs.itrAt(fIdcs[1]), vtcs.itrAt(fIdcs[2]));
+			if (!isworking)
+			{
+				qDebug() << "shit this is not working";
+				throw;
+			}
+			qDebug() << itr.localLength();
 			boundary[i] = itr;
 		}
 		//now reset
 		std::swap(cylinder, newCylinder);
 		newCylinder.clear();
 	}
-	boundary[edgeCnt] = boundary.front();
+	//boundary[edgeCnt] = boundary.front();
 }
 bool isDownard(const FaceConstItr& face)
 {
