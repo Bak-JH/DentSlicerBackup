@@ -658,6 +658,7 @@ std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, Fa
 		else
 		{
 			fails.insert(nf);
+			return false;
 		}
 	};
 	auto res = findNearFaces(mf, faceCond, maxCount);

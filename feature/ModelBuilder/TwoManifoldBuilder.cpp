@@ -300,8 +300,9 @@ void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 	std::transform(std::cbegin(boundary), boundEnd, std::back_inserter(cylinder), [](const HalfEdgeConstItr& itr) {
 		return itr.from().localPosition();
 	});
+	auto originalCylinder = cylinder;
 
-	float zStep = 0.1f;
+	float zStep = 0.01f;
 	if (isBottEmpty)
 	{
 		zStep = -zStep;
@@ -321,25 +322,27 @@ void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 			newCylinder.emplace_back(smoothed);
 
 		}
-		//create new cylinder to smoothed edges
-		for (int i = 0; i < edgeCnt; ++i)
-		{
-			auto pt1 = cylinder[i];
-			auto pt2 = cylinder[getmod(i + 1, edgeCnt)];
-			auto npt1 = newCylinder[i];
-			auto npt2 = newCylinder[getmod(i + 1, edgeCnt)];
 
-			mesh.addFace(pt1, npt1, pt2);
-			auto fIdcs = mesh.addFace(pt2, npt1, npt2).value();
-			auto latestFace = mesh.getFaces().cend() - 1;
-			const auto& vtcs = mesh.getVertices();
-			HalfEdgeConstItr itr;
-			bool isworking = latestFace.getEdgeWithVertices(itr, vtcs.itrAt(fIdcs[1]), vtcs.itrAt(fIdcs[2]));
-			boundary[i] = itr;
-		}
 		//now reset
 		std::swap(cylinder, newCylinder);
 		newCylinder.clear();
+	}
+
+	//create new cylinder to smoothed edges
+	for (int i = 0; i < edgeCnt; ++i)
+	{
+		auto pt1 = originalCylinder[i];
+		auto pt2 = originalCylinder[getmod(i + 1, edgeCnt)];
+		auto npt1 = newCylinder[i];
+		auto npt2 = newCylinder[getmod(i + 1, edgeCnt)];
+
+		mesh.addFace(pt1, npt1, pt2);
+		auto fIdcs = mesh.addFace(pt2, npt1, npt2).value();
+		auto latestFace = mesh.getFaces().cend() - 1;
+		const auto& vtcs = mesh.getVertices();
+		HalfEdgeConstItr itr;
+		bool isworking = latestFace.getEdgeWithVertices(itr, vtcs.itrAt(fIdcs[1]), vtcs.itrAt(fIdcs[2]));
+		boundary[i] = itr;
 	}
 }
 bool isDownard(const FaceConstItr& face)
