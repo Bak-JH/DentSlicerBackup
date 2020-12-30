@@ -5,10 +5,10 @@
 #include <QtMath>
 #include "../utils/mathutils.h"
 using namespace Hix;
+using namespace Hix::Utils::Math;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace Hix::OverhangDetect;
-
 const double critical_angle = 45;
 const double critical_angle_radian = M_PI * (critical_angle / 180.0);
 float area_subdiv = 20.0f;
@@ -219,7 +219,7 @@ Hix::OverhangDetect::Overhangs Hix::OverhangDetect::Detector::detectOverhang(con
 	}
 	//if density is 0, don't detect anything
 	auto supportDensity = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportDensity;
-	if (Utils::Math::floatAreSame(supportDensity, 0.0f))
+	if (floatAreSame(supportDensity, 0.0f))
 		return overhangs;
 	auto suppDensity = supportDensity / 100.0f;
 	//be generous with bin size for face support

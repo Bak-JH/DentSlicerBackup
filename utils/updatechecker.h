@@ -1,24 +1,30 @@
-#ifndef UPDATECHECKER_H
-#define UPDATECHECKER_H
+#pragma once
 #include "winsparkle/winsparkle.h"
 #include <QResource>
 #include <QNetworkReply>
 #include <QXmlStreamReader>
 
-class UpdateChecker : public QObject
+namespace Hix
 {
-    Q_OBJECT
-public:
-    UpdateChecker();
-    void setVersion(QString ver);
-    void initWinSparkle();
-    void checkForUpdates();
+    namespace Utils
+    {
+        class UpdateChecker : public QObject
+        {
+            Q_OBJECT
+        public:
+            UpdateChecker();
+            void init();
+            void checkForUpdates();
+            void forceCheckForUpdates();
+        public slots:
+            void parseUpdateInfo(QNetworkReply*);
 
-public slots:
-    void parseUpdateInfo(QNetworkReply*);
+        private:
+            void initWinSparkle();
 
-private:
-    std::unique_ptr<QNetworkAccessManager> _manager;
-};
+            std::unique_ptr<QNetworkAccessManager> _manager;
+        };
 
-#endif // UPDATECHECKER_H
+
+    }
+}
