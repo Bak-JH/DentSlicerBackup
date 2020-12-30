@@ -46,6 +46,7 @@ void Hix::Application::ApplicationManager::init()
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
 	TaskManagerLoader::init(_taskManager, _engine);
 	_supportRaftManager.initialize(_partManager.modelRoot());
+	_updateChecker.init();
 	//settings
 	_setting.parseJSON();
 	_setting.sliceSetting.parseJSON();
@@ -56,6 +57,10 @@ void Hix::Application::ApplicationManager::init()
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
+#else
+	//only auto update for release
+	_updateChecker.checkForUpdates();
+
 #endif
 }
 QQuickItem* Hix::Application::ApplicationManager::getWindowRoot() const
@@ -112,6 +117,11 @@ Hix::Support::SupportRaftManager& Hix::Application::ApplicationManager::supportR
 Hix::Auth::AuthManager& Hix::Application::ApplicationManager::auth()
 {
 	return _auth;
+}
+
+Hix::Utils::UpdateChecker& Hix::Application::ApplicationManager::updater()
+{
+	return _updateChecker;
 }
 
 QString Hix::Application::ApplicationManager::getVersion() const

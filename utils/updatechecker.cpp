@@ -1,15 +1,10 @@
 #include "updatechecker.h"
 #include "Settings/AppSetting.h"
 #include "application/ApplicationManager.h"
-
+using namespace Hix::Utils;
+constexpr auto APPCAST = "https://services.hix.co.kr/setup/view_file/dentslicer/appcast.xml";
 UpdateChecker::UpdateChecker()
 {
-    _manager.reset(new QNetworkAccessManager());
-    QObject::connect(_manager.get(), &QNetworkAccessManager::finished,
-        [this](QNetworkReply* reply) {
-            parseUpdateInfo(reply);
-        });
-    initWinSparkle();
 }
 
 void UpdateChecker::initWinSparkle(){
@@ -21,7 +16,7 @@ void UpdateChecker::initWinSparkle(){
     auto version = Hix::Application::ApplicationManager::getInstance().getVersion().toStdWString();
     qDebug() << "ver: " << version;
 
-    win_sparkle_set_appcast_url("https://services.hix.co.kr/setup/view_file/dentslicer/appcast.xml");
+    win_sparkle_set_appcast_url(APPCAST);
 
     win_sparkle_set_app_details(L"HiX.org", L"DentSlicerSetup", version.c_str());
 
@@ -36,12 +31,28 @@ void UpdateChecker::initWinSparkle(){
     win_sparkle_init();
 }
 
+void UpdateChecker::init()
+{
+    _manager.reset(new QNetworkAccessManager());
+    QObject::connect(_manager.get(), &QNetworkAccessManager::finished,
+        [this](QNetworkReply* reply) {
+            parseUpdateInfo(reply);
+        });
+    initWinSparkle();
+}
+
 void UpdateChecker::checkForUpdates(){
-    _manager->get(QNetworkRequest(QUrl("https://services.hix.co.kr/setup/view_file/dentslicer/appcast.xml")));
+    _manager->get(QNetworkRequest(QUrl(APPCAST)));
 
     //win_sparkle_check_update_with_ui_and_install();
     win_sparkle_check_update_without_ui();
     //win_sparkle_check_update_with_ui();
+}
+
+void Hix::Utils::UpdateChecker::forceCheckForUpdates()
+{
+    _manager->get(QNetworkRequest(QUrl(APPCAST)));
+    win_sparkle_check_update_with_ui();
 }
 
 void UpdateChecker::parseUpdateInfo(QNetworkReply* reply){

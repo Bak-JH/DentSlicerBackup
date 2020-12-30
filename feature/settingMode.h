@@ -28,6 +28,7 @@ namespace Hix
 			bool isDirty()const;
 			Hix::QML::Controls::DropdownBox* _printerPresets;
 			Hix::QML::Controls::Button* _logoutBttn;
+			Hix::QML::Controls::Button* _updateBttn;
 
 			std::deque<std::filesystem::path> _presetPaths; //same index as combo box
 			int _oldIndex;

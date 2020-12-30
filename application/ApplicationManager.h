@@ -12,8 +12,8 @@
 #include "MouseCursorManager.h"
 #include "../auth/AuthManager.h"
 #include "utils/updatechecker.h"
+#include "../utils/updatechecker.h"
 class QQuickItem;
-class UpdateChecker;
 namespace Qt3DCore
 {
 	class QEntity;
@@ -67,6 +67,7 @@ namespace Hix
 			Hix::Tasking::TaskManager& taskManager();
 			Hix::Support::SupportRaftManager& supportRaftManager();
 			Hix::Auth::AuthManager& auth();
+			Hix::Utils::UpdateChecker& updater();
 
 			QString getVersion()const;
 
@@ -77,6 +78,7 @@ namespace Hix
 			SceneManager _sceneManager;
 			FeatureManager _featureManager;
 			MouseCursorManager _cursorManager;
+			Hix::Utils::UpdateChecker _updateChecker;
 			Hix::Input::RayCastController _rayCastController;
 			Hix::Tasking::TaskManager _taskManager;
 			Hix::Support::SupportRaftManager _supportRaftManager;
@@ -102,7 +104,7 @@ namespace Hix
 			friend class Hix::Features::SupportMode;
 			friend class Hix::Features::SliceExportMode;
 			friend class Hix::Auth::AuthManager;
-			friend class UpdateChecker;
+			friend class Hix::Utils::UpdateChecker;
 
 
 		};

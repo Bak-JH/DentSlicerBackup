@@ -17,7 +17,7 @@ using namespace Qt3DInput;
 using namespace Qt3DCore;
 using namespace Hix::Input;
 using namespace std::chrono_literals;
-using namespace Utils::Math;
+using namespace Hix::Utils::Math;
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define LOG_RAYCAST_TIME
 #define RAYCAST_STRICT
