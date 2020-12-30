@@ -1,5 +1,6 @@
 #pragma once
 #include <QDebug>
+#include "../render/Color.h"
 
 
 #if defined(_DEBUG) || defined(QT_DEBUG )

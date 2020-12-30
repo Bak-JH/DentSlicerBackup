@@ -126,7 +126,6 @@ void Hix::Features::ImportModel::importSingle(const QString& name, const std::fi
 void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QString& name)
 {
 	mesh->centerMesh();
-
 	auto listModel = new ListModel(mesh,name, nullptr);
 	tryRunFeature(*listModel);
 	addFeature(listModel);
@@ -139,12 +138,8 @@ void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QS
 		addFeature(repair);
 	}
 
-	auto bound = listModel->get()->recursiveAabb();
-	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
-	if (printBound.contains(bound))
-	{
-		auto arrange = new AutoArrangeAppend(listModel->get());
-		tryRunFeature(*arrange);
-		addFeature(arrange);
-	}
+	auto bound = listModel->get()->recursiveAabb().centred();
+	auto arrange = new AutoArrangeAppend(listModel->get());
+	tryRunFeature(*arrange);
+	addFeature(arrange);
 }

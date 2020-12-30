@@ -31,9 +31,9 @@ void Hix::Support::SupportModel::initHitTest()
 
 }
 
-void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)
+void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData& m, const Qt3DRender::QRayCasterHit& h)
 {
-	if (isEnabled())
+	if (m.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && isEnabled())
 	{
 		switch (_manager->supportEditMode())
 		{

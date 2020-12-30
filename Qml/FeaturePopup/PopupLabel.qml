@@ -61,11 +61,12 @@ FeaturePopup {
 	}
 
 	CtrSpinBox {
-		id: labelheight
-		label.text: "Label Height"
-		fromNum: 0.1
-		toNum: 100
-		value: 4
+		id: labelDepth
+		label.text: "Label Depth"
+		fromNum: 0.05
+		toNum: 10
+		value: 0.2
+		increment: 0.05
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -84,7 +85,7 @@ FeaturePopup {
 			text: "Emboss"
 		}
 		width: parent.width / 2
-		anchors.top: labelheight.bottom
+		anchors.top: labelDepth.bottom
 		anchors.topMargin: 16
 		anchors.right: parent.right
 		anchors.rightMargin: 16 - 2

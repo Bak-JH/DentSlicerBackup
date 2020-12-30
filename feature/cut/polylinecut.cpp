@@ -64,8 +64,8 @@ void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVe
 	path.reserve(2);
 	path.emplace_back(QVector3D(0, 0, -0.5));
 	path.emplace_back(QVector3D(0, 0, cutBound.zMax() + 0.5));
-	std::vector<std::vector<QVector3D>> jointContours;
-	Hix::Features::Extrusion::extrudeAlongPath<float>(&out, QVector3D(0, 0, 1), contour3d, path, jointContours);
+	auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(path);
+	auto jointContours = Hix::Features::Extrusion::extrudeAlongPath(&out, QVector3D(0, 0, 1), contour3d, path, jointDir);
 	//generate caps
 	if (jointContours.front().size() > 1)
 	{

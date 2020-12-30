@@ -3,36 +3,58 @@ import hix.qml 1.0 as Hix
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 import "../Controls"
+
+
 FeaturePopup {
 	id: leftpopupshell
 	title: qsTr("Model Build")
-	height: 168
+	height: 430
+	function setModeText(modeName, text)
+	{
+		currentMode.text = modeName;
+		currentText.text = text;
+	}
 
 	function helpToggle() {
 		if (modelbuildhelp.visible == false) { modelbuildhelp.visible = true; }
 		else { modelbuildhelp.visible = false; }
 	}
 
+
+	
 	Text {
-		id: popupbody
+		id: currentMode
 		width: 200 //182 //parent.width - sidePadding * 2
 		//height: 26
-		text: qsTr("Adjust the orientation of a model and positions of two planes if necessary.")
 		wrapMode: Text.WordWrap //Text.WrapAnywhere
-		font.pointSize: 10
+		font.pointSize: 14
+		font.bold: true
 		font.family: openRegular.name
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.topMargin: 44
 		anchors.leftMargin: 16
 	}
+	Text {
+		id: currentText
+		width: 200 //182 //parent.width - sidePadding * 2
+		height: 80
+		wrapMode: Text.WordWrap //Text.WrapAnywhere
+		font.pointSize: 10
+		font.family: openRegular.name
+		anchors.top: currentMode.bottom
+		anchors.left: parent.left
+		anchors.topMargin: 5
+		anchors.leftMargin: 16
+	}
 
 	CtrRectButton {
+		id: helpButton
 		width: 30
 		height: width
 		radius: width / 2
 		color: "#f6feff"
-		anchors.top: popupbody.top
+		anchors.top: currentText.top
 		anchors.topMargin: -2
 		anchors.right: parent.right
 		anchors.rightMargin: 10
@@ -51,7 +73,7 @@ FeaturePopup {
 	Rectangle {
 		id: modelbuildhelp
 		width: 296
-		height: 192 //224
+		height: 190 //224
 		color: "transparent"
 		anchors.left: leftpopupshell.right
 		anchors.leftMargin: 12
@@ -62,8 +84,6 @@ FeaturePopup {
 		Canvas {
 			id: canvas
 			anchors.fill: parent
-			width: 296
-			height: 192 //224
 			onPaint: {
 				var ctx = getContext("2d");
 				ctx.reset();
@@ -133,5 +153,92 @@ FeaturePopup {
 		}
 	
 	}
+
+	CtrTextButton {
+		visible: false
+		id: button2
+		anchors.bottomMargin: 5
+		anchors.bottom: button0.top
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: ""
+	}
+
+	CtrTextButton {
+		id: button0
+		visible: false
+		anchors.bottomMargin: 5
+		anchors.bottom: button1.top
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: ""
+	}
+
+	CtrTextButton {
+		visible: false
+		id: button1
+		anchors.bottomMargin: 5
+		anchors.bottom: nextButton.top
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: ""
+	}
+
+	CtrTextButton {
+		id: nextButton
+		anchors.bottomMargin: 5
+		anchors.bottom: prevButton.top
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: "Next"
+	}
+
+	CtrTextButton {
+		id: prevButton
+		anchors.bottomMargin: bottomMargin + 5
+		anchors.bottom: parent.bottom
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: "Previous"
+	}
+	
+	// CtrDropdownBox {
+	// 	id: editType
+	// 	dropdownText: "Edit Type"
+	// 	width: parent.width - 16 * 2
+	// 	anchors.left: parent.left
+	// 	anchors.leftMargin: 16
+	// 	anchors.top: modelbuildhelp.bottom
+	// 	anchors.topMargin: 10
+	// }
+	// CtrToggleSwitch {
+	// 	id: faceSelection
+	// 	sizeMult: 1.2
+	// 	isChecked: false
+	// 	anchors.left: parent.left
+	// 	anchors.leftMargin: 32	// 16 = triangle height
+	// 	anchors.top: modelbuildhelp.bottom
+	// 	anchors.topMargin: 5
+	// 	leftText
+	// 	{
+	// 		text: "Disabled"
+	// 	}
+	// 	rightText
+	// 	{
+	// 		text: "Face Selection"
+	// 	}
+	// }
+	// CtrToggleSwitch {
+	// 	id: rotation
+	// 	sizeMult: 1.2
+	// 	isChecked: true
+	// 	anchors.left: parent.left
+	// 	anchors.leftMargin: 32	// 16 = triangle height
+	// 	anchors.top: faceSelection.bottom
+	// 	anchors.topMargin: 5
+	// 	leftText
+	// 	{
+	// 		text: "Disabled"
+	// 	}
+	// 	rightText
+	// 	{
+	// 		text: "Rotation"
+	// 	}
+	// }
 
 }

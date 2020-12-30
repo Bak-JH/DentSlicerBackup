@@ -25,23 +25,11 @@ void Hix::UI::Widget3D::setVisible(bool show)
 	if (_visible != show)
 	{
 		_visible = show;
-		if (_visible)
+		setEnabled(_visible);
+		for (auto& each : _widgets)
 		{
-			setEnabled(true);
-			for (auto& each : _widgets)
-			{
-				each->setHitTestable(true);
-				each->setHoverable(true);
-			}
-		}
-		else
-		{
-			setEnabled(false);
-			for (auto& each : _widgets)
-			{
-				each->setHitTestable(false);
-				each->setHoverable(false);
-			}
+			each->setHitTestable(_visible);
+			each->setHoverable(_visible);
 		}
 	}
 }

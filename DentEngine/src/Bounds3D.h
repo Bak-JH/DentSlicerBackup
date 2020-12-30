@@ -60,7 +60,8 @@ namespace Hix
 			bool contains(const Hix::Engine3D::Bounds3D& other)const;
 			bool intersects(const Hix::Engine3D::Bounds3D& other)const;
 			bool intersects2D(const Hix::Engine3D::Bounds3D& other)const;
-			
+			Bounds3D centred()const;
+
 			//********When centred around origin ********
 			Bounds3D(QVector3D lengths);
 			void setXLength(float length);

@@ -14,7 +14,9 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-
+			// face selection enabled
+			std::unordered_set<FaceConstItr> selectedFaces;
+			void unselectMeshFaces();
 
 			SceneEntityWithMaterial(Qt3DCore::QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntityWithMaterial();

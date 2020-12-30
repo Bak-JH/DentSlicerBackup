@@ -38,7 +38,7 @@ vec4 calcLights(in vec3 position, in vec3 norm, in vec4 primitiveColor)
         diffTotal += diff;
     }
 
-    return vec4((ambient + diffTotal), 1.0) * primitiveColor;
+    return vec4((ambient + diffTotal), 1) * primitiveColor;
 }
 vec3 calcNorm()
 {

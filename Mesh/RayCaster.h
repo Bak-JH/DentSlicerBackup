@@ -18,6 +18,7 @@ namespace Hix
 			QVector3D intersection;
 			HitType type;
 			FaceConstItr face;
+			float distance;
 		};
 		typedef std::deque<RayHit> RayHits;
 		class RayCaster
@@ -27,6 +28,7 @@ namespace Hix
 			void addAccelerator(RayAccelerator* accelerator);
 			RayHits rayIntersect(const QVector3D& rayOrigin, const QVector3D& rayEnd);
 			RayHits rayIntersectDirection(const QVector3D& rayFrom, const QVector3D& rayDirection);
+			std::optional<RayHit> getFirstFront(RayHits& hits);
 			/// <summary>
 			/// volumetric ray cast test with early exit.
 			/// </summary>
@@ -34,7 +36,7 @@ namespace Hix
 
 		protected:
 			virtual RayHit rayIntersectTri(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;
-			std::unique_ptr<RayAccelerator> _accelerator;
+			RayAccelerator* _accelerator;
 		};
 
 
