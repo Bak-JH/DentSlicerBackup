@@ -53,6 +53,7 @@ Entity {
         objectName:"total"
         Transform{
             id: systemTransform
+            translation: Qt.vector3d(0,0,0)
             scale3D: Qt.vector3d(0.004,0.004,0.004)
             rotationX : -70
             rotationY : 0
@@ -63,13 +64,13 @@ Entity {
 
         /* Grid Mesh */
 
-        PhongMaterial{
-            id : meshMaterial
-            ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
-            diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
-            specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
-            shininess: 0
-        }
+        // PhongMaterial{
+        //     id : meshMaterial
+        //     ambient: Qt.rgba(100/255, 100/255, 100/255, 0)
+        //     diffuse: Qt.rgba(100/255, 100/255, 100/255, 0)
+        //     specular: Qt.rgba(100/255, 100/255, 100/255, 0)
+        //     shininess: 0
+        // }
 		Entity{
             id: models
             //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"

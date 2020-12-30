@@ -41,8 +41,7 @@ public:
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
 
 
-    // face selection enabled
-    std::unordered_set<FaceConstItr> selectedFaces;
+
 
     void changeColor(const QVector4D& color);
 	bool isPrintable()const;
@@ -70,7 +69,6 @@ public:
 	GLModel* getRootModel();
 	const GLModel* getRootModel()const;
 
-	void unselectMeshFaces();
 
 protected:
 	void initHitTest()override;

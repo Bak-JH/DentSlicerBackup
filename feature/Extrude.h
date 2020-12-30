@@ -2,7 +2,7 @@
 
 #include "../DentEngine/src/mesh.h"
 #include "Shapes2D.h"
-
+#include <optional>
 namespace Hix
 {
 
@@ -11,83 +11,64 @@ namespace Hix
 		namespace Extrusion
 		{
 
+
+			//given 3 points, or 2 straign segments, calculate the normal of the joints: start, joint, end
+			std::vector<QVector3D> interpolatedJointNormals(const std::vector<QVector3D>& path);
+			//std::vector<QVector3D> segNormals(const std::vector<QVector3D>& path);
+
 			void generateCylinderWall(const QVector3D& a0, const QVector3D& a1,
 				const QVector3D& b0, const QVector3D& b1, std::vector<std::array<QVector3D, 3>> & output);
 			void generateCylinderWalls(const std::vector<QVector3D>& from, const std::vector<QVector3D>& to,
 				std::vector<std::array<QVector3D, 3>> & output);
 
+			namespace detail {
+				auto noScale = [](std::vector<std::vector<QVector3D>>& contours ) {
+					//do nothing
+					return;
+					 };
+			}
+
+			using Contour = std::vector<QVector3D>;
+			class ContourScaler
+			{
+			public:
+				virtual ~ContourScaler() {};
+				virtual void scale(Contour& contour, size_t index)const = 0;
+			};
+			class FloatScaler : public ContourScaler
+			{
+			public:
+				FloatScaler(const std::vector<float>& scales);
+				~FloatScaler()override;
+			protected:
+				std::vector<float> _scales;
+			};
+
+			class VtxNormalScaler : public FloatScaler
+			{
+			public:
+				using FloatScaler::FloatScaler;
+				~VtxNormalScaler()override;
+				void scale(Contour& contour, size_t index)const override;
+			
+			};
+			//from origin
+			class UniformScaler : public FloatScaler
+			{
+			public:
+				using FloatScaler::FloatScaler;
+				~UniformScaler()override;
+				void scale(Contour& contour, size_t index)const override;
+			};
+
 			//extrude along a parth, returns endcap contour, given contour is on the same direction (CW, CCW) as the final end cap
 			//ie) when cylinder is complete, starting contour faces wrong way and it's normal is towards the inside of cylinder
 			//does not generate end caps though.
-			template<typename ScaleArg>
-			void extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& normal,
-				const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path,
-				std::vector<std::vector<QVector3D>>& jointContours,
-				const std::vector<ScaleArg>* scales = nullptr,
-				std::function<void (std::vector<QVector3D>&,  ScaleArg)>* scaleFunctor = nullptr)
-			{
+			//contourNormal normal of original contour, doesn't calculate for optimizing away float error usually positive Z-axis
+			//template<typename ScalerFunctorType>
+			std::vector<std::vector<QVector3D>> extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& contourNormal, const std::vector<QVector3D>& contour,
+				const std::vector<QVector3D>& path, const std::vector<QVector3D>& jointDirs, ContourScaler *scaler = nullptr);
 
-				if (contour.size() < 3 || path.size() < 2 || (scales && (!scaleFunctor || scales->size() != path.size())))
-					return;
-				//joints including end cap contours
-				jointContours.clear();
-				jointContours.reserve(path.size());
-				//compute segments
-				std::vector<QVector3D> segs;
-				segs.reserve(path.size() - 1);
-				auto lastPathItr = path.end() - 1;
-				for (auto itr = path.begin(); itr != lastPathItr; ++itr)
-				{
-					auto next = itr + 1;
-					segs.emplace_back(*next - *itr);
-				}
-
-				//compute joint directions, joint direction is direction between two segments ie) sum of them
-				std::vector<QVector3D> jointDirs;
-				jointDirs.reserve(path.size());
-				jointDirs.emplace_back(segs[0]);
-				auto lastSegItr = segs.end() - 1;
-				for (auto itr = segs.begin(); itr != lastSegItr; ++itr)
-				{
-					auto next = itr + 1;
-					jointDirs.emplace_back(*next + *itr);
-				}
-				jointDirs.emplace_back(segs.back());
-				//build joint contours
-				for (size_t i = 0; i < path.size(); ++i)
-				{
-					jointContours.emplace_back(contour);
-				}
-				//order of transformation is scale, rotate, translate
-				if (scales)
-				{
-					for (size_t i = 0; i < jointContours.size(); ++i)
-					{
-						(*scaleFunctor)(jointContours[i], (*scales)[i]);
-					}
-				}
-				for (size_t i = 0; i < jointContours.size(); ++i)
-				{
-					Hix::Shapes2D::rotateContour(jointContours[i], QQuaternion::rotationTo(normal, jointDirs[i]));
-					Hix::Shapes2D::moveContour(jointContours[i], path[i]);
-				}
-				//apply scale if needed;
-				//we got all the joint contours, so we can now fill the cylinder walls;
-				std::vector<std::array<QVector3D, 3>> trigVertices;
-				//amount of triangles needed = cylinder wall count * 2 * number of cylinders
-				trigVertices.reserve((jointContours.size() - 1) * contour.size() * 2);
-				auto lastJointItr = jointContours.end() - 1;
-				for (auto itr = jointContours.begin(); itr != lastJointItr; ++itr)
-				{
-					auto next = itr + 1;
-					generateCylinderWalls(*itr, *next, trigVertices);
-				}
-				for (auto& trig : trigVertices)
-				{
-					destinationMesh->addFace(trig[0], trig[1], trig[2]);
-				}
-
-			}
 
 		}
 

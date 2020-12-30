@@ -2,15 +2,23 @@
 #include "../../glmodel.h"
 
 
+Hix::Features::PPShaderMode::PPShaderMode()
+{
+}
+
 Hix::Features::PPShaderMode::PPShaderMode(const std::unordered_set<GLModel*>& selectedModels)
 	:_subjects(selectedModels), Mode()
 {
 	for (auto each : _subjects)
 	{
-		each->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-		each->updateMesh(true);
-
+		initPPShader(*each);
 	}
+}
+
+void Hix::Features::PPShaderMode::initPPShader(GLModel& model)
+{
+	model.setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+	model.updateMesh(true);
 }
 
 void Hix::Features::PPShaderMode::colorFaces(GLModel* model, const std::unordered_set<Hix::Engine3D::FaceConstItr>& faces)

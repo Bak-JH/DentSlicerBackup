@@ -20,7 +20,6 @@
 #include "feature/interfaces/SelectFaceMode.h"
 #include "feature/move.h"
 #include "application/ApplicationManager.h"
-
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _STRICT_GLMODEL
@@ -392,10 +391,7 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int fac
 }
 // for extension
 
-void GLModel:: unselectMeshFaces(){
-	selectedFaces.clear();
-	callRecursive(this, &GLModel::unselectMeshFaces);
-}
+
 
 
 

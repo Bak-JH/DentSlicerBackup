@@ -12,10 +12,7 @@
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include "utils/utils.h"
-
-
-
-#define ATTRIBUTE_SIZE_INCREMENT 200
+#include "common/Debug.h"
 
 using namespace Qt3DCore;
 using namespace Hix::Utils::Math;
@@ -92,10 +89,22 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
 	size_t idx = 0;
 
+#ifdef _DEBUG
+	auto& debug = Hix::Debug::DebugRenderObject::getInstance();
+	auto faceOverrideSet = debug.getOverrideColors(this);
+#endif
+
 	for (auto itr = begin; itr != end; ++itr)
 	{
 		auto faceVertices = itr.meshVertices();
-		auto colorCode = getPrimitiveColorCode(mesh, itr);
+		QVector4D colorCode = getPrimitiveColorCode(mesh, itr);
+#ifdef _DEBUG
+		if (faceOverrideSet && faceOverrideSet->get().faces.find(itr) != faceOverrideSet->get().faces.cend())
+		{
+			colorCode = faceOverrideSet->get().color;
+		}
+#endif
+		
 
 		for (auto& vtxItr : faceVertices)
 		{
@@ -137,4 +146,10 @@ void Hix::Render::SceneEntityWithMaterial::setMaterialParamter(const std::string
 {
 	_meshMaterial.setParameterValue(key, value);
 	callRecursive(this, &SceneEntityWithMaterial::setMaterialParamter, key, value);
+}
+
+
+void Hix::Render::SceneEntityWithMaterial::unselectMeshFaces() {
+	selectedFaces.clear();
+	callRecursive(this, &Hix::Render::SceneEntityWithMaterial::unselectMeshFaces);
 }

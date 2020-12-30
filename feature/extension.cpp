@@ -6,6 +6,7 @@
 #include "render/Color.h"
 #include "glmodel.h"
 #include "application/ApplicationManager.h"
+#include "../Mesh/FaceSelectionUtils.h"
 
 using namespace Hix::Debug;
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
@@ -21,73 +22,8 @@ Hix::Features::ExtendMode::ExtendMode()
 	auto& co = controlOwner();
 	co.getControl(_extendValue, "extendvalue");
 }
-std::deque<std::deque<HalfEdgeConstItr>> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
-{
-	std::unordered_map<VertexConstItr, HalfEdgeConstItr> edgeMap;
-	std::deque<std::deque<HalfEdgeConstItr>> paths;
-	for (auto& f : faces)
-	{
-		auto e = f.edge();
-		for (size_t i = 0; i < 3; ++i, e.moveNext())
-		{
-			auto nfs = e.nonOwningFaces();
-			bool isBoundary = true;
-			for (auto& nf : nfs)
-			{
-				if (faces.find(nf) != faces.cend())
-				{
-					isBoundary = false;
-					break;
-				}
-			}
-			if (isBoundary)
-			{
-				edgeMap.insert(std::make_pair(e.from(), e));
-			}
-		}
-	}
-	if (edgeMap.empty())
-		return paths;
-	
 
-	while (!edgeMap.empty())
-	{
-		std::deque<HalfEdgeConstItr> path;
-		path.emplace_back(edgeMap.begin()->second);
-		edgeMap.erase(edgeMap.begin());
-		bool pathIncomplete = true;
-		while (pathIncomplete)
-		{
 
-			auto to = path.back().to();
-			auto found = edgeMap.find(to);
-			if (found != edgeMap.end())
-			{
-				path.emplace_back(found->second);
-			}
-			else
-			{
-				paths.emplace_back(std::move(path));
-				pathIncomplete = false;
-			}
-			edgeMap.erase(to);
-		}
-	}
-	return paths;
-}
-
-void extendAlongOutline(Mesh* mesh, QVector3D normal, double distance, const std::deque<HalfEdgeConstItr>& path) 
-{
-	for (auto& e : path)
-	{
-		auto v0 = e.from().localPosition();
-		auto v1 = e.to().localPosition();
-		auto e0 = v0 + distance * normal;
-		auto e1 = v1 + distance * normal;
-		mesh->addFace(e1, v0, v1);
-		mesh->addFace(e1, e0, v0);
-	}
-}
 
 Hix::Features::ExtendMode::~ExtendMode()
 {
@@ -163,10 +99,11 @@ void Hix::Features::Extend::runImpl()
 	_model->unselectMeshFaces();
 	_prevMesh.reset(_model->getMeshModd());
 
-	auto paths = boundaryPath(_extensionFaces);
+	auto paths = Hix::Engine3D::boundaryPath(_extensionFaces);
 	for (auto& path : paths)
 	{
-		extendAlongOutline(mesh, _normal, _distance, path);
+		auto vtcs = extendAlongOutline(_normal, _distance, path);
+		mesh->addFaces(vtcs);
 	}
 	postUIthread([this, &mesh]() {
 		_model->setMesh(mesh);

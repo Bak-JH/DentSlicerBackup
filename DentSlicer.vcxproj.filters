@@ -292,6 +292,12 @@
     <ClCompile Include="common\mathUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh\FaceSelectionUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\ModelBuilder\SelectionPlane.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1163,6 +1169,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\mathUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\FaceSelectionUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\ModelBuilder\SelectionPlane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,7 +15,9 @@ namespace Hix
 	namespace UI
 	{
 		class Widget3D;
-		class Widget: public Qt3DCore::QEntity, public Hix::Input::HitTestAble, public Hix::Input::Draggable, public Hix::Input::Hoverable, public Hix::UI::Highlightable
+		class Widget: 
+			public Qt3DCore::QEntity, public Hix::Input::HitTestAble, 
+			public Hix::Input::Draggable, public Hix::Input::Hoverable, public Hix::UI::Highlightable
 		{
 		public:
 			Widget(const QVector3D& axis, Qt3DCore::QEntity* parent);

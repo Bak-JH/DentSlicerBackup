@@ -111,6 +111,7 @@ public:
 	//iterators
 	typename ItrFac::iterator begin();
 	typename ItrFac::iterator itrAt(size_t idx);
+	typename ItrFac::const_iterator itrAt(size_t idx)const;
 	typename ItrFac::const_iterator begin() const;
 	typename ItrFac::const_iterator cbegin() const;
 	typename ItrFac::iterator end();
@@ -685,6 +686,12 @@ template <class T, class A, class ItrFac>
 typename ItrFac::iterator IndexedList<T, A, ItrFac>::itrAt(size_t idx)
 {
 	return _itrFactory.buildIterator(idx, this);
+}
+
+template <class T, class A, class ItrFac>
+typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::itrAt(size_t idx)const
+{
+	return _itrFactory.buildConstIterator(idx, this);
 }
 
 template <class T, class A, class ItrFac>

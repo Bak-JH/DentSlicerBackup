@@ -17,7 +17,11 @@ namespace Hix
 		public:
 			virtual void onEntered()=0;
 			virtual void onExited() =0;
+			virtual void onMouseMovement(const Qt3DRender::QRayCasterHit&);
+			bool mouseMovementEnabled();
 			virtual ~Hoverable();
+		protected:
+			bool _isMovementEnabled = false;
 		};
 	}
 }

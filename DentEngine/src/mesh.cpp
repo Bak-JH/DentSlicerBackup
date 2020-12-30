@@ -10,6 +10,7 @@
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
+#include "../../common/Debug.h"
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
 #endif
 using namespace Hix::Utils::Math;
@@ -295,18 +296,18 @@ void Hix::Engine3D::Mesh::clear()
 	faces.clear();
 }
 
-bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
+std::optional<std::array<size_t, 3>> Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
 	std::array<size_t, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0);
 	fVtx[1] = addOrRetrieveFaceVertex(v1);
 	fVtx[2] = addOrRetrieveFaceVertex(v2);
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
-		return false;
+		return {};
     Hix::Engine3D::MeshFace mf;
 	faces.emplace_back(mf);
 	addHalfEdgesToFace(fVtx, faces.size() - 1);
-	return true;
+	return fVtx;
 }
 
 bool Mesh::addFace(const FaceConstItr& face)
@@ -514,43 +515,6 @@ VertexConstItr Hix::Engine3D::Mesh::getVtxAtLocalPos(const QVector3D& pos) const
 	return VertexConstItr();
 }
 
-std::unordered_map<FaceConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldFN() const
-{
-	std::unordered_map<FaceConstItr, QVector3D> result;
-	result.reserve(faces.size());
-	auto cend = faces.cend();
-	for (auto itr = faces.cbegin(); itr != cend; ++itr)
-	{
-		result.emplace(std::make_pair(itr, itr.worldFn()));
-	}
-	return result;
-}
-
-std::unordered_map<VertexConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldPos() const
-{
-	std::unordered_map<VertexConstItr, QVector3D> result;
-	result.reserve(vertices.size());
-	auto cend = vertices.cend();
-	for (auto itr = vertices.cbegin(); itr != cend; ++itr)
-	{
-		result.emplace(std::make_pair(itr, itr.worldPosition()));
-	}
-	return result;
-}
-
-std::unordered_map<VertexConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldVN() const
-{
-	std::unordered_map<VertexConstItr, QVector3D> result;
-	result.reserve(vertices.size());
-	auto cend = vertices.cend();
-	for (auto itr = vertices.cbegin(); itr != cend; ++itr)
-	{
-		result.emplace(std::make_pair(itr, itr.worldVn()));
-	}
-	return result;
-}
-
-
 size_t Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used
 	auto hashval = _vtxHasher(v);
@@ -588,19 +552,19 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<size_t, 3> faceVertices,
 
 		//add "owning" face or face that the hEdge circuit creates
 		itr.ref().owningFace = faceIdx;
-		//for each vertices that the half edges are "leaving" from, add the half edge reference
-		vertices[faceVertices[vtxIdx % 3]].leavingEdges.insert(itr.index());
-		vertices[faceVertices[(vtxIdx + 1) % 3]].arrivingEdges.insert(itr.index());
+//for each vertices that the half edges are "leaving" from, add the half edge reference
+vertices[faceVertices[vtxIdx % 3]].leavingEdges.insert(itr.index());
+vertices[faceVertices[(vtxIdx + 1) % 3]].arrivingEdges.insert(itr.index());
 
-		//add circular relationship for all half edges
-		nextItr = itr + 1;
-		//since we can't use % on itrs
-		if (nextItr == halfEdges.end())
-		{
-			nextItr = firstAddedItr;
-		}
-		itr.ref().next = nextItr.index();
-		++vtxIdx;
+//add circular relationship for all half edges
+nextItr = itr + 1;
+//since we can't use % on itrs
+if (nextItr == halfEdges.end())
+{
+	nextItr = firstAddedItr;
+}
+itr.ref().next = nextItr.index();
+++vtxIdx;
 
 	}
 	faces[faceIdx].edge = firstAddedItr.index();
@@ -618,14 +582,14 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	for (auto leavingEdge : vtx.leavingEdges)
 	{
 		auto& modLeavingEdge = halfEdges[leavingEdge];
-		modLeavingEdge.from= newIdx;
+		modLeavingEdge.from = newIdx;
 		//get twin edges with opposite direction ie) arriving 
 	}
 	//update arrivingEdges
 	for (auto arrivingEdge : vtx.arrivingEdges)
 	{
 		auto& modArrEdge = halfEdges[arrivingEdge];
-		modArrEdge.to= newIdx;
+		modArrEdge.to = newIdx;
 	}
 	auto newIndexItr = vertices.cbegin() + newIdx;
 	//update hash value
@@ -637,7 +601,7 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 		if (curr->second == oldItr)
 		{
 			_verticesHash.erase(curr);
-			_verticesHash.insert({ hashVal , newIndexItr});
+			_verticesHash.insert({ hashVal , newIndexItr });
 			break;
 		}
 	}
@@ -660,7 +624,7 @@ void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
 void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
 	//halfEdge whose index has been changed
-	HalfEdgeItr hEdge(newIdx,this);
+	HalfEdgeItr hEdge(newIdx, this);
 	//update face that owns this half edge only if the itr owned by the face is this one
 	if (hEdge.owningFace()->edge == oldIdx)
 	{
@@ -678,503 +642,33 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 
 
+
+
 std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf, float maxNormalDiff, size_t maxCount)const
 {
-	std::unordered_set<FaceConstItr> result;
-	std::unordered_set<FaceConstItr> explored;
-	std::deque<FaceConstItr>q;
-	result.reserve(maxCount);
-	explored.reserve(maxCount);
-	q.emplace_back(mf);
-	result.emplace(mf);
-	explored.emplace(mf);
-	while (!q.empty())
-	{
-		auto curr = q.front();
-		q.pop_front();
-		if (explored.size() == maxCount)
-			break;
-		auto edge = curr.edge();
-		for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
-			auto nFaces = edge.twinFaces();
-			for (auto nFace : nFaces)
-			{
-				if (explored.find(nFace) == explored.end())
-				{
-					explored.emplace(nFace);
-					if ((nFace.localFn() - normal).lengthSquared() < maxNormalDiff)
-					{
-						q.emplace_back(nFace);
-						result.emplace(nFace);
-					}
-				}
-				else
-				{
-					if (result.find(nFace) == result.end())
-					{
-						qDebug() << "overtaken face?";
-					}
-				}
-			}
+	std::unordered_set<VertexConstItr> bannedVtcs;
+	std::unordered_set<FaceConstItr> fails;
+
+	auto faceCond = [normal, maxNormalDiff, maxCount, &fails](const FaceConstItr& nf)->bool {
+
+		if ((nf.localFn() - normal).lengthSquared() < maxNormalDiff)
+		{
+			return true;
 		}
-	}
-	return result;
-}
-
-std::unordered_set<FaceConstItr> Hix::Engine3D::Mesh::findNearSimilarFaces(QVector3D pt, QVector3D normal, FaceConstItr mf, float maxNormalDiff, size_t maxCount, float radius) const
-{
-	auto radSquared = radius * radius;
-	std::unordered_set<FaceConstItr> result;
-	std::unordered_set<FaceConstItr> explored;
-	std::deque<FaceConstItr>q;
-	result.reserve(maxCount);
-	explored.reserve(maxCount);
-	q.emplace_back(mf);
-	result.emplace(mf);
-	explored.emplace(mf);
-	while (!q.empty())
-	{
-		auto curr = q.front();
-		q.pop_front();
-		if (explored.size() == maxCount)
-			break;
-		auto edge = curr.edge();
-		for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
-			auto nFaces = edge.twinFaces();
-			for (auto nFace : nFaces)
-			{
-				if (explored.find(nFace) == explored.end())
-				{
-					explored.emplace(nFace);
-					if ((nFace.localFn() - normal).lengthSquared() < maxNormalDiff)
-					{
-
-						auto vtcs = nFace.meshVertices();
-						for (auto& v : vtcs)
-						{
-							//for optimized non-squarerooted distance, we subtract and find length
-							auto ab = v.localPosition() - pt;
-							if (ab.lengthSquared() < radSquared)
-							{
-								q.emplace_back(nFace);
-								result.emplace(nFace);
-								break;
-							}
-						}
-
-					}
-				}
-				else
-				{
-					if (result.find(nFace) == result.end())
-					{
-						qDebug() << "overtaken face?";
-					}
-				}
-			}
+		else
+		{
+			fails.insert(nf);
+			return false;
 		}
-	}
-	return result;
+	};
+	auto res = findNearFaces(mf, faceCond, maxCount);
+	//auto entity = dynamic_cast<SceneEntityWithMaterial*>(const_cast<SceneEntity*> (this->entity()));
+	//auto& debugger = Hix::Debug::DebugRenderObject::getInstance();
+	//debugger.clear();
+	//debugger.registerDebugColorFaces(entity, fails, Hix::Render::Colors::DebugRed);
+	//debugger.colorDebugFaces();
+	return res;
 }
-
-
-
-
-
-QHash<uint32_t, Path>::iterator Hix::Engine3D::findSmallestPathHash(QHash<uint32_t, Path> pathHash){
-    //QHashIterator<uint32_t, Path> j(pathHash);
-    //QHashIterator<uint32_t, Path> prev_j(pathHash);
-    QHash<uint32_t, Path>::iterator i = pathHash.begin();
-    QHash<uint32_t, Path>::iterator biggest_i = pathHash.begin();
-    for (i = pathHash.begin(); i!= pathHash.end(); ++i){
-        if (biggest_i.value().size() >= i.value().size())
-            biggest_i = i;
-    }
-    return biggest_i;
-}
-
-
-void findAndDeleteHash(std::vector<uint32_t>* hashList, uint32_t hash){
-    for (std::vector<uint32_t>::iterator h_it = hashList->begin(); h_it != hashList->end();){
-        if (*h_it == hash){
-            hashList->erase(h_it);
-            break;
-        }
-        h_it ++;
-    }
-}
-
-bool contourContains(Path3D contour, MeshVertex mv){
-    for (MeshVertex& cmv : contour){
-        if (cmv == mv)
-            return true;
-    }
-    return false;
-}
-
-bool listContains(std::vector<uint32_t>* hashList, uint32_t hash){
-    for (std::vector<uint32_t>::iterator h_it = hashList->begin(); h_it != hashList->end();){
-        if (*h_it == hash){
-            return true;
-        }
-        h_it ++;
-    }
-    return false;
-}
-
-
-// construct closed contour using segments created from identify step
-Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
-    int iter = 0;
-    std::vector<Paths3D::iterator> checked_its;
-    bool dirty = true; // checks if iteration erased some contour
-
-    while (dirty){
-        dirty = false;
-        qDebug() << iter;
-        Paths3D::iterator hole_edge1_it;
-        Paths3D::iterator hole_edge2_it;
-
-        qDebug() << "hole edge size : " << hole_edges.size() << int(hole_edges.end() - hole_edges.begin());
-        /*int cnt1 =0, cnt2 =0;
-        for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end(); ++hole_edge1_it){
-            cnt2 = 0;
-            for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end(); ++hole_edge2_it){
-                qDebug() << "checking" << cnt1 << cnt2;
-                cnt2 ++;
-            }
-            cnt1 ++;
-        }*/
-        int edge_lookup = 0;
-        for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end();){
-            if (edge_lookup %50 ==0)
-                QCoreApplication::processEvents();
-            edge_lookup ++;
-
-            bool checked = false;
-            for (Paths3D::iterator checked_it : checked_its){
-                if (checked_it == hole_edge1_it){
-                    checked = true;
-                }
-            }
-            if (checked){
-                hole_edge1_it ++;
-                continue;
-            }
-
-
-            for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end();){
-                checked = false;
-                for (Paths3D::iterator checked_it : checked_its){
-                    if (checked_it == hole_edge2_it){
-                        checked = true;
-                    }
-                }
-                if (checked){
-                    hole_edge2_it ++;
-                    continue;
-                }
-
-                if (hole_edges.size() == 1)
-                    return hole_edges;
-                if (hole_edge1_it == hole_edge2_it){
-                    //qDebug() << "same edge it";
-                    hole_edge2_it ++;
-                    continue;
-                }
-                // prolong hole_edge 1 if end and start matches
-                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < VTX_INBOUND_DIST *0.05/Hix::Polyclipping::INT_PT_RESOLUTION){
-                //if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*hole_edge2_it->begin())){
-                    //qDebug() << "erase";
-                    dirty = true;
-                    hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
-                    checked_its.push_back(hole_edge2_it);
-                    //hole_edge2_it = hole_edges.erase(hole_edge2_it);
-                    //qDebug() << "erased";
-                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < VTX_INBOUND_DIST *0.05/Hix::Polyclipping::INT_PT_RESOLUTION){
-                //} else if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*(hole_edge2_it->end()-1))){
-                    //qDebug() << "erase";
-                    dirty = true;
-                    std::reverse(hole_edge2_it->begin(), hole_edge2_it->end());
-
-                    hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
-                    checked_its.push_back(hole_edge2_it);
-                    //hole_edge2_it = hole_edges.erase(hole_edge2_it);
-                    //qDebug() << "erased";
-                }
-                hole_edge2_it ++;
-            }
-            hole_edge1_it ++;
-        }
-        qDebug() << "hole edges size " << hole_edges.size();
-    }
-
-    // select contour if size > 2
-    Paths3D result_edges;
-
-    for (Paths3D::iterator hole_edge_it = hole_edges.begin(); hole_edge_it != hole_edges.end();){
-        bool checked = false;
-        for (Paths3D::iterator checked_it : checked_its){
-            if (checked_it == hole_edge_it){
-                checked = true;
-            }
-        }
-        if (!checked){
-            result_edges.push_back(*hole_edge_it);
-            qDebug() << "result_edge : " << hole_edge_it->begin()->position<< (hole_edge_it->end()-1)->position;
-        }
-        hole_edge_it ++;
-    }
-
-    for (Path3D result_edge : result_edges){
-        qDebug() << "hole_edge size : " << result_edge.size();
-    }
-
-    /*for (Path3D hole_edge : hole_edges){
-        if (hole_edge.size() > 2){
-            result_edges.push_back(hole_edge);
-            qDebug() << "hole_edge size : " << hole_edge.size();
-        }
-    }*/
-
-    qDebug() << "result edges : " << result_edges.size();
-
-    return result_edges;
-    /*// new trial if there's 분기점
-    Paths3D contourList;
-
-    QHash<uint32_t, Path3D> pathHash;
-    std::vector<uint32_t> hashList;
-    hashList.reserve(hole_edges.size());
-
-    if (hole_edges.size() == 0)
-        return contourList;
-
-    int pathCnt = 0;
-    for (int i=0; i<hole_edges.size(); i++){
-        pathCnt += hole_edges[i].size();
-    }
-    qDebug() << pathCnt;
-    pathHash.reserve(pathCnt*10);
-
-    int debug_count=0;
-
-    for (int i=0; i<hole_edges.size(); i++){
-        Path3D p = hole_edges[i];
-        //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
-
-        uint32_t path_hash_u = Vertex2Hash(p[0]);
-        uint32_t path_hash_v = Vertex2Hash(p[1]);
-
-        if (! pathHash.contains(path_hash_u)){
-            debug_count ++;
-            pathHash[path_hash_u].reserve(10);
-            pathHash[path_hash_u].push_back(p[0]);
-            hashList.push_back(path_hash_u);
-        }
-        if (! pathHash.contains(path_hash_v)){
-            debug_count ++;
-            pathHash[path_hash_v].reserve(10);
-            pathHash[path_hash_v].push_back(p[1]);
-            hashList.push_back(path_hash_v);
-        }
-        pathHash[path_hash_u].push_back(p[1]);
-        pathHash[path_hash_v].push_back(p[0]);
-    }
-
-    for (uint32_t hash : hashList){
-        qDebug() << "hash " <<hash << " path size : "<< pathHash[hash].size();
-    }
-
-    qDebug() << "hashList.size : " << hashList.size();
-
-    while (pathHash.size() > 0){
-        qDebug() << "new contour start" << "chosen from "<< hashList.size();
-        MeshVertex start, pj_prev, pj, pj_next, last, u, v;
-        Path3D contour;
-        start = pathHash[hashList[0]][0];
-        contour.push_back(start);
-        qDebug() << "inserted pj : " << start.position;
-        pj_prev = start;
-        Path3D* dest = &(pathHash[hashList[0]]);
-        qDebug() << "new contour dest size : " << dest->size();
-
-        if (pathHash[Vertex2Hash(start)].size() <= 2){
-            pathHash.remove(Vertex2Hash(start));
-            findAndDeleteHash(&hashList, Vertex2Hash(start));
-            continue;
-        }
-
-        pj = findAvailableMeshVertex(&pathHash, &hashList, start);
-        last = findAvailableMeshVertex(&pathHash, &hashList, start);
-
-        qDebug() << "current selected pj : " << pj.position;
-        qDebug() << "current selected last : " << last.position;
-
-        if (pathHash[Vertex2Hash(start)].size() <= 2){
-            pathHash.remove(Vertex2Hash(start));
-            findAndDeleteHash(&hashList, Vertex2Hash(start));
-        }
-
-        //while (!contourContains(contour, pj)){
-        while (pj != last){
-            contour.push_back(pj);
-            qDebug() << "inserted pj : " << pj.position;
-            qDebug() << "current contour size :" << contour.size();
-            for (MeshVertex mv : pathHash[Vertex2Hash(pj)]){
-                qDebug() << "current adding meshvertex neighbors : "<< mv.position;
-            }
-
-            if (pathHash[Vertex2Hash(pj)].size() <= 2){
-                pathHash.remove(Vertex2Hash(pj));
-                findAndDeleteHash(&hashList, Vertex2Hash(pj));
-                break;
-            }
-
-            u = findAvailableMeshVertex(&pathHash, &hashList, pj);
-            v = findAvailableMeshVertex(&pathHash, &hashList, pj);
-
-            if (pathHash[Vertex2Hash(pj)].size() <= 2){
-                pathHash.remove(Vertex2Hash(pj));
-                findAndDeleteHash(&hashList, Vertex2Hash(pj));
-            }
-
-            qDebug() << "current selected u : " << u.position;
-            qDebug() << "current selected v : " << v.position;
-
-            if (u == pj_prev){
-                pj_next = v;
-            } else {
-                pj_next = u;
-            }
-            pj_prev = pj;
-            pj = pj_next;
-
-            if (contourContains(contour, pj)){
-                Path3D new_contour;
-                Path3D::iterator new_start;
-
-                for (Path3D::iterator p_it = contour.begin(); p_it != contour.end();){
-                    if (*p_it == pj){
-                        new_start = p_it;
-                        break;
-                    }
-                    p_it ++;
-                }
-
-                new_contour.insert(new_contour.end(), new_start, contour.end());
-                new_contour.push_back(pj);
-                contourList.push_back(new_contour);
-                contour = Path3D(contour.begin(), new_start);
-            }
-        }
-
-        uint32_t lastHash = Vertex2Hash(pj);
-        for (Path3D::iterator mv_it = pathHash[lastHash].begin(); mv_it != pathHash[lastHash].end();){
-            if (*mv_it == pj_prev || *mv_it == start)
-                mv_it = pathHash[lastHash].erase(mv_it);
-            else
-                mv_it ++;
-        }
-
-        if (pathHash[Vertex2Hash(pj)].size() <= 2){
-            pathHash.remove(Vertex2Hash(pj));
-            findAndDeleteHash(&hashList, Vertex2Hash(pj));
-        }
-
-        contour.push_back(pj);
-        contourList.push_back(contour);
-    }
-
-    return contourList;*/
-}
-
-bool Hix::Engine3D::intPointInPath(IntPoint ip, Path p){
-    for (IntPoint i : p){
-        if ((ip.X == i.X) && (ip.Y == i.Y)){
-            return true;
-        }
-    }
-    return false;
-};
-
-bool Hix::Engine3D::pathInpath(Path3D target, Path3D in){
-    for (IntPoint ip : target.projection){
-        if (PointInPolygon(ip, in.projection)==0){ // if ip is not contained in in
-            return false;
-        }
-    }
-    return true;
-}
-
-std::vector<std::array<QVector3D, 3>> Hix::Engine3D::interpolate(Path3D from, Path3D to){
-    std::vector<std::array<QVector3D, 3>> result_faces;
-    if (from.size() != to.size()){
-        qDebug() << "from and to size differs";
-        return result_faces;
-    }
-    if (from.size() <3){
-        qDebug() << "from path size small :" << from.size();
-        return result_faces;
-    }
-
-    result_faces.reserve(from.size()*2);
-
-    qDebug() << from.size() << to.size();
-
-    // add odd number faces
-    for (int i=1; i<from.size()-1; i++){
-        if (i%2 != 0){
-            // add right left new face
-            std::array<QVector3D,3> temp_face1;
-            temp_face1[0] = to[i].position;
-            temp_face1[1] = from[i-1].position;
-            temp_face1[2] = from[i].position;
-            result_faces.push_back(temp_face1);
-            std::array<QVector3D,3> temp_face2;
-            temp_face2[0] = to[i].position;
-            temp_face2[1] = from[i].position;
-            temp_face2[2] = from[i+1].position;
-            result_faces.push_back(temp_face2);
-        }
-    }
-    qDebug() << "reserved odd number faces" << result_faces.size();
-
-    // add even number faces
-    for (int i=2; i<from.size()-1; i++){
-        if (i%2 == 0){
-            // add right left new face
-            std::array<QVector3D,3> temp_face1;
-            temp_face1[0] = to[i].position;
-            temp_face1[1] = from[i-1].position;
-            temp_face1[2] = from[i].position;
-            result_faces.push_back(temp_face1);
-            std::array<QVector3D,3> temp_face2;
-            temp_face2[0] = to[i].position;
-            temp_face2[1] = from[i].position;
-            temp_face2[2] = from[i+1].position;
-            result_faces.push_back(temp_face2);
-        }
-    }
-    qDebug() << "reserved even number faces" << result_faces.size();
-
-    // add right left new face
-    std::array<QVector3D,3> temp_face1;
-    temp_face1[0] = to[from.size()-1].position;
-    temp_face1[1] = from[from.size()-2].position;
-    temp_face1[2] = from[from.size()-1].position;
-    result_faces.push_back(temp_face1);
-    std::array<QVector3D,3> temp_face2;
-    temp_face2[0] = to[from.size()-1].position;
-    temp_face2[1] = from[from.size()-1].position;
-    temp_face2[2] = from[0].position;
-    result_faces.push_back(temp_face2);
-
-    return result_faces;
-}
-
-
-
 
 
 /************** Helper Functions *****************/

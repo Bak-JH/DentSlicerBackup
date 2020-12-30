@@ -10,50 +10,365 @@ using namespace T_MESH;
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
 
-Paths3D  Hix::Features::identifyHoles(const Mesh* mesh) {
 
-	// used for auto repair steps
-	Paths3D holes;
-	std::unordered_set<HalfEdgeConstItr> interesect;
-	auto faceCend = mesh->getFaces().cend();
-	for (auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
-	{
-		auto edge = mf.edge();
-		for (size_t i = 0; i < 3; ++i, edge.moveNext())
-		{
-			auto neighbors = edge.nonOwningFaces();
-			if (neighbors.size() == 0)
-			{
-				Path3D temp_edge;
-				auto meshVertices = mf.meshVertices();
-				temp_edge.push_back(*meshVertices[i]);
-				temp_edge.push_back(*meshVertices[(i + 1) % 3]);
-				holes.push_back(temp_edge);
+
+class Path3D : public std::vector<MeshVertex> {
+public:
+	ClipperLib::Path projection;
+	std::vector<Path3D> inner;
+	std::vector<Path3D> outer;
+};
+
+typedef std::vector<Path3D> Paths3D;
+
+
+//
+//QHash<uint32_t, Path>::iterator Hix::Engine3D::findSmallestPathHash(QHash<uint32_t, Path> pathHash) {
+//	//QHashIterator<uint32_t, Path> j(pathHash);
+//	//QHashIterator<uint32_t, Path> prev_j(pathHash);
+//	QHash<uint32_t, Path>::iterator i = pathHash.begin();
+//	QHash<uint32_t, Path>::iterator biggest_i = pathHash.begin();
+//	for (i = pathHash.begin(); i != pathHash.end(); ++i) {
+//		if (biggest_i.value().size() >= i.value().size())
+//			biggest_i = i;
+//	}
+//	return biggest_i;
+//}
+//
+//
+//void findAndDeleteHash(std::vector<uint32_t>* hashList, uint32_t hash) {
+//	for (std::vector<uint32_t>::iterator h_it = hashList->begin(); h_it != hashList->end();) {
+//		if (*h_it == hash) {
+//			hashList->erase(h_it);
+//			break;
+//		}
+//		h_it++;
+//	}
+//}
+//
+//bool contourContains(Path3D contour, MeshVertex mv) {
+//	for (MeshVertex& cmv : contour) {
+//		if (cmv == mv)
+//			return true;
+//	}
+//	return false;
+//}
+
+
+
+
+// construct closed contour using segments created from identify step
+Paths3D contourConstruct3D(Paths3D hole_edges) {
+	int iter = 0;
+	std::vector<Paths3D::iterator> checked_its;
+	bool dirty = true; // checks if iteration erased some contour
+
+	while (dirty) {
+		dirty = false;
+		qDebug() << iter;
+		Paths3D::iterator hole_edge1_it;
+		Paths3D::iterator hole_edge2_it;
+
+		qDebug() << "hole edge size : " << hole_edges.size() << int(hole_edges.end() - hole_edges.begin());
+		/*int cnt1 =0, cnt2 =0;
+		for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end(); ++hole_edge1_it){
+			cnt2 = 0;
+			for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end(); ++hole_edge2_it){
+				qDebug() << "checking" << cnt1 << cnt2;
+				cnt2 ++;
 			}
-			else if (neighbors.size() > 1)
-			{
-				if (neighbors.size() % 2 != 0)
-				{
-					qDebug() << "shit";
+			cnt1 ++;
+		}*/
+		int edge_lookup = 0;
+		for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end();) {
+			if (edge_lookup % 50 == 0)
+				QCoreApplication::processEvents();
+			edge_lookup++;
+
+			bool checked = false;
+			for (Paths3D::iterator checked_it : checked_its) {
+				if (checked_it == hole_edge1_it) {
+					checked = true;
 				}
 			}
+			if (checked) {
+				hole_edge1_it++;
+				continue;
+			}
+
+
+			for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end();) {
+				checked = false;
+				for (Paths3D::iterator checked_it : checked_its) {
+					if (checked_it == hole_edge2_it) {
+						checked = true;
+					}
+				}
+				if (checked) {
+					hole_edge2_it++;
+					continue;
+				}
+
+				if (hole_edges.size() == 1)
+					return hole_edges;
+				if (hole_edge1_it == hole_edge2_it) {
+					//qDebug() << "same edge it";
+					hole_edge2_it++;
+					continue;
+				}
+				// prolong hole_edge 1 if end and start matches
+				if ((hole_edge1_it->end() - 1)->position.distanceToPoint(hole_edge2_it->begin()->position) < VTX_INBOUND_DIST * 0.05 / Hix::Polyclipping::INT_PT_RESOLUTION) {
+					//if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*hole_edge2_it->begin())){
+						//qDebug() << "erase";
+					dirty = true;
+					hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin() + 1, hole_edge2_it->end());
+					checked_its.push_back(hole_edge2_it);
+					//hole_edge2_it = hole_edges.erase(hole_edge2_it);
+					//qDebug() << "erased";
+				}
+				else if ((hole_edge1_it->end() - 1)->position.distanceToPoint((hole_edge2_it->end() - 1)->position) < VTX_INBOUND_DIST * 0.05 / Hix::Polyclipping::INT_PT_RESOLUTION) {
+					//} else if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*(hole_edge2_it->end()-1))){
+						//qDebug() << "erase";
+					dirty = true;
+					std::reverse(hole_edge2_it->begin(), hole_edge2_it->end());
+
+					hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin() + 1, hole_edge2_it->end());
+					checked_its.push_back(hole_edge2_it);
+					//hole_edge2_it = hole_edges.erase(hole_edge2_it);
+					//qDebug() << "erased";
+				}
+				hole_edge2_it++;
+			}
+			hole_edge1_it++;
 		}
+		qDebug() << "hole edges size " << hole_edges.size();
 	}
-	qDebug() << "hole edges coutn : " << holes.size();
 
-	// get closed contour from hole_edges
-	holes = contourConstruct3D(holes);
-	qDebug() << "hole detected";
+	// select contour if size > 2
+	Paths3D result_edges;
 
-	/*for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
+	for (Paths3D::iterator hole_edge_it = hole_edges.begin(); hole_edge_it != hole_edges.end();) {
+		bool checked = false;
+		for (Paths3D::iterator checked_it : checked_its) {
+			if (checked_it == hole_edge_it) {
+				checked = true;
+			}
+		}
+		if (!checked) {
+			result_edges.push_back(*hole_edge_it);
+			qDebug() << "result_edge : " << hole_edge_it->begin()->position << (hole_edge_it->end() - 1)->position;
+		}
+		hole_edge_it++;
+	}
 
-		if (ps_it->size() <3)
-			ps_it = mesh->holes.erase(ps_it);
-		ps_it++;
+	for (Path3D result_edge : result_edges) {
+		qDebug() << "hole_edge size : " << result_edge.size();
+	}
+
+	/*for (Path3D hole_edge : hole_edges){
+		if (hole_edge.size() > 2){
+			result_edges.push_back(hole_edge);
+			qDebug() << "hole_edge size : " << hole_edge.size();
+		}
 	}*/
-	qDebug() << "mesh hole count :" << holes.size();
-	return holes;
+
+	qDebug() << "result edges : " << result_edges.size();
+
+	return result_edges;
+	/*// new trial if there's 분기점
+	Paths3D contourList;
+
+	QHash<uint32_t, Path3D> pathHash;
+	std::vector<uint32_t> hashList;
+	hashList.reserve(hole_edges.size());
+
+	if (hole_edges.size() == 0)
+		return contourList;
+
+	int pathCnt = 0;
+	for (int i=0; i<hole_edges.size(); i++){
+		pathCnt += hole_edges[i].size();
+	}
+	qDebug() << pathCnt;
+	pathHash.reserve(pathCnt*10);
+
+	int debug_count=0;
+
+	for (int i=0; i<hole_edges.size(); i++){
+		Path3D p = hole_edges[i];
+		//insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
+
+		uint32_t path_hash_u = Vertex2Hash(p[0]);
+		uint32_t path_hash_v = Vertex2Hash(p[1]);
+
+		if (! pathHash.contains(path_hash_u)){
+			debug_count ++;
+			pathHash[path_hash_u].reserve(10);
+			pathHash[path_hash_u].push_back(p[0]);
+			hashList.push_back(path_hash_u);
+		}
+		if (! pathHash.contains(path_hash_v)){
+			debug_count ++;
+			pathHash[path_hash_v].reserve(10);
+			pathHash[path_hash_v].push_back(p[1]);
+			hashList.push_back(path_hash_v);
+		}
+		pathHash[path_hash_u].push_back(p[1]);
+		pathHash[path_hash_v].push_back(p[0]);
+	}
+
+	for (uint32_t hash : hashList){
+		qDebug() << "hash " <<hash << " path size : "<< pathHash[hash].size();
+	}
+
+	qDebug() << "hashList.size : " << hashList.size();
+
+	while (pathHash.size() > 0){
+		qDebug() << "new contour start" << "chosen from "<< hashList.size();
+		MeshVertex start, pj_prev, pj, pj_next, last, u, v;
+		Path3D contour;
+		start = pathHash[hashList[0]][0];
+		contour.push_back(start);
+		qDebug() << "inserted pj : " << start.position;
+		pj_prev = start;
+		Path3D* dest = &(pathHash[hashList[0]]);
+		qDebug() << "new contour dest size : " << dest->size();
+
+		if (pathHash[Vertex2Hash(start)].size() <= 2){
+			pathHash.remove(Vertex2Hash(start));
+			findAndDeleteHash(&hashList, Vertex2Hash(start));
+			continue;
+		}
+
+		pj = findAvailableMeshVertex(&pathHash, &hashList, start);
+		last = findAvailableMeshVertex(&pathHash, &hashList, start);
+
+		qDebug() << "current selected pj : " << pj.position;
+		qDebug() << "current selected last : " << last.position;
+
+		if (pathHash[Vertex2Hash(start)].size() <= 2){
+			pathHash.remove(Vertex2Hash(start));
+			findAndDeleteHash(&hashList, Vertex2Hash(start));
+		}
+
+		//while (!contourContains(contour, pj)){
+		while (pj != last){
+			contour.push_back(pj);
+			qDebug() << "inserted pj : " << pj.position;
+			qDebug() << "current contour size :" << contour.size();
+			for (MeshVertex mv : pathHash[Vertex2Hash(pj)]){
+				qDebug() << "current adding meshvertex neighbors : "<< mv.position;
+			}
+
+			if (pathHash[Vertex2Hash(pj)].size() <= 2){
+				pathHash.remove(Vertex2Hash(pj));
+				findAndDeleteHash(&hashList, Vertex2Hash(pj));
+				break;
+			}
+
+			u = findAvailableMeshVertex(&pathHash, &hashList, pj);
+			v = findAvailableMeshVertex(&pathHash, &hashList, pj);
+
+			if (pathHash[Vertex2Hash(pj)].size() <= 2){
+				pathHash.remove(Vertex2Hash(pj));
+				findAndDeleteHash(&hashList, Vertex2Hash(pj));
+			}
+
+			qDebug() << "current selected u : " << u.position;
+			qDebug() << "current selected v : " << v.position;
+
+			if (u == pj_prev){
+				pj_next = v;
+			} else {
+				pj_next = u;
+			}
+			pj_prev = pj;
+			pj = pj_next;
+
+			if (contourContains(contour, pj)){
+				Path3D new_contour;
+				Path3D::iterator new_start;
+
+				for (Path3D::iterator p_it = contour.begin(); p_it != contour.end();){
+					if (*p_it == pj){
+						new_start = p_it;
+						break;
+					}
+					p_it ++;
+				}
+
+				new_contour.insert(new_contour.end(), new_start, contour.end());
+				new_contour.push_back(pj);
+				contourList.push_back(new_contour);
+				contour = Path3D(contour.begin(), new_start);
+			}
+		}
+
+		uint32_t lastHash = Vertex2Hash(pj);
+		for (Path3D::iterator mv_it = pathHash[lastHash].begin(); mv_it != pathHash[lastHash].end();){
+			if (*mv_it == pj_prev || *mv_it == start)
+				mv_it = pathHash[lastHash].erase(mv_it);
+			else
+				mv_it ++;
+		}
+
+		if (pathHash[Vertex2Hash(pj)].size() <= 2){
+			pathHash.remove(Vertex2Hash(pj));
+			findAndDeleteHash(&hashList, Vertex2Hash(pj));
+		}
+
+		contour.push_back(pj);
+		contourList.push_back(contour);
+	}
+
+	return contourList;*/
 }
+
+
+//Paths3D  Hix::Features::identifyHoles(const Mesh* mesh) {
+//
+//	// used for auto repair steps
+//	Paths3D holes;
+//	std::unordered_set<HalfEdgeConstItr> interesect;
+//	auto faceCend = mesh->getFaces().cend();
+//	for (auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
+//	{
+//		auto edge = mf.edge();
+//		for (size_t i = 0; i < 3; ++i, edge.moveNext())
+//		{
+//			auto neighbors = edge.nonOwningFaces();
+//			if (neighbors.size() == 0)
+//			{
+//				Path3D temp_edge;
+//				auto meshVertices = mf.meshVertices();
+//				temp_edge.push_back(*meshVertices[i]);
+//				temp_edge.push_back(*meshVertices[(i + 1) % 3]);
+//				holes.push_back(temp_edge);
+//			}
+//			else if (neighbors.size() > 1)
+//			{
+//				if (neighbors.size() % 2 != 0)
+//				{
+//					qDebug() << "shit";
+//				}
+//			}
+//		}
+//	}
+//	qDebug() << "hole edges coutn : " << holes.size();
+//
+//	// get closed contour from hole_edges
+//	holes = contourConstruct3D(holes);
+//	qDebug() << "hole detected";
+//
+//	/*for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
+//
+//		if (ps_it->size() <3)
+//			ps_it = mesh->holes.erase(ps_it);
+//		ps_it++;
+//	}*/
+//	qDebug() << "mesh hole count :" << holes.size();
+//	return holes;
+//}
 
 bool Hix::Features::isRepairNeeded(const Hix::Engine3D::Mesh* mesh)
 {
@@ -81,19 +396,16 @@ std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::getBoundaryEdges(co
 
 
 
-std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
+std::deque<std::unordered_set<FaceConstItr>>  Hix::Features::seperateConnectedFaceSet(const Hix::Engine3D::Mesh& mesh)
 {
-	std::vector<Hix::Engine3D::Mesh*> meshes;
 	std::deque<std::unordered_set<FaceConstItr>> connected;
 	std::unordered_set<size_t> unexplored;
-	auto meshFaces = mesh->getFaces();
+
+	auto meshFaces = mesh.getFaces();
 	size_t totalFaceCnt = meshFaces.size();
 	unexplored.reserve(totalFaceCnt);
 	for (size_t i = 0; i < totalFaceCnt; ++i)
-	{
 		unexplored.insert(i);
-	}
-
 	while (!unexplored.empty())
 	{
 		auto& current = connected.emplace_back();
@@ -121,6 +433,14 @@ std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix:
 			}
 		}
 	}
+	return connected;
+}
+
+std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
+{
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	auto connected = seperateConnectedFaceSet(*mesh);
+
 	//if there are indeed multiple meshes, allocate new meshs
 	if (connected.size() > 1)
 	{

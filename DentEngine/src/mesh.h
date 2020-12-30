@@ -6,6 +6,7 @@
 #include <QTime>
 #include <array>
 #include <variant>
+#include <optional>
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
 #define cos50 0.64278761
@@ -98,14 +99,6 @@ namespace Hix
 
 		typedef std::array<QVector3D,3> Plane;
 
-		class Path3D : public std::vector<MeshVertex> {
-		public:
-			ClipperLib::Path projection;
-			std::vector<Path3D> inner;
-			std::vector<Path3D> outer;
-		};
-
-		typedef std::vector<Path3D> Paths3D;
 
 		struct MeshDeleteGuard
 		{
@@ -143,7 +136,19 @@ namespace Hix
 			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
 			void clear();
-            bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
+			template <typename ContainerType>
+			void addFaces(const ContainerType& cont)
+			{
+				if (cont.size() == 0 || cont.size() % 3 != 0)
+					throw std::runtime_error("vertices count invalid for addFaces");
+				auto itr = cont.cbegin();
+				auto cend = cont.cend();
+				while (itr != cend)
+				{
+					addFace(*itr++, *itr++, *itr++);
+				}
+			}
+			std::optional<std::array<size_t, 3>> addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
 			MeshDeleteGuard removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs);
 			void removeFaces(const std::unordered_set<FaceConstItr>& faceItrs);
@@ -170,8 +175,6 @@ namespace Hix
 			const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces()const;
 			const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges()const;
 
-			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal,FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000)const;
-			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D pt, QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000, float radius = 5.0f)const;
 
 			void setSceneEntity(const Render::SceneEntity* entity);
 			const Render::SceneEntity* entity()const;
@@ -181,11 +184,59 @@ namespace Hix
 			QVector3D vectorToWorld(const QVector3D& local)const;
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
-
 			VertexConstItr getVtxAtLocalPos(const QVector3D& pos)const;
-			std::unordered_map<FaceConstItr, QVector3D> cacheWorldFN()const;
-			std::unordered_map<VertexConstItr, QVector3D> cacheWorldPos()const;
-			std::unordered_map<VertexConstItr, QVector3D> cacheWorldVN()const;
+
+			
+
+
+			//templates
+
+			template <typename FaceCond>
+			std::unordered_set<FaceConstItr> findNearFaces(FaceConstItr startFace, FaceCond cond, size_t maxCount) const
+			{
+				std::unordered_set<FaceConstItr> result;
+				std::unordered_set<FaceConstItr> explored;
+				std::unordered_set<HalfEdgeConstItr> frontiers;
+				std::deque<FaceConstItr>q;
+				result.reserve(maxCount);
+				explored.reserve(maxCount);
+				q.emplace_back(startFace);
+				result.emplace(startFace);
+				explored.emplace(startFace);
+				while (!q.empty())
+				{
+					auto curr = q.front();
+					q.pop_front();
+					if (explored.size() == maxCount)
+						break;
+					auto edge = curr.edge();
+					for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
+						auto nFaces = edge.twinFaces();
+						for (auto nFace : nFaces)
+						{
+							if (explored.find(nFace) == explored.end())
+							{
+								explored.emplace(nFace);
+								if (cond(nFace))
+								{
+									q.emplace_back(nFace);
+									result.emplace(nFace);
+								}
+							}
+							else
+							{
+								if (result.find(nFace) == result.end())
+								{
+									qDebug() << "overtaken face?";
+								}
+							}
+						}
+					}
+				}
+				return result;
+			}
+			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal, FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 15000)const;
+
 
 
 		private:
@@ -211,17 +262,6 @@ namespace Hix
 			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;			
 
 		};
-
-		QHash<uint32_t, ClipperLib::Path>::iterator findSmallestPathHash(QHash<uint32_t, ClipperLib::Path> pathHash);
-
-		// construct closed contour using segments created from identify step
-		Paths3D contourConstruct3D(Paths3D hole_edges);
-
-		bool intPointInPath(ClipperLib::IntPoint ip, ClipperLib::Path p);
-		bool pathInpath(Path3D target, Path3D in);
-
-		std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
-
 	};
 
 	namespace Debug

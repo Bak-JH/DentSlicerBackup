@@ -33,11 +33,9 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-			ModelMaterial();
+			ModelMaterial(Qt3DCore::QNode* parent = nullptr);
 			virtual ~ModelMaterial();
 
-			void setDiffuse(const QColor& diffuse);
-			void setAmbient(const QColor& ambient);
 			void addParameterWithKey(const std::string& key);
 			void removeParameterWithKey(const std::string& key);
 			void setParameterValue(const std::string& key, const QVariant& value);
@@ -45,6 +43,9 @@ namespace Hix
 			ShaderMode shaderMode()const;
 			//color for single color mode
 			void setColor(QVector4D color);
+			void setColor(QColor color);
+			void setDiffuse(const QColor& diffuse);
+			void setAmbient(const QColor& ambient);
 		private:
 			ShaderMode _mode = ShaderMode::None;
 			//custom parameters
@@ -53,10 +54,9 @@ namespace Hix
 			Qt3DRender::QEffect _effect;
 
 			//default parameters
+			Qt3DRender::QParameter _singleColorParameter;
 			Qt3DRender::QParameter _ambientParameter;
 			Qt3DRender::QParameter _diffuseParameter;
-			Qt3DRender::QParameter _singleColorParameter;
-
 			Qt3DRender::QFilterKey _filterKey;
 			Qt3DRender::QRenderPass _renderPass;
 			Qt3DRender::QShaderProgram _shaderProgram;

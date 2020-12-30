@@ -86,6 +86,7 @@ namespace Hix
 			std::unique_ptr<RaftModel> _raft;
 			//std::unordered_map<const GLModel*, RayCaster> _rayCasters;
 			std::unique_ptr<RayCaster> _rayCaster;
+			std::unique_ptr<RayAccelerator> _rayAccel;
 
 		};
 

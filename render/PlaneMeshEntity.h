@@ -22,11 +22,16 @@ namespace Hix
 
 			virtual ~PlaneMeshEntity();
 			Qt3DCore::QTransform& transform();
+			Qt3DCore::QTransform& planeTransform(size_t index);
+
+			const Qt3DCore::QTransform& transform()const;
+			const Qt3DCore::QTransform& planeTransform(size_t index)const;
 			void setPointNormal(const Hix::Plane3D::PDPlane& plane);
+			Hix::Plane3D::PDPlane pointNormal()const;
 		protected:
+			std::vector<Qt3DCore::QEntity*> _entityOrder;
 			std::unordered_map<Qt3DCore::QEntity*, Qt3DCore::QTransform*> _meshTransformMap;
 			Qt3DCore::QTransform _transform;
-			Qt3DCore::QEntity* _owner = nullptr;
 
 		};
 

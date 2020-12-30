@@ -13,11 +13,12 @@ namespace Hix
 		public:
 			WidgetMode();
 			virtual ~WidgetMode();
-			void updatePosition();
+			virtual void updatePosition();
 			virtual void featureStarted() = 0;
 			virtual void featureEnded() = 0;
 			virtual QVector3D getWidgetPosition() = 0;
 		protected:
+			void updateTransform(Qt3DCore::QTransform& transform);
 			UI::Widget3D _widget;
 			Input::RayCastController* _controller;
 		};

@@ -3,8 +3,6 @@
 #include <QtMath>
 #include <QVector3D>
 #include <Qt3DCore/qtransform.h>
-#include <Qt3DExtras/QPhongMaterial>
-#include <Qt3DExtras/QPlaneMesh>
 #include <Qt3DRender/qdirectionallight.h>
 #include <qDebug>
 

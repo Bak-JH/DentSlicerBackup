@@ -88,6 +88,35 @@ void Hix::Application::SceneManager::fileDropped(QUrl fileUrl)
 //temp
 void Hix::Application::SceneManager::onCameraChanged()
 {
+	//qDebug() << "cam position: " << _camera->position();
+	//qDebug() << "cam transform translation: " << _camera->transform()->translation();
+	//qDebug() << "cam transform rotation: " << _camera->transform()->rotation();
+	//qDebug() << "view transform scale: " << _systemTransform->scale3D();
+
+	//qDebug() << "cam view centre: " << _camera->viewCenter();
+	//qDebug() << "cam view vec: " << _camera->viewVector();
+	//qDebug() << "view vector calculated: " << (_camera->viewCenter() - _camera->position()).normalized();
+
+	//qDebug() << "_systemTransform->translation(): " << _systemTransform->translation();
+	//qDebug() << "old view vector" << (_camera->position() - _systemTransform->translation()).normalized();
+
+
+
+	//auto position = QVector3D(_systemTransform->matrix().inverted() * QVector4D(_camera->position(), 1));
+	////auto nInverted = QVector3D(_systemTransform->matrix() * QVector4D(_camera->position(), 1));
+
+
+
+	//auto camPt = _camera->position() + _camera->viewVector().normalized() * 15.0f;
+	//auto pt = QVector3D(_systemTransform->matrix().inverted() * QVector4D(camPt, 1));
+
+	//qDebug() << "cam pos orig" << _camera->position();
+	//qDebug() << "cam pos changed" << position;
+
+	//qDebug() << "pt orig" << camPt;
+	//qDebug() << "pt changed" << pt;
+
+	//qDebug() << "cam pos nInverted" << nInverted;
 	Hix::Features::UpdateWidgetModePos();
 }
 
