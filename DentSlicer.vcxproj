@@ -292,6 +292,7 @@
     <ClCompile Include="input\KeyboardController.cpp" />
     <ClCompile Include="application\PartManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Qml\functional\QMLSingleton.cpp" />
     <ClCompile Include="Qml\components\ControlOwner.cpp" />
     <ClCompile Include="Qml\components\FeatureMenu.cpp" />
     <ClCompile Include="Qml\components\HixQML.cpp" />
@@ -983,6 +984,7 @@
     <ClInclude Include="feature\zip\zip.h" />
     <ClInclude Include="feature\zip\zip_file.hpp" />
     <ClInclude Include="input\KeyboardController.h" />
+    <ClInclude Include="Qml\functional\QMLSingleton.h" />
     <ClInclude Include="Qml\components\ControlForwardInclude.h" />
     <ClInclude Include="Qml\components\ControlOwner.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\common\GTEngine\Include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;$(QT_MSVC2017_64)\include\QtQuick\$(QT_VERSION)\QtQuick;$(QT_MSVC2017_64)\include\QtQml\$(QT_VERSION)\QtQml;$(QT_MSVC2017_64)\include\QtCore\$(QT_VERSION)\QtCore;$(QT_MSVC2017_64)\include\QtGui\$(QT_VERSION);$(QT_MSVC2017_64)\include\QtQml\$(QT_VERSION);$(QT_MSVC2017_64)\include\QtCore\$(QT_VERSION);$(QT_MSVC2017_64)\include\QtQuick\$(QT_VERSION);$(QT_MSVC2017_64)\include\QtQuickTemplates2\$(QT_VERSION);.\debug;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg;$(INHERIT);$(OPENNI2_DIR)\Include;$(PCL_DIR)\3rdParty\VTK\include\vtk-8.1;$(PCL_DIR)\include\pcl-1.9;$(PCL_DIR)\3rdParty\Eigen\eigen3;$(PCL_DIR)\3rdParty\FLANN\include;$(PCL_DIR)\3rdParty\FLANN\include\flann\ext;$(PCL_DIR)\3rdParty\Qhull\include;$(PCL_DIR)\3rdParty\VTK\include;$(QTDIR)\include\QtQuick;$(QTDIR)\include\QtQuickWidgets;$(QTDIR)\include\QtQuickControls2;$(QTDIR)\include\QtQml</IncludePath>
@@ -1304,10 +1306,12 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrButtonBase.qml" />
+    <None Include="Qml\Controls\CtrRectButton.qml" />
     <None Include="Qml\Controls\CtrTextButton.qml" />
     <None Include="Qml\Controls\CtrToggleButton.qml" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />
     <None Include="Qml\FeatureDivider.qml" />
+    <None Include="Qml\FeaturePopup\PopupPrinter.qml" />
     <None Include="Qml\FeaturePopup\PopupSlice.qml" />
     <None Include="Qml\FeaturePopup\PrintSettingPopup.qml" />
     <None Include="Qml\PartListFullnameBox.qml" />
