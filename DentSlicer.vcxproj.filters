@@ -298,6 +298,12 @@
     <ClCompile Include="feature\ModelBuilder\SelectionPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Qml\functional\QMLSingleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="application\I18nManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1177,6 +1183,42 @@
     <ClInclude Include="feature\ModelBuilder\SelectionPlane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Qml\functional\QMLSingleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\catalog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\catalog_metadata.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\default_plural_forms_compiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\default_plural_forms_expressions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\exceptions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\po_grammar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\po_message.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\po_message_adapted.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\spirit_po.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\spirit_po\version.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="application\I18nManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1570,6 +1612,8 @@
     <None Include="shaders\singleColorNoLight.frag" />
     <None Include="Qml\Controls\CtrButtonBase.qml" />
     <None Include="Qml\FeatureDivider.qml" />
+    <None Include="Qml\Controls\CtrRectButton.qml" />
+    <None Include="Qml\FeaturePopup\PopupPrinter.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
