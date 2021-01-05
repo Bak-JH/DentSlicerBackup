@@ -897,16 +897,6 @@
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\platform\Process.h" />
     <ClInclude Include="common\Semaphore.h" />
-    <ClInclude Include="common\spirit_po\catalog.hpp" />
-    <ClInclude Include="common\spirit_po\catalog_metadata.hpp" />
-    <ClInclude Include="common\spirit_po\default_plural_forms_compiler.hpp" />
-    <ClInclude Include="common\spirit_po\default_plural_forms_expressions.hpp" />
-    <ClInclude Include="common\spirit_po\exceptions.hpp" />
-    <ClInclude Include="common\spirit_po\po_grammar.hpp" />
-    <ClInclude Include="common\spirit_po\po_message.hpp" />
-    <ClInclude Include="common\spirit_po\po_message_adapted.hpp" />
-    <ClInclude Include="common\spirit_po\spirit_po.hpp" />
-    <ClInclude Include="common\spirit_po\version.hpp" />
     <ClInclude Include="common\Tree\BVHBuilder.h" />
     <ClInclude Include="common\Tree\NTree.h" />
     <ClInclude Include="common\Tree\NTreeDeque.h" />

@@ -1,11 +1,8 @@
 #pragma once
 #include <string>
-#include <spirit_po/spirit_po.hpp>
+#include <optional>
 
 
-
-//shorthand for translation HixTrans
-std::string htr();
 
 namespace Hix
 {
@@ -18,9 +15,7 @@ namespace Hix
 		{
 		public:
 			I18nManager();
-			spirit_po::default_catalog& cat();
 		private:
-			spirit_po::default_catalog _cat;
 
 		};
 
