@@ -28,7 +28,7 @@ Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float wi
 		planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90 + 180 * i));
 		planeEntity->addComponent(clipPlane);
 		planeEntity->addComponent(planeTransform);
-		if (alpha != 0.0f)
+		if (alpha > 0.01f)
 		{
 			auto planeMaterial = new Hix::Render::ModelMaterial(this);
 			planeMaterial->setColor(actualColor);
