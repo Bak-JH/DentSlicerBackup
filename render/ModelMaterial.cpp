@@ -42,9 +42,9 @@ Hix::Render::ModelMaterial::ModelMaterial(Qt3DCore::QNode* parent):
 	changeMode(ShaderMode::SingleColor);
 	_renderPass.setShaderProgram(&_shaderProgram);
 
-	auto cullFace = new QCullFace();
-	cullFace->setMode(QCullFace::CullingMode::Back);
-	_renderPass.addRenderState(cullFace);
+	//auto cullFace = new QCullFace();
+	//cullFace->setMode(QCullFace::CullingMode::Back);
+	//_renderPass.addRenderState(cullFace);
 	
 	auto aBlending = new QBlendEquation();
 	aBlending->setBlendFunction(QBlendEquation::BlendFunction::Add);
