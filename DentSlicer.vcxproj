@@ -941,6 +941,9 @@
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="feature\ModelBuilder\SelectionPlane.h" />
+    <ClInclude Include="feature\repair\Kernel\heap.h" />
+    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
+    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="Mesh\FaceSelectionUtils.h" />
     <ClInclude Include="feature\cdt\HixCDT.h" />
     <ClInclude Include="cork\src\accel\aabvh.h" />
@@ -1131,8 +1134,6 @@
     <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\Plane3D.h" />
-    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
-    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
     <ClInclude Include="feature\repair\Kernel\coordinates.h" />
     <ClInclude Include="feature\repair\Kernel\graph.h" />
