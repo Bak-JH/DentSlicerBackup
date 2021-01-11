@@ -846,8 +846,6 @@
     <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\Plane3D.h" />
-    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
-    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
     <ClInclude Include="feature\repair\Kernel\coordinates.h" />
     <ClInclude Include="feature\repair\Kernel\graph.h" />
@@ -1187,6 +1185,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="application\I18nManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\repair\Kernel\heap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

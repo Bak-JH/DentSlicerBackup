@@ -4,6 +4,7 @@
 #include "DentEngine/src/ContourBuilder.h"
 #include "DentEngine/src/Bounds3D.h"
 #include "DrawingPlane.h"
+#include <optional>
 namespace Hix
 {
 	namespace QML
@@ -43,7 +44,7 @@ namespace Hix
 			//cutting
 			CutType _cutType = ZAxial;
 			const Engine3D::Mesh* _origMesh;
-			Hix::Features::Cut::DrawingPlane _cuttingPlane;
+			std::optional<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
 			Hix::Engine3D::Bounds3D _modelsBound;
 			std::unordered_set<GLModel*> _models;
 			Hix::QML::Controls::ToggleSwitch* _cutSwitch;

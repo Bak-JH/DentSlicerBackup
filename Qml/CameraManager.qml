@@ -96,11 +96,6 @@ Entity {
 
     }
 
-    Entity {
-        components: [
-        ]
-    }
-
     CameraController{
         camera:camera
         onCameraChanged: {
