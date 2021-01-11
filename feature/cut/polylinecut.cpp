@@ -45,24 +45,18 @@ void Hix::Features::Cut::PolylineCut::runImpl()
 	auto cylinderWallCork = toCorkMesh(polylineWall);
 	cutCSG(_target->modelName(), _target, cylinderWallCork);
 	freeCorkTriMesh(&cylinderWallCork);
-
-	if (isRepairNeeded(_target->getMesh()))
-	{
-		auto repair = new MeshRepair(_target);
-		tryRunFeature(*repair);
-	}
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)
 {
 	//to 2d polygon
 	auto polyline2d = Hix::Shapes2D::to2DShape(polyline);
-	auto contour2d = Hix::Shapes2D::PolylineToArea(0.001f, polyline2d);
+	auto contour2d = Hix::Shapes2D::PolylineToArea(0.1f, polyline2d);
 	auto contour3d = Hix::Shapes2D::to3DShape(0.0f, contour2d);
 
 	std::vector<QVector3D> path;
 	path.reserve(2);
-	path.emplace_back(QVector3D(0, 0, -0.5));
+	path.emplace_back(QVector3D(0, 0, cutBound.zMin() -0.5));
 	path.emplace_back(QVector3D(0, 0, cutBound.zMax() + 0.5));
 	auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(path);
 	auto jointContours = Hix::Features::Extrusion::extrudeAlongPath(&out, QVector3D(0, 0, 1), contour3d, path, jointDir);
@@ -117,6 +111,13 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		tryRunFeature(*addModel);
 		addModel->get()->setZToBed();
 		addFeature(addModel);
+		if (Hix::Features::isRepairNeeded(seperateParts[i]))
+		{
+			//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
+			auto repair = new MeshRepair(addModel->get());
+			tryRunFeature(*repair);
+			addFeature(repair);
+		}
 	}
 	auto model = dynamic_cast<GLModel*>(subject);
 	if (model)
