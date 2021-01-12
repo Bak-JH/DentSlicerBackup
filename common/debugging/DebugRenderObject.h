@@ -35,7 +35,7 @@ namespace Hix
 		{
 		public:
 			void initialize(Qt3DCore::QEntity* root);
-			void addLine(const std::vector<QVector3D>& vertices, const QColor& color = QColor(0,0,0, 255));
+			void addPath(const std::vector<QVector3D>& vertices, const QColor& color = QColor(0,0,0, 255));
 			void addPaths(const std::vector< std::vector<QVector3D>>& paths, const QColor& color = QColor(0, 0, 0, 255));
 			void outlineFace(const Hix::Engine3D::FaceConstItr& face, const QColor& color = QColor(0, 0, 0, 255));
 			void registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces, const QVector4D& color);
