@@ -208,57 +208,132 @@ std::vector<QVector3D> Hix::Shapes2D::to3DShape(float zPos, const std::vector<QV
 	return output;
 }
 
+//std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std::vector<QVector2D>& polyline)
+//{
+//	std::vector<QVector2D> areaContour;
+//	if (polyline.size() > 1)
+//	{
+//		auto radius = thickness / 2.0f;
+//		auto vtcsCnt = polyline.size();
+//		areaContour.reserve(vtcsCnt * 2);
+//		//same code as extrude, but 2d...TODO: templateize 
+//		//compute segments
+//		std::vector<QVector2D> segs;
+//		segs.reserve(vtcsCnt - 1);
+//		auto lastPathItr = polyline.end() - 1;
+//		for (auto itr = polyline.begin(); itr != lastPathItr; ++itr)
+//		{
+//			auto next = itr + 1;
+//			segs.emplace_back(*next - *itr);
+//		}
+//
+//		//compute joint directions, joint direction is direction between two segments ie) sum of them, similar to tangent
+//		std::vector<QVector2D> jointDirs;
+//		jointDirs.reserve(vtcsCnt);
+//		jointDirs.emplace_back(segs[0]);
+//		auto lastSegItr = segs.end() - 1;
+//		for (auto itr = segs.begin(); itr != lastSegItr; ++itr)
+//		{
+//			auto next = itr + 1;
+//			jointDirs.emplace_back((*next + *itr));
+//		}
+//		jointDirs.emplace_back(segs.back());
+//		//for (auto& each : jointDirs)
+//		//{
+//		//	each *= radius;
+//		//}
+//
+//		for (size_t i = 0; i < vtcsCnt; ++i)
+//		{
+//			auto offset = jointDirs[i];
+//			Hix::Shapes2D::rotateCW90(offset);
+//			areaContour.emplace_back(polyline[i] + (offset.normalized() * radius));
+//		}
+//		//other side of the polyline
+//		for (int i = vtcsCnt - 1; i >= 0 ; --i)
+//		{
+//			auto offset = jointDirs[i];
+//			Hix::Shapes2D::rotateCCW90(offset);
+//			areaContour.emplace_back(polyline[i] +(offset.normalized() * radius));
+//		}
+//	}
+//	return areaContour;
+//}
+
+
 std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std::vector<QVector2D>& polyline)
 {
+	struct OffsetInfo
+	{
+		QVector2D pt0;
+		QVector2D pt1;
+		QVector2D dir;
+	};
 	std::vector<QVector2D> areaContour;
 	if (polyline.size() > 1)
 	{
 		auto radius = thickness / 2.0f;
 		auto vtcsCnt = polyline.size();
 		areaContour.reserve(vtcsCnt * 2);
-		//same code as extrude, but 2d...TODO: templateize 
+
 		//compute segments
-		std::vector<QVector2D> segs;
-		segs.reserve(vtcsCnt - 1);
+		std::vector<OffsetInfo> offsets;
+		offsets.reserve(vtcsCnt - 1);
 		auto lastPathItr = polyline.end() - 1;
 		for (auto itr = polyline.begin(); itr != lastPathItr; ++itr)
 		{
+
 			auto next = itr + 1;
-			segs.emplace_back(*next - *itr);
+			auto edgeDir = (*next - *itr);
+			auto edgeNorm = edgeDir.normalized();
+			Hix::Shapes2D::rotateCW90(edgeNorm);
+			offsets.emplace_back(OffsetInfo{
+				*itr + (edgeNorm * radius),
+				*next + (edgeNorm * radius),
+				edgeDir });
+		}
+		//compute joint directions, joint direction is direction between two segments ie) sum of them, similar to tangent
+		std::vector<QVector2D> offsetPts;
+		offsetPts.reserve(vtcsCnt);
+		//calculate first offset pt
+		{
+			auto& first = offsets.front();
+			offsetPts.emplace_back(first.pt0);
 		}
 
-		//compute joint directions, joint direction is direction between two segments ie) sum of them
-		std::vector<QVector2D> jointDirs;
-		jointDirs.reserve(vtcsCnt);
-		jointDirs.emplace_back(segs[0].normalized());
-		auto lastSegItr = segs.end() - 1;
-		for (auto itr = segs.begin(); itr != lastSegItr; ++itr)
+		auto lastSegItr = offsets.end() - 1;
+		for (auto itr = offsets.begin(); itr != lastSegItr; ++itr)
 		{
+			//https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+			//E = B-A = ( Bx-Ax, By-Ay )
+			//F = D-C = ( Dx-Cx, Dy-Cy ) 
+			//P = ( -Ey, Ex )
+			//h = ( (A-C) * P ) / ( F * P )
 			auto next = itr + 1;
-			jointDirs.emplace_back((*next + *itr).normalized());
+			auto a = itr->pt0;
+			auto c = next->pt0;
+			auto e = itr->dir; //first segment non-normalized tangent
+			auto f = next->dir; //secodn segment non-normalized tangent
+			auto p = e;
+			Hix::Shapes2D::rotateCCW90(p);
+			auto h = QVector2D::dotProduct((a - c), p) / QVector2D::dotProduct(f,p);
+			auto interection = c + (f * h);
+			offsetPts.emplace_back(interection);
 		}
-		jointDirs.emplace_back(segs.back().normalized());
-		for (auto& each : jointDirs)
+		//calculate last offset pt
 		{
-			each *= radius;
+			auto& last = offsets.back();
+			offsetPts.emplace_back(last.pt1);
 		}
-
-		for (size_t i = 0; i < vtcsCnt; ++i)
-		{
-			auto offset = jointDirs[i];
-			Hix::Shapes2D::rotateCW90(offset);
-			areaContour.emplace_back(polyline[i] + offset);
-		}
-		//other side of the polyline
-		for (int i = vtcsCnt - 1; i >= 0 ; --i)
-		{
-			auto offset = jointDirs[i];
-			Hix::Shapes2D::rotateCCW90(offset);
-			areaContour.emplace_back(polyline[i] + offset);
-		}
+		//reverse and join
+		std::reverse(offsetPts.begin(), offsetPts.end());
+		areaContour = polyline;
+		areaContour.insert(areaContour.end(), offsetPts.begin(), offsetPts.end());
+		areaContour.emplace_back(areaContour.front());
 	}
 	return areaContour;
 }
+
 
 
 

@@ -23,6 +23,7 @@
 #include "polylinecut.h"
 #include "../CSG/CSG.h"
 #include "../cdt/HixCDT.h"
+#include "../../common/Debug.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -53,6 +54,11 @@ void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVe
 	auto polyline2d = Hix::Shapes2D::to2DShape(polyline);
 	auto contour2d = Hix::Shapes2D::PolylineToArea(0.1f, polyline2d);
 	auto contour3d = Hix::Shapes2D::to3DShape(0.0f, contour2d);
+	postUIthread([this, contour3d]()
+		{
+			Hix::Debug::DebugRenderObject::getInstance().addPath(contour3d);
+		});
+
 
 	std::vector<QVector3D> path;
 	path.reserve(2);
