@@ -52,12 +52,12 @@ void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVe
 {
 	//to 2d polygon
 	auto polyline2d = Hix::Shapes2D::to2DShape(polyline);
-	auto contour2d = Hix::Shapes2D::PolylineToArea(0.1f, polyline2d);
+	auto contour2d = Hix::Shapes2D::PolylineToArea(0.001f, polyline2d);
 	auto contour3d = Hix::Shapes2D::to3DShape(0.0f, contour2d);
-	postUIthread([this, contour3d]()
-		{
-			Hix::Debug::DebugRenderObject::getInstance().addPath(contour3d);
-		});
+	//postUIthread([this, contour3d]()
+	//	{
+	//		Hix::Debug::DebugRenderObject::getInstance().addPath(contour3d);
+	//	});
 
 
 	std::vector<QVector3D> path;

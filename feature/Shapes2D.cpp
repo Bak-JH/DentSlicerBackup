@@ -208,58 +208,6 @@ std::vector<QVector3D> Hix::Shapes2D::to3DShape(float zPos, const std::vector<QV
 	return output;
 }
 
-//std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std::vector<QVector2D>& polyline)
-//{
-//	std::vector<QVector2D> areaContour;
-//	if (polyline.size() > 1)
-//	{
-//		auto radius = thickness / 2.0f;
-//		auto vtcsCnt = polyline.size();
-//		areaContour.reserve(vtcsCnt * 2);
-//		//same code as extrude, but 2d...TODO: templateize 
-//		//compute segments
-//		std::vector<QVector2D> segs;
-//		segs.reserve(vtcsCnt - 1);
-//		auto lastPathItr = polyline.end() - 1;
-//		for (auto itr = polyline.begin(); itr != lastPathItr; ++itr)
-//		{
-//			auto next = itr + 1;
-//			segs.emplace_back(*next - *itr);
-//		}
-//
-//		//compute joint directions, joint direction is direction between two segments ie) sum of them, similar to tangent
-//		std::vector<QVector2D> jointDirs;
-//		jointDirs.reserve(vtcsCnt);
-//		jointDirs.emplace_back(segs[0]);
-//		auto lastSegItr = segs.end() - 1;
-//		for (auto itr = segs.begin(); itr != lastSegItr; ++itr)
-//		{
-//			auto next = itr + 1;
-//			jointDirs.emplace_back((*next + *itr));
-//		}
-//		jointDirs.emplace_back(segs.back());
-//		//for (auto& each : jointDirs)
-//		//{
-//		//	each *= radius;
-//		//}
-//
-//		for (size_t i = 0; i < vtcsCnt; ++i)
-//		{
-//			auto offset = jointDirs[i];
-//			Hix::Shapes2D::rotateCW90(offset);
-//			areaContour.emplace_back(polyline[i] + (offset.normalized() * radius));
-//		}
-//		//other side of the polyline
-//		for (int i = vtcsCnt - 1; i >= 0 ; --i)
-//		{
-//			auto offset = jointDirs[i];
-//			Hix::Shapes2D::rotateCCW90(offset);
-//			areaContour.emplace_back(polyline[i] +(offset.normalized() * radius));
-//		}
-//	}
-//	return areaContour;
-//}
-
 
 std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std::vector<QVector2D>& polyline)
 {
@@ -329,7 +277,8 @@ std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std:
 		std::reverse(offsetPts.begin(), offsetPts.end());
 		areaContour = polyline;
 		areaContour.insert(areaContour.end(), offsetPts.begin(), offsetPts.end());
-		areaContour.emplace_back(areaContour.front());
+		std::reverse(areaContour.begin(), areaContour.end());
+
 	}
 	return areaContour;
 }
