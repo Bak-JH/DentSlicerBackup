@@ -16,3 +16,5 @@
 
 packagingTools/DSBuild.nsi
 packagingTools/setup
+packagingTools/DentSlicerSetup.exe
+packagingTools/appcast.xml
