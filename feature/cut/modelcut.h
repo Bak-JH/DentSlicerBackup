@@ -1,8 +1,8 @@
 #pragma once
 #include "../interfaces/DialogedMode.h"
 #include "../interfaces/SliderMode.h"
-#include "DentEngine/src/ContourBuilder.h"
-#include "DentEngine/src/Bounds3D.h"
+#include "../slice/ContourBuilder.h"
+#include "render/Bounds3D.h"
 #include "DrawingPlane.h"
 #include <optional>
 namespace Hix

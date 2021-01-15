@@ -1,5 +1,5 @@
 #include "CorkMeshFactory.h"
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 #include "../../render/SceneEntity.h"
 CorkTriMesh Hix::Features::CSG::toCorkMesh(const Hix::Engine3D::Mesh& mesh)
 {

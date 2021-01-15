@@ -3,7 +3,7 @@
 #include "../../slice/slicingengine.h"
 #include "../Shapes2D.h"
 #include "../../glmodel.h"
-#include "../../DentEngine/src/SlicerDebug.h"
+#include "../slice/SlicerDebug.h"
 #include "../cdt/HixCDT.h"
 
 using namespace Hix::Input;

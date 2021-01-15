@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <filesystem>
 #include <memory>
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 
 struct GLFWwindow;
 class Shader;

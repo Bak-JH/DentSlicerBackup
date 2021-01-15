@@ -6,7 +6,7 @@
 #include <list>
 #include <set>
 #include "../../render/SceneEntity.h"
-#include "Bounds3D.h"
+#include "../render/Bounds3D.h"
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH

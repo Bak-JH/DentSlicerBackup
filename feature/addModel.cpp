@@ -1,6 +1,6 @@
 #include "addModel.h"
 #include "glmodel.h"
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "../application/ApplicationManager.h"
 
 using namespace Hix::Features;

@@ -1,5 +1,5 @@
 #include "autoorientation.h"
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include <qDebug>
 #define _USE_MATH_DEFINES
 #include <math.h>

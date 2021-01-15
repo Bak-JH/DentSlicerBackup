@@ -1,6 +1,6 @@
 #pragma once
 #include "../common/Singleton.h"
-#include "../DentEngine/src/mesh.h"
+#include "../Mesh/mesh.h"
 namespace Hix
 {
 	namespace Engine3D

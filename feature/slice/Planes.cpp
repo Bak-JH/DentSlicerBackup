@@ -1,5 +1,4 @@
 #include "Planes.h"
-
 using namespace Hix::Engine3D;
 Hix::Slicer::UniformPlanes::UniformPlanes(float zMin, float zMax, float delta):_delta(delta)
 {

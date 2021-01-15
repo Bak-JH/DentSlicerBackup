@@ -15,7 +15,7 @@
 #include "../repair/meshrepair.h"
 #include "application/ApplicationManager.h"
 #include "../widget/RotateWidget.h"
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>

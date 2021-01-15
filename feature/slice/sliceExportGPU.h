@@ -1,8 +1,8 @@
 #pragma once
-#include "interfaces/Mode.h"
+#include "../interfaces/Mode.h"
 #include "../Tasking/Task.h"
-#include "DentEngine/src/Bounds3D.h"
-#include "interfaces/DialogedMode.h"
+#include "render/Bounds3D.h"
+#include "../interfaces/DialogedMode.h"
 #include "../Qml/components/ControlForwardInclude.h"
 #include "sliceExport.h"
 

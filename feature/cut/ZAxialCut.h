@@ -1,6 +1,6 @@
 #pragma once
 #include <unordered_set>
-#include "../../DentEngine/src/ContourBuilder.h"
+#include "../slice/ContourBuilder.h"
 #include "feature/interfaces/FlushSupport.h"
 
 class GLModel;

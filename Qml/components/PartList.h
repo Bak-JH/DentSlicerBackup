@@ -2,7 +2,7 @@
 #include <qquickitem.h>
 #include <qqmlcomponent.h>
 #include <unordered_set>
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 #include "ControlOwner.h"
 
 class GLModel;

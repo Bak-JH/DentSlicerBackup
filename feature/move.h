@@ -2,7 +2,7 @@
 #include "feature/interfaces/FlushSupport.h"
 #include "feature/interfaces/WidgetMode.h"
 #include "widget/Widget3D.h"
-#include "DentEngine/src/Bounds3D.h"
+#include "render/Bounds3D.h"
 #include "interfaces/DialogedMode.h"
 #include <optional>
 

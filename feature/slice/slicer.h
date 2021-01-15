@@ -8,7 +8,6 @@
 #include <QVector2D>
 
 using namespace ClipperLib;
-using namespace Hix::Engine3D;
 class OverhangPoint;
 
 

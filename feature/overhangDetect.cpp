@@ -1,6 +1,6 @@
 #include "overhangDetect.h"
-#include "DentEngine/src/polyclipping/polyclipping.h"
-#include "DentEngine/src/slicer.h"
+#include "polyclipping/polyclipping.h"
+#include "slice/slicer.h"
 #include "../application/ApplicationManager.h"
 #include <QtMath>
 #include "../utils/mathutils.h"

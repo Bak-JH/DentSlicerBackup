@@ -6,7 +6,7 @@
 using namespace Qt3DCore;
 using namespace Hix::Render;
 using namespace Hix::Debug;
-
+using namespace Hix::Engine3D;
 void Hix::Debug::DebugRenderObject::initialize(QEntity* root)
 {
 	_root = root;

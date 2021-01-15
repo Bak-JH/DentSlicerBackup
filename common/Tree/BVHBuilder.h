@@ -1,7 +1,7 @@
 #pragma once
 #include "NTreeDeque.h"
-#include "../../DentEngine/src/Bounds3D.h"
-#include "../../DentEngine/src/mesh.h"
+#include "../../render/Bounds3D.h"
+#include "../../Mesh/mesh.h"
 #include <optional>
 namespace Hix
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mesh.h"
+#include "../../Mesh/mesh.h"
 #include <QVector2D>
 
 

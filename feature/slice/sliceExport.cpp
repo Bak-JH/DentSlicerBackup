@@ -2,10 +2,10 @@
 #include <QFileDialog>
 
 #include "../glmodel.h"
-#include "addModel.h"
+#include "../addModel.h"
 #include "../application/ApplicationManager.h"
-#include "DentEngine/src/SlicerDebug.h"
-#include "DentEngine/src/svgexporter.h"
+#include "SlicerDebug.h"
+#include "svgexporter.h"
 #include "../Qml/components/Inputs.h"
 #include "../Qml/components/Buttons.h"
 #include "../slice/InfoWriter.h"

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <unordered_set>
-#include "mesh.h"
+#include "../../Mesh/mesh.h"
 //namespace Hix
 //{
 //	namespace Engine3D
