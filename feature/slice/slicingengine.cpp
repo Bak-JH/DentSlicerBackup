@@ -7,10 +7,10 @@
 #include <execution>
 #include "glmodel.h"
 
-#include "DentEngine/src/Planes.h"
+#include "Planes.h"
 #include "feature/overhangDetect.h"
-#include "DentEngine/src/SlicerDebug.h"
-#include "DentEngine/src/SlicerDebugInfoExport.h"
+#include "SlicerDebug.h"
+#include "SlicerDebugInfoExport.h"
 #include "../support/SupportRaftManager.h"
 #include "../support/RaftModel.h"
 using namespace Hix;

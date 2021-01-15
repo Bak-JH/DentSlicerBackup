@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include <vector>
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "../Mesh/RayCaster.h"
 #include "feature/interfaces/Feature.h"
 namespace Hix

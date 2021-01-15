@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #include <qvector3d.h>
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 #include "../widget/GridBed.h"
 class QQuickItem;
 class GLModel;

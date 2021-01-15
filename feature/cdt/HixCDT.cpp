@@ -1,7 +1,7 @@
 #include "HixCDT.h"
 #include <unordered_set>
 #include <qdebug.h>
-#include "../../DentEngine/src/SlicerDebugInfoExport.h"
+#include "../slice/SlicerDebugInfoExport.h"
 #include "../../application/ApplicationManager.h"
 #include "../feature/agCDT/CDT.h"
 

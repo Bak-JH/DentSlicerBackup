@@ -13,7 +13,6 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include "utils/quaternionhelper.h"
-#include "slice/slicingengine.h"
 
 #include "glmodel.h"
 #include <QQuickView>

@@ -1,7 +1,7 @@
 #pragma once
 #include <QString>
 #include <unordered_set>
-#include "DentEngine/src/slicer.h"
+#include "slicer.h"
 
 namespace Hix
 {

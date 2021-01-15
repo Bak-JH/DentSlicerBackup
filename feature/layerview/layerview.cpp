@@ -1,6 +1,6 @@
 #include "layerview.h"
 #include "../../application/ApplicationManager.h"
-#include "../sliceExport.h"
+#include "../slice/sliceExport.h"
 #include "../cut/modelcut.h"
 #include "../../glmodel.h"
 #include "../../support/SupportModel.h"

@@ -3,7 +3,7 @@
 #include "SkylineBinPack.h"
 #include <unordered_map>
 #include <unordered_set>
-#include "../../DentEngine/src/polyclipping/polyclipping.h"
+#include "../polyclipping/polyclipping.h"
 
 #include "../move.h"
 #include "../../application/ApplicationManager.h"

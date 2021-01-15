@@ -3,18 +3,18 @@
 #include "sliceExportGPU.h"
 #include <QFileDialog>
 #include "../glmodel.h"
-#include "addModel.h"
+#include "../addModel.h"
 #include "../application/ApplicationManager.h"
 #include "../Qml/components/Inputs.h"
 #include "../Qml/components/Buttons.h"
 #include "../slice/InfoWriter.h"
 
 #include "../slice/slicingengine.h"
-#include "../DentEngine/src/mesh.h"
+#include "../Mesh/mesh.h"
 #include "../render/SceneEntity.h"
 #include "../glmodel.h"
 #include "../Qt/QtUtils.h"
-#include "zip/zip.h"
+#include "../zip/zip.h"
 
 #include <unordered_set>
 #include <filesystem>

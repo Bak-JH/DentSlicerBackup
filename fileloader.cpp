@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QFile>
 #include <iostream>
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include <fstream>
 #include <string>
 #include <sstream>

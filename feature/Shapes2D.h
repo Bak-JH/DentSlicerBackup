@@ -1,5 +1,5 @@
 #pragma once
-#include "../DentEngine//src/polyclipping/polyclipping.h"
+#include "polyclipping/polyclipping.h"
 #include <QQuaternion>
 
 namespace Hix

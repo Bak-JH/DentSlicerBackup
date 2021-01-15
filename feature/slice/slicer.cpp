@@ -4,7 +4,7 @@
 #include <QTextStream>
 #include <unordered_map>
 #include "../../utils/mathutils.h"
-#include "polyclipping/QDebugPolyclipping.h"
+#include "../polyclipping/QDebugPolyclipping.h"
 #include "ContourBuilder.h"
 #include "Planes.h"
 #include "SlicerDebug.h"
@@ -16,6 +16,8 @@
 using namespace ClipperLib;
 using namespace Hix::Debug;
 using namespace Hix::Slicer;
+using namespace Hix::Engine3D;
+
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "polytree: " << *obj.polytree;
 

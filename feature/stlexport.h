@@ -2,7 +2,7 @@
 #include <sstream>
 #include <QFile>
 #include <unordered_map>
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "interfaces/Feature.h"
 #include "interfaces/Mode.h"
 #include <filesystem>

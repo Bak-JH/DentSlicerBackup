@@ -18,7 +18,7 @@
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"
 
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "../repair/meshrepair.h"
 #include "polylinecut.h"
 #include "../CSG/CSG.h"

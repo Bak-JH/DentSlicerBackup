@@ -1,5 +1,5 @@
 #pragma once
-#include "../DentEngine/src/mesh.h"
+#include "mesh.h"
 #include <vector>
 namespace Hix
 {

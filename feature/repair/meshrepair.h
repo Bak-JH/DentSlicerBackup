@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <string>
-#include "../../DentEngine/src/Mesh.h"
+#include "../../Mesh/mesh.h"
 #include "../interfaces/Feature.h"
 class GLModel;
 namespace Hix

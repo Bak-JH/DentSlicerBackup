@@ -58,17 +58,6 @@
     <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
     <ClCompile Include="common\Tree\TreeBuilder.cpp" />
-    <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
-    <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
-    <ClCompile Include="DentEngine\src\Planes.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\common\shapes.cc" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cc" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cc" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
-    <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
-    <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
-    <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
     <ClCompile Include="feature\addModel.cpp" />
     <ClCompile Include="feature\arrange\autoarrange.cpp" />
     <ClCompile Include="feature\arrange\GuillotineBinPack.cpp" />
@@ -78,7 +67,6 @@
     <ClCompile Include="feature\arrange\ShelfNextFitBinPack.cpp" />
     <ClCompile Include="feature\arrange\SkylineBinPack.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
@@ -124,7 +112,6 @@
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
     <ClCompile Include="feature\rotate.cpp" />
-    <ClCompile Include="feature\sliceExport.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
     <ClCompile Include="feature\UndoRedo.cpp" />
@@ -177,14 +164,9 @@
     <ClCompile Include="utils\httpreq.cpp" />
     <ClCompile Include="utils\linemeshgeometry.cpp" />
     <ClCompile Include="utils\mathutils.cpp" />
-    <ClCompile Include="DentEngine\src\mesh.cpp" />
-    <ClCompile Include="DentEngine\src\utils\metric.cpp" />
     <ClCompile Include="utils\qtriangulator.cpp" />
     <ClCompile Include="utils\quaternionhelper.cpp" />
     <ClCompile Include="feature\shelloffset.cpp" />
-    <ClCompile Include="DentEngine\src\slicer.cpp" />
-    <ClCompile Include="slice\slicingengine.cpp" />
-    <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
     <ClCompile Include="feature\interfaces\SliderMode.cpp">
       <Filter>Source Files</Filter>
@@ -233,21 +215,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="feature\zip\zip.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="slice\gpuSlicer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\sliceExportGPU.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="slice\InfoWriter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="slice\GLContextFunctionObj.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="slice\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="common\Semaphore.cpp">
@@ -302,6 +269,70 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="application\I18nManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\ContourBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\Planes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\sliceExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\sliceExportGPU.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\slicer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\SlicerDebug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\SlicerDebugInfoExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\svgexporter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\Bounds3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\poly2tri\common\shapes.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\poly2tri\sweep\advancing_front.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\poly2tri\sweep\cdt.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\poly2tri\sweep\sweep.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\poly2tri\sweep\sweep_context.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\clipper\clipper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\polyclipping\polyclipping.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\GLContextFunctionObj.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\gpuSlicer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\InfoWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\slice\slicingengine.cpp" />
+    <ClCompile Include="common\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -796,15 +827,6 @@
     <ClInclude Include="Tasking\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="common\Tree\TreeBuilder.h" />
-    <ClInclude Include="DentEngine\src\Bounds3D.h" />
-    <ClInclude Include="DentEngine\src\ContourBuilder.h" />
-    <ClInclude Include="DentEngine\src\MeshIterators.h" />
-    <ClInclude Include="DentEngine\src\Planes.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
-    <ClInclude Include="DentEngine\src\SlicerDebug.h" />
-    <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
     <ClInclude Include="feature\addModel.h" />
     <ClInclude Include="feature\agCDT\CDT.h" />
     <ClInclude Include="feature\agCDT\CDTUtils.h" />
@@ -819,9 +841,6 @@
     <ClInclude Include="feature\arrange\ShelfNextFitBinPack.h" />
     <ClInclude Include="feature\arrange\SkylineBinPack.h" />
     <ClInclude Include="feature\autoorientation.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
-    <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
     <ClInclude Include="feature\convex_hull.h" />
     <ClInclude Include="feature\CSG\CorkMeshFactory.h" />
     <ClInclude Include="feature\CSG\CSG.h" />
@@ -861,7 +880,6 @@
     <ClInclude Include="feature\repair\TMesh\triangle.h" />
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
     <ClInclude Include="feature\rotate.h" />
-    <ClInclude Include="feature\sliceExport.h" />
     <ClInclude Include="feature\SupportFeature.h" />
     <ClInclude Include="feature\ModelBuilder\TwoManifoldBuilder.h" />
     <ClInclude Include="feature\UndoRedo.h" />
@@ -904,21 +922,13 @@
     <ClInclude Include="unitTest\tests\SlicerTest.h" />
     <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h" />
     <ClInclude Include="utils\mathutils.h" />
-    <ClInclude Include="DentEngine\src\utils\metric.h" />
     <ClInclude Include="feature\cut\polylinecut.h" />
     <ClInclude Include="utils\qbezier.h" />
     <ClInclude Include="utils\qdatabuffer_p.h" />
     <ClInclude Include="utils\qrbtree.h" />
     <ClInclude Include="utils\qtriangulator_p.h" />
     <ClInclude Include="utils\qvectorpath_p.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\shapes.h" />
     <ClInclude Include="feature\shelloffset.h" />
-    <ClInclude Include="DentEngine\src\slicer.h" />
-    <ClInclude Include="slice\slicingengine.h" />
-    <ClInclude Include="DentEngine\src\svgexporter.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h">
@@ -932,9 +942,6 @@
     </ClInclude>
     <ClInclude Include="common\RandomGen.h" />
     <ClInclude Include="feature\layerview\CrossSectionPlane.h" />
-    <ClInclude Include="DentEngine\src\mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="feature\sendError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1020,36 +1027,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\zip\zip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\gpuSlicer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\OpenGLIncludes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\include\stb_image_write.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\include\shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\include\camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\sliceExportGPU.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\InfoWriter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\GLContextFunctionObj.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\glad\include\glad\glad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="slice\glad\include\KHR\khrplatform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\Semaphore.h">
@@ -1194,6 +1171,91 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\MeshIterators.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\svgexporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\ContourBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\Planes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\sliceExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\sliceExportGPU.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\slicer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\SlicerDebug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\SlicerDebugInfoExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render\Bounds3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\clipper\clipper.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\poly2tri\common\shapes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\poly2tri\sweep\advancing_front.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\poly2tri\sweep\sweep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\poly2tri\sweep\sweep_context.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\poly2tri\poly2tri.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\polyclipping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\polyclipping\QDebugPolyclipping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\include\camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\include\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\include\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\GLContextFunctionObj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\gpuSlicer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\InfoWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\OpenGLIncludes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\slice\slicingengine.h" />
+    <ClInclude Include="common\glad\include\glad\glad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\glad\include\KHR\khrplatform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

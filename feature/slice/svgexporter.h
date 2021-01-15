@@ -1,6 +1,6 @@
 #pragma once
 
-#include "polyclipping/polyclipping.h"
+#include "../polyclipping/polyclipping.h"
 #include "slicer.h"
 #include "../../Settings/SliceSetting.h"
 #include "../../Settings/PrinterSetting.h"

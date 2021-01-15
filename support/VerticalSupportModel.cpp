@@ -6,7 +6,7 @@
 #include "../feature/Shapes2D.h"
 #include "../application/ApplicationManager.h"
 #include <unordered_map>
-#include "../DentEngine/src/mesh.h"
+#include "../Mesh/mesh.h"
 #include "../Mesh/FaceSelectionUtils.h"
 #include "../feature/Plane3D.h"
 #include "../common/Debug.h"

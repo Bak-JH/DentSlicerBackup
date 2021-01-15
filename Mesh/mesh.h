@@ -1,7 +1,7 @@
 #pragma once
 #include "MeshIterators.h"
 #include <QHash>
-#include "polyclipping/polyclipping.h"
+#include "../feature/polyclipping/polyclipping.h"
 #include <QTransform>
 #include <QTime>
 #include <array>
@@ -9,10 +9,6 @@
 #include <optional>
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
-#define cos50 0.64278761
-#define cos100 -0.17364818
-#define cos150 -0.8660254
-#define FZERO 0.00001f
 
 
 
@@ -266,11 +262,9 @@ namespace Hix
 
 	namespace Debug
 	{
-		using namespace Hix::Engine3D;
-
-		QDebug operator<< (QDebug d, const VertexConstItr& obj);
-		QDebug operator<< (QDebug d, const HalfEdgeConstItr& obj);
-		QDebug operator<< (QDebug d, const FaceConstItr& obj);
+		QDebug operator<< (QDebug d, const Hix::Engine3D::VertexConstItr& obj);
+		QDebug operator<< (QDebug d, const Hix::Engine3D::HalfEdgeConstItr& obj);
+		QDebug operator<< (QDebug d, const Hix::Engine3D::FaceConstItr& obj);
 	}
 
 };
@@ -279,51 +273,50 @@ namespace Hix
 
 namespace std
 {
-	using namespace Hix::Engine3D;
 	template<>
-	struct hash<VertexConstItr>
+	struct hash<Hix::Engine3D::VertexConstItr>
 	{
-		size_t operator()(const VertexConstItr& v)const
+		size_t operator()(const Hix::Engine3D::VertexConstItr& v)const
 		{
 			return v.index();
 		}
 	};
 	template<>
-	struct hash<HalfEdgeConstItr>
+	struct hash<Hix::Engine3D::HalfEdgeConstItr>
 	{
-		size_t operator()(const HalfEdgeConstItr& v)const
+		size_t operator()(const Hix::Engine3D::HalfEdgeConstItr& v)const
 		{
 			return v.index();
 		}
 	};
 	template<>
-	struct hash<FaceConstItr>
+	struct hash<Hix::Engine3D::FaceConstItr>
 	{
-		size_t operator()(const FaceConstItr& v)const
+		size_t operator()(const Hix::Engine3D::FaceConstItr& v)const
 		{
 			return v.index();
 		}
 	};
 	template<>
-	struct hash<VertexItr>
+	struct hash<Hix::Engine3D::VertexItr>
 	{
-		size_t operator()(const VertexItr& v)const
+		size_t operator()(const Hix::Engine3D::VertexItr& v)const
 		{
 			return v.index();
 		}
 	};
 	template<>
-	struct hash<FaceItr>
+	struct hash<Hix::Engine3D::FaceItr>
 	{
-		size_t operator()(const FaceItr& v)const
+		size_t operator()(const Hix::Engine3D::FaceItr& v)const
 		{
 			return v.index();
 		}
 	};
 	template<>
-	struct hash<HalfEdgeItr>
+	struct hash<Hix::Engine3D::HalfEdgeItr>
 	{
-		size_t operator()(const HalfEdgeItr& v)const
+		size_t operator()(const Hix::Engine3D::HalfEdgeItr& v)const
 		{
 			return v.index();
 		}

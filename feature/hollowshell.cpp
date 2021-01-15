@@ -1,4 +1,5 @@
 #include "hollowshell.h"
+using namespace Hix::Engine3D;
 void HollowShell::hollowShell(Mesh* mesh,const FaceConstItr& mf, QVector3D center, float radius){
     std::unordered_set<FaceConstItr> hollow_shell_faces;
     QVector3D normal = mf.localFn();

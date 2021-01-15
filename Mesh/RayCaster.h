@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DentEngine/src/mesh.h"
+#include "../Mesh/mesh.h"
 #include "RayAccelerator.h"
 namespace Hix
 {

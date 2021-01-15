@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "JSONParsedSetting.h"
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 #include <optional>
 namespace Hix
 {

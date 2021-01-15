@@ -2,7 +2,7 @@
 
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
-#include "slice/slicingengine.h"
+#include "../feature/slice/slicingengine.h"
 #include "feature/autoorientation.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
@@ -78,7 +78,7 @@ private:
 	QString _name;
     QVector3D lastpoint;
     QVector2D prevPoint;
-	QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+	QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)override;
 
 
 };

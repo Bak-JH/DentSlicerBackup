@@ -3,7 +3,7 @@
 #include "../interfaces/WidgetMode.h"
 #include "../interfaces/RangeSliderMode.h"
 
-#include "DentEngine/src/Bounds3D.h"
+#include "render/Bounds3D.h"
 #include "../../render/PlaneMeshEntity.h"
 #include "../rotate.h"
 #include "../../Qml/components/ControlForwardInclude.h"

@@ -1,7 +1,7 @@
 #pragma once
 #include "interfaces/Mode.h"`
-#include "DentEngine/src/Bounds3D.h"
-#include "../../DentEngine/src/Mesh.h"
+#include "render/Bounds3D.h"
+#include "../../Mesh/mesh.h"
 #include <qurl.h>
 #include <filesystem>
 class GLModel;

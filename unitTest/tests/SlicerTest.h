@@ -1,13 +1,13 @@
 
 #include "../catch.hpp"
 #include <string>
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 #include "../../fileloader.h"
 
-//#include "../../DentEngine/src/slicer.h"
+//#include "../../slice/slicer.h"
 
 //acces unaccessible cpp only functions
-#include "../../DentEngine/src/slicer.h"
+#include "../../slice/slicer.h"
 #include "../../common/RandomGen.h"
 namespace SlicerTest
 {

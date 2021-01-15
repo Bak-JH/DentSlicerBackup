@@ -1,5 +1,5 @@
 #pragma once
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include <qvector3d.h>
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderMode.h"

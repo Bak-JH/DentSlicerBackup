@@ -19,7 +19,7 @@
 #include "arrange/autoarrange.h"
 #include "SupportFeature.h"
 #include "stlexport.h"
-#include "sliceExport.h"
+#include "slice/sliceExport.h"
 #include "printerServer.h"
 
 #include "Qml/components/Buttons.h"
