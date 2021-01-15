@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <stack>
 #include <algorithm>
-#include "DentEngine/src/polyclipping/clipper/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 
 using namespace ClipperLib;
 
