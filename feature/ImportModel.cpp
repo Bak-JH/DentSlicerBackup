@@ -81,7 +81,7 @@ void Hix::Features::ImportModel::runImpl()
 		//read each models
 		for (auto& p : modelNameMap)
 		{
-			auto mesh = new Mesh();
+			auto mesh = new Hix::Engine3D::Mesh();
 			auto modelStr = zf.read(p.first);
 			std::stringstream strStrm(modelStr);
 			if (!FileLoader::loadMeshSTL(mesh, strStrm))
@@ -103,7 +103,7 @@ void Hix::Features::ImportModel::runImpl()
 void Hix::Features::ImportModel::importSingle(const QString& name, const std::filesystem::path& path)
 {
 
-	auto mesh = new Mesh();
+	auto mesh = new Hix::Engine3D::Mesh();
 	std::fstream file(path);
 	if (!file.is_open())
 		return;

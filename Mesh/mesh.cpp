@@ -7,6 +7,7 @@
 #include <set>
 #include "../../render/SceneEntity.h"
 #include "../render/Bounds3D.h"
+//#include "../feature/polyclipping/polyclipping.h"
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH

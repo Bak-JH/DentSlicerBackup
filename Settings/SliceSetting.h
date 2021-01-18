@@ -5,15 +5,18 @@ namespace Hix
 {
 	namespace Settings
 	{
+
+
+
 		class SliceSetting:public JSONParsedSetting, public JSONWriteSetting
 		{
 		public:
+
 			enum class SlicingMode : uint8_t
 			{
 				Uniform
 				//,Adaptive
 			};
-
 			SliceSetting(std::filesystem::path settingsPath);
 			~SliceSetting();
 

@@ -32,7 +32,7 @@ Hix::Support::DiagInterconnect::~DiagInterconnect()
 {
 }
 
-QVector4D Hix::Support::DiagInterconnect::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
+QVector4D Hix::Support::DiagInterconnect::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)
 {
 	return QVector4D();
 }

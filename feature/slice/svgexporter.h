@@ -1,11 +1,14 @@
 #pragma once
-
-#include "../polyclipping/polyclipping.h"
-#include "slicer.h"
-#include "../../Settings/SliceSetting.h"
-#include "../../Settings/PrinterSetting.h"
 #include "mesh.h"
-
+#include <QVector2D>
+#include "../../Settings/SliceSetting.h"
+#include "slicer.h"
+//
+//namespace ClipperLib
+//{
+//	class PolyNode;
+//	class Path;
+//}
 
 
 namespace Hix
