@@ -2,7 +2,6 @@
 #include "../interfaces/Mode.h"
 #include "../Tasking/Task.h"
 #include "render/Bounds3D.h"
-#include "../slice/slicingengine.h"
 #include "../interfaces/DialogedMode.h"
 #include "../Qml/components/ControlForwardInclude.h"
 

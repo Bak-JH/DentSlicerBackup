@@ -10,7 +10,9 @@
 #include "../common/rapidjson/writer.h"
 #include "../common/rapidjson/ostreamwrapper.h"
 #include "../common/rapidjson/prettywriter.h"
-
+#include "../polyclipping/polyclipping.h"
+#include "../../Settings/SliceSetting.h"
+#include "../../Settings/PrinterSetting.h"
 #include <fstream>
 
 using namespace Hix::Slicer;

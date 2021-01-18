@@ -8,11 +8,11 @@
 #include "../rotate.h"
 #include "../../Qml/components/ControlForwardInclude.h"
 #include "SelectionPlane.h"
-#include "../CSG/CSG.h"
 #include "../interfaces/PPShaderMode.h"
-
+#include "../CSG/CSG.h"
 class GLModel;
 class QQuaternion;
+struct CorkTriMesh;
 namespace Hix
 {
 
@@ -37,7 +37,7 @@ namespace Hix
 		public:
 			FaceSelector(const Hix::Render::SceneEntity& subject);
 			std::unordered_set<Hix::Engine3D::VertexConstItr> doSelection(const Hix::Features::SelectionPlane& selectionPlane, const std::vector<QVector3D>& polyline);
-
+			~FaceSelector();
 		private:
 			//cached subject mesh
 			const Hix::Engine3D::Mesh& _subjectOrig;

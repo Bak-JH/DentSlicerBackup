@@ -1,15 +1,16 @@
 #include "sliceExport.h"
 #include <QFileDialog>
 
-#include "../glmodel.h"
-#include "../addModel.h"
+//#include "../glmodel.h"
+//#include "../addModel.h"
 #include "../application/ApplicationManager.h"
-#include "SlicerDebug.h"
-#include "svgexporter.h"
+//#include "SlicerDebug.h"
 #include "../Qml/components/Inputs.h"
 #include "../Qml/components/Buttons.h"
 #include "../slice/InfoWriter.h"
 #include "sliceExportGPU.h"
+//#include "../slice/slicingengine.h"
+
 #include <unordered_set>
 constexpr float ZMARGIN = 5;
 using namespace Hix::Settings;

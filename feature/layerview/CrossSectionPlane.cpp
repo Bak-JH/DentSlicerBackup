@@ -11,7 +11,7 @@ using namespace Hix::Features;
 using namespace Hix::Render;
 using namespace Hix::Slicer;
 using namespace Hix::Polyclipping;
-
+using namespace Hix::Engine3D;
 
 Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): SceneEntityWithMaterial(owner)
 {

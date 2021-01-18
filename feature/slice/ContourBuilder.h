@@ -21,15 +21,14 @@ namespace std
 			return digest;
 		}
 	};
-	using namespace Hix::Engine3D;
 	template<>
-	struct hash<std::pair<VertexConstItr, VertexConstItr>>
+	struct hash<std::pair<Hix::Engine3D::VertexConstItr, Hix::Engine3D::VertexConstItr>>
 	{
 		//2D only!
-		std::size_t operator()(const std::pair<VertexConstItr, VertexConstItr>& pair)const
+		std::size_t operator()(const std::pair<Hix::Engine3D::VertexConstItr, Hix::Engine3D::VertexConstItr>& pair)const
 		{
 			//we don't care about symmertricity as the vertice pair should be sorted anyway ie) no symmetry
-			return std::hash<VertexConstItr>()(pair.first) ^ std::hash<VertexConstItr>()(pair.second);
+			return std::hash<Hix::Engine3D::VertexConstItr>()(pair.first) ^ std::hash<Hix::Engine3D::VertexConstItr>()(pair.second);
 		}
 	};
 }
@@ -40,7 +39,6 @@ namespace Hix
 {
 	namespace Slicer
 	{
-		using namespace Hix::Engine3D;
 		struct ContourSegment
 		{
 			enum FlipResult : uint8_t
@@ -53,7 +51,7 @@ namespace Hix
 			//constructor helper;
 			bool isValid()const;
 			float dist()const;
-			FaceConstItr face;
+			Hix::Engine3D::FaceConstItr face;
 			QVector2D from;
 			QVector2D to;
 		};
@@ -84,7 +82,7 @@ namespace Hix
 		class ContourBuilder
 		{
 		public:
-			ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
+			ContourBuilder(const Hix::Engine3D::Mesh* mesh, std::unordered_set<Hix::Engine3D::FaceConstItr>& intersectingFaces, float z);
 			std::vector<Contour> buildContours();
 			std::vector<Contour> flushIncompleteContours();
 			static bool isArea(const Contour& contour);
@@ -95,21 +93,21 @@ namespace Hix
 
 			//two points
 
-			void buildSegment(const FaceConstItr& mf);
+			void buildSegment(const Hix::Engine3D::FaceConstItr& mf);
 			bool buildContour(Contour& current, bool reverse);
-			QVector2D planeIntersectionPt(VertexConstItr vtxA0, VertexConstItr vtxA1);
+			QVector2D planeIntersectionPt(Hix::Engine3D::VertexConstItr vtxA0, Hix::Engine3D::VertexConstItr vtxA1);
 			std::vector<Contour>  joinOrCloseIncompleteContours();
 
-			const Mesh* _mesh;
+			const Hix::Engine3D::Mesh* _mesh;
 			float _plane;
-			std::unordered_map<std::pair<VertexConstItr, VertexConstItr>, QVector2D> _midPtLUT;
-			const std::unordered_set<FaceConstItr>& _intersectList;
-			std::unordered_map<FaceConstItr, ContourSegment> _segments;
+			std::unordered_map<std::pair<Hix::Engine3D::VertexConstItr, Hix::Engine3D::VertexConstItr>, QVector2D> _midPtLUT;
+			const std::unordered_set<Hix::Engine3D::FaceConstItr>& _intersectList;
+			std::unordered_map<Hix::Engine3D::FaceConstItr, ContourSegment> _segments;
 
 			std::unordered_multimap<QVector2D, ContourSegment*> _fromHash;
 			std::unordered_multimap<QVector2D, ContourSegment*> _toHash;
 
-			std::unordered_set<FaceConstItr> _unexplored;
+			std::unordered_set<Hix::Engine3D::FaceConstItr> _unexplored;
 			std::vector<Contour> _incompleteContours;
 
 		};

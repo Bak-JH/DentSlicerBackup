@@ -15,7 +15,6 @@
 #include "../cdt/HixCDT.h"
 #include "../Mesh/BVH.h"
 #include "../Mesh/MTRayCaster.h"
-using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;
 using namespace Hix::Features::Extrusion;
@@ -29,7 +28,7 @@ const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
 constexpr float LABEL_SCALE = 0.05f;
 GLModel* Hix::Features::LabellingMode::generatePreviewModel(const QMatrix4x4& transformMat)
 {
-	auto labelMesh = new Mesh();
+	auto labelMesh = new Hix::Engine3D::Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
 	QFont font(_fontStyle->getSelectedItem(), _fontSize->getValue());
@@ -213,7 +212,7 @@ Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 		childs.insert(model);
 	}
 
-	_rayCaster.reset(new MTRayCaster());
+	_rayCaster.reset(new Hix::Engine3D::MTRayCaster());
 	std::for_each(
 		std::begin(childs),
 		std::end(childs),

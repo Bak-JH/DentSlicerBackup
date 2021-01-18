@@ -14,7 +14,6 @@ namespace Hix
 			Manual = 1
 		};
 
-		using namespace Engine3D;
 		class SupportModel;
 		class ModelAttachedSupport;
 		class RaftModel;
@@ -60,7 +59,7 @@ namespace Hix
 			Qt3DCore::QEntity& rootEntity();
 			size_t supportCount()const;
 			//void checkOverhangCollision(GLModel* model, )
-			RayCaster& supportRaycaster();
+			Hix::Engine3D::RayCaster& supportRaycaster();
 			std::vector<std::array<SupportModel*, 2>> interconnectPairs()const;
 			void prepareRaycasterSelected();
 
@@ -85,8 +84,8 @@ namespace Hix
 			std::unordered_map<const GLModel*, std::unordered_set<ModelAttachedSupport*>> _modelSupportMap;
 			std::unique_ptr<RaftModel> _raft;
 			//std::unordered_map<const GLModel*, RayCaster> _rayCasters;
-			std::unique_ptr<RayCaster> _rayCaster;
-			std::unique_ptr<RayAccelerator> _rayAccel;
+			std::unique_ptr<Hix::Engine3D::RayCaster> _rayCaster;
+			std::unique_ptr<Hix::Engine3D::RayAccelerator> _rayAccel;
 
 		};
 

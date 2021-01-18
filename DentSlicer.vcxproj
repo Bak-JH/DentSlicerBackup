@@ -284,15 +284,6 @@
     <ClCompile Include="feature\slice\svgexporter.cpp" />
     <ClCompile Include="Mesh\FaceSelectionUtils.cpp" />
     <ClCompile Include="feature\cdt\HixCDT.cpp" />
-    <ClCompile Include="cork\src\cork.cpp" />
-    <ClCompile Include="cork\src\file_formats\files.cpp" />
-    <ClCompile Include="cork\src\file_formats\ifs.cpp" />
-    <ClCompile Include="cork\src\file_formats\off.cpp" />
-    <ClCompile Include="cork\src\isct\empty3d.cpp" />
-    <ClCompile Include="cork\src\isct\quantization.cpp" />
-    <ClCompile Include="cork\src\isct\CDTtriangle.c" />
-    <ClCompile Include="cork\src\util\log.cpp" />
-    <ClCompile Include="cork\src\util\timer.cpp" />
     <ClCompile Include="feature\interfaces\RangeSliderMode.cpp" />
     <ClCompile Include="feature\interfaces\SliderMode.cpp" />
     <ClCompile Include="feature\printerServer.cpp" />
@@ -961,29 +952,6 @@
     <ClInclude Include="feature\slice\svgexporter.h" />
     <ClInclude Include="Mesh\FaceSelectionUtils.h" />
     <ClInclude Include="feature\cdt\HixCDT.h" />
-    <ClInclude Include="cork\src\accel\aabvh.h" />
-    <ClInclude Include="cork\src\cork.h" />
-    <ClInclude Include="cork\src\file_formats\files.h" />
-    <ClInclude Include="cork\src\isct\absext4.h" />
-    <ClInclude Include="cork\src\isct\CDTtriangle.h" />
-    <ClInclude Include="cork\src\isct\empty3d.h" />
-    <ClInclude Include="cork\src\isct\ext4.h" />
-    <ClInclude Include="cork\src\isct\fixext4.h" />
-    <ClInclude Include="cork\src\isct\fixint.h" />
-    <ClInclude Include="cork\src\isct\gmpext4.h" />
-    <ClInclude Include="cork\src\isct\quantization.h" />
-    <ClInclude Include="cork\src\isct\unsafeRayTriIsct.h" />
-    <ClInclude Include="cork\src\math\bbox.h" />
-    <ClInclude Include="cork\src\math\ray.h" />
-    <ClInclude Include="cork\src\math\vec.h" />
-    <ClInclude Include="cork\src\mesh\mesh.decl.h" />
-    <ClInclude Include="cork\src\mesh\mesh.h" />
-    <ClInclude Include="cork\src\rawmesh\rawMesh.h" />
-    <ClInclude Include="cork\src\util\iterPool.h" />
-    <ClInclude Include="cork\src\util\memPool.h" />
-    <ClInclude Include="cork\src\util\prelude.h" />
-    <ClInclude Include="cork\src\util\shortVec.h" />
-    <ClInclude Include="cork\src\util\unionFind.h" />
     <ClInclude Include="feature\interfaces\RangeSliderMode.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h" />
     <ClInclude Include="feature\printerServer.h" />
@@ -1296,12 +1264,6 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cork\src\mesh\mesh.bool.tpp" />
-    <None Include="cork\src\mesh\mesh.isct.tpp" />
-    <None Include="cork\src\mesh\mesh.remesh.tpp" />
-    <None Include="cork\src\mesh\mesh.topoCache.tpp" />
-    <None Include="cork\src\mesh\mesh.tpp" />
-    <None Include="cork\src\rawmesh\rawMesh.tpp" />
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrButtonBase.qml" />
@@ -1655,6 +1617,11 @@
   </ItemGroup>
   <ItemGroup>
     <Media Include="Resource\dentslicer_loading.mp4" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="cork\win\wincork\wincorkDLL.vcxproj">
+      <Project>{239d1648-b3dc-437e-830c-f2106c01b30c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
