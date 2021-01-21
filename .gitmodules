@@ -1,3 +1,6 @@
 [submodule "cork"]
-	path = cork
+	path = extern/cork
 	url = https://github.com/legokangpalla/cork.git
+[submodule "glm"]
+	path = extern/glm
+	url = https://github.com/g-truc/glm.git
