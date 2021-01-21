@@ -22,11 +22,7 @@
         <file>Qml/Login.qml</file>
         <file>Qml/LeftTabSlicingOptionElement2.qml</file>
         <file>Qml/LeftTabSlicingOptionElement3.qml</file>
-        <file>Resource/mesh/box.stl</file>
-        <file>Resource/mesh/box2.stl</file>
         <file>Qml/SettingPopup.qml</file>
-        <file>Resource/mesh/plate_logo.stl</file>
-        <file>Resource/mesh/boundedBox3.stl</file>
         <file>Qml/MeshPlate.qml</file>
         <file>shaders/default.vert</file>
         <file>shaders/flat.frag</file>
