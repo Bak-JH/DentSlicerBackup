@@ -12,7 +12,6 @@
 #include <QApplication>
 #include <QQmlEngine>
 #include <QQmlContext>
-#include "utils/quaternionhelper.h"
 
 #include "glmodel.h"
 #include <QQuickView>
