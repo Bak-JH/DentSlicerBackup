@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.19.3)
 project(DentSlicer)
-
-
+#Qt packages
 find_package(Qt5Core REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt5SerialPort REQUIRED)
@@ -12,11 +11,22 @@ find_package(Qt5Qml REQUIRED)
 find_package(Qt5Svg REQUIRED)
 find_package(Qt5WebSockets REQUIRED)
 
+#submodules
+add_subdirectory(extern/eigen)
+add_subdirectory(extern/boost)
+add_subdirectory(extern/flann)
+add_subdirectory(extern/vtk)
+add_subdirectory(extern/cork)
+add_subdirectory(extern/glm)
+add_subdirectory(extern/rapidjson)
+add_subdirectory(extern/taskflow)
+add_subdirectory(extern/frozenString)
+add_subdirectory(extern/readerwriterqueue)
+
+#Platforms
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
-
-
 
 set(SOURCES
 application/ApplicationManager.cpp
