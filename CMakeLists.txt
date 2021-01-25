@@ -3,13 +3,30 @@ project(DentSlicer)
 #Qt packages
 find_package(Qt5Core REQUIRED)
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
-find_package(Qt5SerialPort REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5Quick REQUIRED)
 find_package(Qt5Gui  REQUIRED)
-find_package(Qt5Qml REQUIRED)
 find_package(Qt5Svg REQUIRED)
+
+find_package(Qt5Network REQUIRED)
+find_package(Qt5WebEngine REQUIRED)
+find_package(Qt5WebEngineCore REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 find_package(Qt5WebSockets REQUIRED)
+
+find_package(Qt5Qml REQUIRED)
+find_package(Qt5QuickControls2 REQUIRED)
+find_package(Qt5QuickWidgets REQUIRED)
+find_package(Qt5QuickTemplates2 REQUIRED)
+find_package(Qt5Quick REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
+
+find_package(Qt53DCore REQUIRED)
+find_package(Qt53DInput REQUIRED)
+find_package(Qt53DRender REQUIRED)
+find_package(Qt53DExtras REQUIRED)
+
+find_package(Qt5OpenGL REQUIRED)
+
 
 #submodules
 add_subdirectory(extern/eigen)
@@ -448,12 +465,32 @@ widget/Widget3D.h
 add_executable( ${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME}  
+Qt5::Core
 Qt5::Widgets
-Qt5::Network
 Qt5::Gui
-Qt5::Qml
 Qt5::Svg
+
+Qt5::Network
 Qt5::WebSockets
+Qt5::WebEngine
+Qt5::WebEngineCore
+Qt5::WebEngineWidgets
+
+Qt5::Qml
 Qt5::Quick
-Qt5::SerialPort
+Qt5::QuickControls2
+Qt5::QuickWidgets
+
+Qt5::3DCore
+Qt5::3DInput
+Qt5::3DRender
+Qt5::3DExtras
+
+Qt5::OpenGL
 )
+
+
+
+
+
+
