@@ -1,2 +1,2 @@
 #! /bin/sh/
-cmake --build out/build
+cmake --build build
