@@ -49,7 +49,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 [Bb][Uu][Ii][Ll][Dd]/
-/extern
 
 #dent
 /DentSlicer.pro.user.*
