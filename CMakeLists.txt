@@ -29,15 +29,27 @@ find_package(Qt5OpenGL REQUIRED)
 
 
 #submodules
-add_subdirectory(extern/eigen)
+message(STATUS "lz4 adding subdirectory")
+add_subdirectory(extern/lz4/build/cmake)
+message(STATUS "boost adding subdirectory")
 add_subdirectory(extern/boost)
+message(STATUS "eigen adding subdirectory")
+add_subdirectory(extern/eigen)
+message(STATUS "flann adding subdirectory")
 add_subdirectory(extern/flann)
+message(STATUS "vtk adding subdirectory")
 add_subdirectory(extern/vtk)
+message(STATUS "cork adding subdirectory")
 add_subdirectory(extern/cork)
+message(STATUS "glm adding subdirectory")
 add_subdirectory(extern/glm)
+message(STATUS "rapidjson adding subdirectory")
 add_subdirectory(extern/rapidjson)
+message(STATUS "taskflow adding subdirectory")
 add_subdirectory(extern/taskflow)
+message(STATUS "frozenString adding subdirectory")
 add_subdirectory(extern/frozenString)
+message(STATUS "readerwriterqueue adding subdirectory")
 add_subdirectory(extern/readerwriterqueue)
 
 #Platforms

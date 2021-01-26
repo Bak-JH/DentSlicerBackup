@@ -28,3 +28,6 @@
 [submodule "extern/readerwriterqueue"]
 	path = extern/readerwriterqueue
 	url = https://github.com/cameron314/readerwriterqueue.git
+[submodule "extern/lz4"]
+	path = extern/lz4
+	url = https://github.com/lz4/lz4.git
