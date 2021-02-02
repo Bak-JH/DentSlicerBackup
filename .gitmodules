@@ -4,9 +4,6 @@
 [submodule "extern/boost"]
 	path = extern/boost
 	url = https://github.com/Orphis/boost-cmake.git
-[submodule "extern/flann"]
-	path = extern/flann
-	url = https://github.com/mariusmuja/flann.git
 [submodule "extern/vtk"]
 	path = extern/vtk
 	url = https://github.com/Kitware/VTK.git
