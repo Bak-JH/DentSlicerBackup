@@ -447,12 +447,6 @@ widget/Widget3D.cpp
 widget/Widget3D.h
 )
 
-add_executable( ${PROJECT_NAME} ${SOURCES})
-#Platforms
-if(MSVC)
-    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-endif()
-
 
 target_link_libraries(${PROJECT_NAME}  
 Qt5::Core
@@ -480,7 +474,8 @@ Qt5::OpenGL
 )
 
 
-
-
-
-
+add_executable( ${PROJECT_NAME} ${SOURCES})
+#Platforms
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
