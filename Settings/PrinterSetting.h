@@ -29,6 +29,7 @@ namespace Hix
 			};
 			//struct like
 			std::string presetName;
+			std::filesystem::path printerPresetsPath()const;
 			InfoFileType infoFileType;
 			size_t sliceImageResolutionX;
 			size_t sliceImageResolutionY;
@@ -47,6 +48,7 @@ namespace Hix
 			double pixelPerMMY()const;
 			double pixelSizeX()const;
 			double pixelSizeY()const;
+			void setPrinterPreset(std::string presetName);
 		protected:
 			std::array<char, 100> _buffer;
 			rapidjson::MemoryPoolAllocator<> _allocator;

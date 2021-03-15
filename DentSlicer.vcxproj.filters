@@ -308,6 +308,9 @@
     <ClCompile Include="common\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Settings\BasicSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1160,6 +1163,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\glad\include\KHR\khrplatform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\BasicSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

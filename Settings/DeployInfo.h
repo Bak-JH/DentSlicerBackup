@@ -13,8 +13,8 @@ namespace Hix
 			DeployInfo();
 			std::string version;
 			std::filesystem::path settingsDir;
-			std::filesystem::path localSettingsDir()const;
-			std::filesystem::path printerPresetsDir()const;
+			const std::filesystem::path defaultsDir;
+			std::filesystem::path jsonPath()override;
 
 		protected:
 			void initialize()override;

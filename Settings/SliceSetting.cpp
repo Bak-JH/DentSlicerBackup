@@ -10,10 +10,8 @@ using namespace Hix::Settings::JSON;
 
 constexpr auto SLICE_FILE("sliceSettings.json");
 
-Hix::Settings::SliceSetting::SliceSetting(std::filesystem::path settingsPath)
+Hix::Settings::SliceSetting::SliceSetting() : JSONParsedSetting(SLICE_FILE)
 {
-	settingsPath.append(SLICE_FILE);
-	_jsonPath = settingsPath;
 }
 
 Hix::Settings::SliceSetting::~SliceSetting()
@@ -36,13 +34,6 @@ void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
 
 void Hix::Settings::SliceSetting::initialize()
 {
-}
-
-
-
-const std::filesystem::path& Hix::Settings::SliceSetting::jsonPath()
-{
-	return _jsonPath;
 }
 
 rapidjson::Document Hix::Settings::SliceSetting::doc()

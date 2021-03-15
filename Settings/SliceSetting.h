@@ -17,7 +17,7 @@ namespace Hix
 				Uniform
 				//,Adaptive
 			};
-			SliceSetting(std::filesystem::path settingsPath);
+			SliceSetting();
 			~SliceSetting();
 
 			double layerHeight;
@@ -33,7 +33,6 @@ namespace Hix
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
 			void initialize()override;
-			const std::filesystem::path& jsonPath()override;
 			rapidjson::Document doc()override;
 		};
 	}
