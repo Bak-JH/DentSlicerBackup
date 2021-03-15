@@ -29,6 +29,7 @@ namespace Hix
 			Hix::QML::Controls::DropdownBox* _printerPresets;
 			Hix::QML::Controls::Button* _logoutBttn;
 			Hix::QML::Controls::Button* _updateBttn;
+			Hix::QML::Controls::Button* _resetBttn;
 
 			std::deque<std::filesystem::path> _presetPaths; //same index as combo box
 			int _oldIndex;

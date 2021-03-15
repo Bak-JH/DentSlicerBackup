@@ -1,13 +1,19 @@
 #include "PrinterSetting.h"
+#include "../application/ApplicationManager.h"
 #include <QDebug>
 using namespace Hix::Settings::JSON;
 using namespace Hix::Settings;
 constexpr size_t MAX_NAME_LEN = 200;
 
-
+const std::filesystem::path printerPresetFolder = "PrinterPresets";
 
 Hix::Settings::PrinterSetting::PrinterSetting(): _allocator(&_buffer, _buffer.size())
 {
+}
+
+std::filesystem::path Hix::Settings::PrinterSetting::printerPresetsPath()const
+{
+	return Hix::Application::ApplicationManager::getInstance().settings().deployInfo.settingsDir / printerPresetFolder;
 }
 
 double Hix::Settings::PrinterSetting::pixelPerMMX() const
@@ -28,6 +34,15 @@ double Hix::Settings::PrinterSetting::pixelSizeX() const
 double Hix::Settings::PrinterSetting::pixelSizeY() const
 {
 	return screenY/ sliceImageResolutionY;
+}
+
+void Hix::Settings::PrinterSetting::setPrinterPreset(std::string presetName)
+{
+	auto presetdir = printerPresetFolder / presetName;
+	setJsonName(presetdir.string());
+	parseJSON();
+	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
+
 }
 
 void Hix::Settings::PrinterSetting::initialize()

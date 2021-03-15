@@ -48,9 +48,7 @@ void Hix::Application::ApplicationManager::init()
 	_supportRaftManager.initialize(_partManager.modelRoot());
 	_updateChecker.init();
 	//settings
-	_setting.parseJSON();
-	_setting.sliceSetting.parseJSON();
-	_setting.supportSetting.parseJSON();
+	_setting.parse();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");

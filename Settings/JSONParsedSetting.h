@@ -134,13 +134,19 @@ namespace Hix
 		class JSONParsedSetting
 		{
 		public:
-			void parseJSON(const std::filesystem::path& jsonPath);
+			JSONParsedSetting();
+			JSONParsedSetting(std::string jsonName);
+			void setJsonName(std::string jsonName);
 			virtual void parseJSON();
+			virtual std::filesystem::path jsonPath();
+			virtual std::filesystem::path defaultPath();
+			void toDefault();
 		protected:
+			void parseJSON(std::filesystem::path jsonPath);
 			//set default values
 			virtual void initialize() = 0;
 			virtual void parseJSONImpl(const rapidjson::Document& doc) = 0;
-			std::filesystem::path _jsonPath;
+			std::string _jsonName;
 		};
 	}
 }

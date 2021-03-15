@@ -16,7 +16,7 @@ namespace Hix
 			LocalSetting(const std::string& settingName);
 			virtual ~LocalSetting();
 		protected:
-			const std::filesystem::path& jsonPath()override;
+			static const std::filesystem::path  localSettingsDir;
 
 		};
 	}
