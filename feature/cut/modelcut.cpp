@@ -18,7 +18,6 @@ const QUrl CUT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupCut.qml");
 
 Hix::Features::ModelCut::ModelCut() :
 	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()),
-	_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
 	_modelsBound(Hix::Application::ApplicationManager::getInstance().partManager().selectedBound()),
 	DialogedMode(CUT_POPUP_URL),
 	SliderMode(0, Hix::Application::ApplicationManager::getInstance().partManager().selectedBound().lengthZ())
@@ -32,7 +31,7 @@ Hix::Features::ModelCut::ModelCut() :
 	co.getControl(_cutSwitch, "cutswitch");
 	QObject::connect(_cutSwitch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() { cutModeSelected(); });
 	QObject::connect(&slider(), &Hix::QML::SlideBarShell::valueChanged, [this]() {
-		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + slider().getValue()));
+		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + slider().getValue()));
 		});
 	cutModeSelected();
 }
@@ -40,7 +39,6 @@ Hix::Features::ModelCut::ModelCut() :
 Hix::Features::ModelCut::~ModelCut()
 {
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
-	_cuttingPlane.enablePlane(false);
 }
 
 void ModelCut::cutModeSelected() 
@@ -48,24 +46,26 @@ void ModelCut::cutModeSelected()
 	//if flat cut		
 	if (!_cutSwitch->isChecked())
 	{
+		_cuttingPlane.emplace(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), 1.0f);
 		_cutType = ZAxial;
-		_cuttingPlane.enableDrawing(false);
-		_cuttingPlane.clearPt();
+		_cuttingPlane->enableDrawing(false);
+		_cuttingPlane->clearPt();
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
-		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
-		_cuttingPlane.enablePlane(true);
+		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
+		_cuttingPlane->enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Center);
 		slider().setValue(_modelsBound.zMin() + 1.0 * _modelsBound.lengthZ());
 		slider().setVisible	(true);
 	}
 	else if (_cutSwitch->isChecked())
 	{
+		_cuttingPlane.emplace(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), 0.0f);
 		_cutType = Polyline;
-		_cuttingPlane.enableDrawing(true);
+		_cuttingPlane->enableDrawing(true);
 		//want cutting plane to be over model mesh
 		float zOverModel = _modelsBound.zMax() + 0.1f;
-		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, zOverModel));
-		_cuttingPlane.enablePlane(true);
+		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, zOverModel));
+		_cuttingPlane->enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
 		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Down);
 		slider().setVisible(false);
@@ -84,13 +84,13 @@ void Hix::Features::ModelCut::applyButtonClicked()
 	{
 		for (auto each : _models)
 		{
-			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ZAxialCut(each, _cuttingPlane.transform().translation().z(), Hix::Features::Cut::KeepBoth));
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ZAxialCut(each, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth));
 		}
 		break;
 	}
 	case Hix::Features::ModelCut::Polyline:
 	{
-		auto cuttingPts = _cuttingPlane.contour();
+		auto cuttingPts = _cuttingPlane->contour();
 		if (!cuttingPts.empty())
 		{
 			for (auto each : _models)

@@ -619,19 +619,27 @@ void Hix::Features::repair(Hix::Engine3D::Mesh& mesh)
 	}
 	Basic_TMesh tin;
 	tin.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
+	Basic_TMesh debugTin0;
+	debugTin0.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
+	Basic_TMesh debugTin1;
+	debugTin1.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
    //seperate into multiple components if there are disjoing components
 	tin.removeSmallestComponents();
-
+	debugTin0.removeSmallestComponents();
+	debugTin1.removeSmallestComponents();
 	// Fill holes
 	if (tin.boundaries())
 	{
 		tin.fillSmallBoundaries(0, true);
+		debugTin0.fillSmallBoundaries(0, true);
 	}
 
 	// Run geometry correction
 	if (!tin.boundaries()) TMesh::warning("Fixing degeneracies and intersections...\n");
 	if (tin.boundaries() || !tin.meshclean())
+	{
 		qDebug() << "mesh repair failed";
+	}
 	
 	toHixMesh(tin, mesh);
 

@@ -298,6 +298,12 @@
     <ClCompile Include="feature\ModelBuilder\SelectionPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Qml\functional\QMLSingleton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="application\I18nManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -840,8 +846,6 @@
     <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\Plane3D.h" />
-    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
-    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
     <ClInclude Include="feature\repair\Kernel\coordinates.h" />
     <ClInclude Include="feature\repair\Kernel\graph.h" />
@@ -1175,6 +1179,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\ModelBuilder\SelectionPlane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\functional\QMLSingleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="application\I18nManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\repair\Kernel\heap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1570,6 +1589,8 @@
     <None Include="shaders\singleColorNoLight.frag" />
     <None Include="Qml\Controls\CtrButtonBase.qml" />
     <None Include="Qml\FeatureDivider.qml" />
+    <None Include="Qml\Controls\CtrRectButton.qml" />
+    <None Include="Qml\FeaturePopup\PopupPrinter.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

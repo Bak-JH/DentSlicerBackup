@@ -12,7 +12,7 @@ void Hix::Debug::DebugRenderObject::initialize(QEntity* root)
 	_root = root;
 }
 
-void Hix::Debug::DebugRenderObject::addLine(const std::vector<QVector3D>& vertices, const QColor& color)
+void Hix::Debug::DebugRenderObject::addPath(const std::vector<QVector3D>& vertices, const QColor& color)
 {
 	_lines.emplace_back(vertices, _root, color);
 }
@@ -31,7 +31,7 @@ void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstIt
 	{
 		points.emplace_back(each.worldPosition());
 	}
-	addLine(points, color);
+	addPath(points, color);
 }
 
 void Hix::Debug::DebugRenderObject::registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces, const QVector4D& color)

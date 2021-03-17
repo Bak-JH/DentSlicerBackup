@@ -258,7 +258,7 @@ int Basic_TMesh::save(const char *fname, bool back_approx)
 Triangle * Basic_TMesh::CreateTriangleFromVertices(ExtVertex *vari1, ExtVertex *vari2, ExtVertex *vari3)
 {
  Edge *e1, *e2, *e3;
- Triangle *t = NULL;			
+ Triangle *t = NULL;
 
  e1 = CreateEdge(vari1,vari2); if (e1->t1 != NULL && e1->t2 != NULL) MARK_BIT(e1,5);
  e2 = CreateEdge(vari2,vari3); if (e2->t1 != NULL && e2->t2 != NULL) MARK_BIT(e2,5);
@@ -267,7 +267,7 @@ Triangle * Basic_TMesh::CreateTriangleFromVertices(ExtVertex *vari1, ExtVertex *
  if (IS_BIT(e2,5)) {e2 = CreateEdge(vari2,vari3,0); MARK_BIT(e2,5);}
  if (IS_BIT(e3,5)) {e3 = CreateEdge(vari3,vari1,0); MARK_BIT(e3,5);}
 
- if ((t=CreateUnorientedTriangle(e1,e2,e3)) == NULL)	
+ if ((t=CreateUnorientedTriangle(e1,e2,e3)) == NULL)
  {
   if (e3->t1 == NULL && e3->t2 == NULL)
   {
@@ -292,7 +292,7 @@ Triangle * Basic_TMesh::CreateTriangleFromVertices(ExtVertex *vari1, ExtVertex *
   }
  }
 
- return t;								
+ return t;
 }
 
 
@@ -331,7 +331,7 @@ void Basic_TMesh::closeLoadingSession(FILE *fp, int loaded_faces, ExtVertex **va
 
 // This method should be called after a Save to ascii file to ensure
 // coherence between in-memory data and saved data.
- 
+
 void Basic_TMesh::coordBackApproximation()
 {
  Node *n;
@@ -404,6 +404,47 @@ int Basic_TMesh::loadIV(const char *fname)
 
 ////////////////////// Loads OFF format ///////////////////////////
 
+
+int Basic_TMesh::loadTriangleList(const float* vtcs, const size_t* inds, size_t vtxCount, size_t triCount)
+{
+	Node* n;
+	char s[256], * line;
+	float x, y, z;
+	int  nt, ne, triangulate = 0;
+	Vertex* v;
+	size_t i = 0;
+
+	size_t floatCount = vtxCount * 3;
+	for (i = 0; i < floatCount; i += 3)
+	{
+		V.appendTail(newVertex(vtcs[i], vtcs[i + 1], vtcs[i + 2]));
+	}
+
+	ExtVertex** var = (ExtVertex**)malloc(sizeof(ExtVertex*) * vtxCount);
+	i = 0; FOREACHVERTEX(v, n) var[i++] = new ExtVertex(v);
+
+	size_t triIndexCnt = triCount * 3;
+	for (i = 0; i < triIndexCnt; i += 3)
+	{
+		auto i0 = inds[i];
+		auto i1 = inds[i + 1];
+		auto i2 = inds[i + 2];
+
+		if (!(i0 == i1 || i1 == i2 || i2 == i0))
+		{
+			CreateIndexedTriangle(var, i0, i1, i2);
+		}
+	}
+
+	for (i = 0; i < vtxCount; i++) delete(var[i]);
+	free(var);
+	fixConnectivity();
+	d_boundaries = d_handles = d_shells = 1;
+	TMesh::setFilename("tmp");
+	return 0;
+}
+
+
 int Basic_TMesh::loadOFF(const char *fname)
 {
  FILE *fp;
@@ -462,50 +503,6 @@ int Basic_TMesh::loadOFF(const char *fname)
 
  return 0;
 }
-
-
-
-////////////////////// Loads OFF format ///////////////////////////
-
-int Basic_TMesh::loadTriangleList(const float* vtcs, const size_t* inds, size_t vtxCount, size_t triCount)
-{
-	Node* n;
-	char s[256], * line;
-	float x, y, z;
-	int  nt, ne, triangulate = 0;
-	Vertex* v;
-	size_t i = 0;
-
-	size_t floatCount = vtxCount * 3;
-	for (i = 0; i < floatCount; i += 3)
-	{
-		V.appendTail(newVertex(vtcs[i], vtcs[i + 1], vtcs[i + 2]));
-	}
-
-	ExtVertex** var = (ExtVertex * *)malloc(sizeof(ExtVertex*) * vtxCount);
-	i = 0; FOREACHVERTEX(v, n) var[i++] = new ExtVertex(v);
-
-	size_t triIndexCnt = triCount * 3;
-	for (i = 0; i < triIndexCnt; i += 3)
-	{
-		auto i0 = inds[i];
-		auto i1 = inds[i + 1];
-		auto i2 = inds[i + 2];
-
-		if (!(i0 == i1 || i1 == i2 || i2 == i0))
-		{
-			CreateIndexedTriangle(var, i0, i1, i2);
-		}
-	}
-
-	for (i = 0; i < vtxCount; i++) delete(var[i]);
-	free(var);
-	fixConnectivity();
-	d_boundaries = d_handles = d_shells = 1;
-	TMesh::setFilename("tmp");
-	return 0;
-}
-
 
 ////////////////////// Loads EFF format ///////////////////////////
 
@@ -690,7 +687,7 @@ int Basic_TMesh::saveIV(const char *fname)
  Vertex *v;
 
  strcpy(triname,fname);
- 
+
  if ((fp = fopen(triname,"w")) == NULL)
  {
   TMesh::warning("Can't open '%s' for output !\n",triname);
@@ -715,7 +712,7 @@ int Basic_TMesh::saveIV(const char *fname)
 
  fprintf(fp,"  ]\n }\n");
  fprintf(fp,"}\n");
- 
+
  fclose(fp);
  i=0; FOREACHVERTEX(v, n) v->x = ocds[i++];
  delete[] ocds;
@@ -738,7 +735,7 @@ int Basic_TMesh::saveVRML1(const char *fname, const int mode)
  coord *ocds;
 
  strcpy(triname,fname);
- 
+
  if ((fp = fopen(triname,"w")) == NULL)
  {
   TMesh::warning("Can't open '%s' for output !\n",triname);
@@ -749,7 +746,7 @@ int Basic_TMesh::saveVRML1(const char *fname, const int mode)
  PRINT_HEADING_COMMENT(fp);
  fprintf(fp,"Separator {\n");
  fprintf(fp," Coordinate3 {\n  point [\n");
- 
+
  FOREACHVERTEX(v, n) fprintf(fp, "   %f %f %f,\n", TMESH_TO_FLOAT(v->x), TMESH_TO_FLOAT(v->y), TMESH_TO_FLOAT(v->z));
 
  fprintf(fp,"  ]\n }\n");
@@ -822,7 +819,7 @@ int Basic_TMesh::saveVRML1(const char *fname, const int mode)
  }
 
  fprintf(fp," }\n}\n");
- 
+
  fclose(fp);
  i=0; FOREACHVERTEX(v, n) v->x = ocds[i++];
  delete[] ocds;
@@ -843,7 +840,7 @@ int Basic_TMesh::saveOFF(const char *fname)
  Vertex *v;
 
  strcpy(triname,fname);
- 
+
  if ((fp = fopen(triname,"w")) == NULL)
  {
   TMesh::warning("Can't open '%s' for output !\n",triname);
@@ -853,7 +850,7 @@ int Basic_TMesh::saveOFF(const char *fname)
  fprintf(fp,"OFF\n");
  PRINT_HEADING_COMMENT(fp);
  fprintf(fp,"%d %d 0\n",V.numels(),T.numels());
- 
+
  FOREACHVERTEX(v, n) fprintf(fp, "%f %f %f\n", TMESH_TO_FLOAT(v->x), TMESH_TO_FLOAT(v->y), TMESH_TO_FLOAT(v->z));
 
  ocds = new coord[V.numels()];
@@ -861,7 +858,7 @@ int Basic_TMesh::saveOFF(const char *fname)
  i=0; FOREACHVERTEX(v, n) v->x = i++;
 
  FOREACHNODE(T, n) fprintf(fp,"3 %d %d %d\n",TVI1(n),TVI2(n),TVI3(n));
- 
+
  fclose(fp);
  i=0; FOREACHVERTEX(v, n) v->x = ocds[i++];
  delete[] ocds;
@@ -912,7 +909,7 @@ int Basic_TMesh::saveVerTri(const char *fname)
 #ifdef SAVE_INFO
  if ((fpj = fopen(jkkname,"w")) == NULL)
  {
-  fclose(fpv); fclose(fpt); 
+  fclose(fpv); fclose(fpt);
   fprintf(stderr,"Can't open '%s' for output !\n",jkkname);
   return 1;
  }
@@ -937,7 +934,7 @@ int Basic_TMesh::saveVerTri(const char *fname)
  ocds = new coord[V.numels()];
  i=0; FOREACHVERTEX(v, n) ocds[i++] = v->x;
  i=0; FOREACHVERTEX(v, n) v->x = ++i;
- i=0; FOREACHTRIANGLE(t, n) {i++; t->info = (void *)i;}
+ i=0; FOREACHTRIANGLE(t, n) {i++; t->info = (void *)(intptr_t)i;}
 
  fprintf(fpt,"%d\n",T.numels());
  FOREACHTRIANGLE(t, n)
@@ -1160,7 +1157,7 @@ int ply_getOverhead(FILE *in, int format, const char *element)
   pos = ftell(in);
   if (!strcmp(ptype, "char") || !strcmp(ptype, "uchar")) oh += (format)?(1):1;
   else if (!strcmp(ptype, "short") || !strcmp(ptype, "ushort")) oh += (format)?(2):1;
-  else if (!strcmp(ptype, "int") || !strcmp(ptype, "uint") || 
+  else if (!strcmp(ptype, "int") || !strcmp(ptype, "uint") ||
            !strcmp(ptype, "float") || !strcmp(ptype,"float32")) oh += (format)?(4):1;
   else if (!strcmp(ptype, "double")) oh += (format)?(8):1;
   else if (!strcmp(ptype, "list")) TMesh::error("list properties other than face indices are not supported!\n");
@@ -1200,7 +1197,7 @@ int ply_readVCoords(FILE *in, int format, int ph, int oh, float *x, float *y, fl
 
  if (format == PLY_FORMAT_ASCII)
  {
-  if (fscanf(in,"%f %f %f", x, y, z) < 3) TMesh::error("Unexpected token or end of file!\n"); 
+  if (fscanf(in,"%f %f %f", x, y, z) < 3) TMesh::error("Unexpected token or end of file!\n");
  }
  else
  {
@@ -1289,12 +1286,12 @@ int Basic_TMesh::loadPLY(const char *fname)
  while (strcmp(keyword, "end_header"))
   if (!sscanf(readLineFromFile(in),"%64s ",keyword)) TMesh::error("Unexpected token or end of file!\n");
 
- for (i=0; i<nv; i++) 
+ for (i=0; i<nv; i++)
  {
   ply_readVCoords(in, format, vph, voh, &x, &y, &z);
   V.appendTail(newVertex(x,y,z));
  }
- 
+
  ExtVertex **var = (ExtVertex **)malloc(sizeof(ExtVertex *)*nv);
  i=0; FOREACHVERTEX(v, n) var[i++] = new ExtVertex(v);
 
@@ -1344,7 +1341,7 @@ int Basic_TMesh::savePLY(const char *fname, bool ascii)
  Vertex *v;
 
  strcpy(triname,fname);
- 
+
  if ((fp = fopen(triname,"w")) == NULL)
  {
   TMesh::warning("Can't open '%s' for output !\n",triname);
@@ -1362,7 +1359,7 @@ int Basic_TMesh::savePLY(const char *fname, bool ascii)
  fprintf(fp,"element face %d\n",T.numels());
  fprintf(fp,"property list uchar int vertex_indices\n");
  fprintf(fp,"end_header\n");
- 
+
  if (ascii) FOREACHVERTEX(v, n) fprintf(fp, "%f %f %f\n", TMESH_TO_FLOAT(v->x), TMESH_TO_FLOAT(v->y), TMESH_TO_FLOAT(v->z));
  else FOREACHVERTEX(v, n)
  {
@@ -1472,7 +1469,7 @@ int Basic_TMesh::saveOBJ(const char *fname)
  Vertex *v;
 
  strcpy(triname,fname);
- 
+
  if ((fp = fopen(triname,"w")) == NULL)
  {
   TMesh::warning("Can't open '%s' for output !\n",triname);
@@ -1480,7 +1477,7 @@ int Basic_TMesh::saveOBJ(const char *fname)
  }
 
  PRINT_HEADING_COMMENT(fp);
- 
+
  FOREACHVERTEX(v, n) fprintf(fp, "v %f %f %f\n", TMESH_TO_FLOAT(v->x), TMESH_TO_FLOAT(v->y), TMESH_TO_FLOAT(v->z));
 
  ocds = new coord[V.numels()];
@@ -1488,7 +1485,7 @@ int Basic_TMesh::saveOBJ(const char *fname)
  i=0; FOREACHVERTEX(v, n) v->x = i++;
 
  FOREACHNODE(T, n) fprintf(fp,"f %d %d %d\n",TVI1(n)+1,TVI2(n)+1,TVI3(n)+1);
- 
+
  fclose(fp);
  i=0; FOREACHVERTEX(v, n) v->x = ocds[i++];
  delete[] ocds;

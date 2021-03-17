@@ -33,12 +33,13 @@ void Hix::Support::SupportModel::initHitTest()
 
 void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData& m, const Qt3DRender::QRayCasterHit& h)
 {
-	if (m.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && isEnabled())
+	auto currMode = dynamic_cast<Features::SupportMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode());
+	if (currMode && m.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && isEnabled())
 	{
 		switch (_manager->supportEditMode())
 		{
 		case EditMode::Manual:
-			dynamic_cast<Features::SupportMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->removeSupport(this);
+			currMode->removeSupport(this);
 			break;
 		default:
 			break;
