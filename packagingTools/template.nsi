@@ -146,10 +146,12 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
 
 ;NSISBuilder:copy
-
-
-  CopyFiles $INSTDIR\*.json "${HIX_SETTINGS_DIR}"
-  CopyFiles $INSTDIR\PrinterPresets\*.json "${HIX_SETTINGS_DIR}\PrinterPresets"
+  SetOverwrite off
+  SetOutPath "${HIX_SETTINGS_DIR}"
+  File setup\*.json
+  SetOverwrite on
+  SetOutPath "${HIX_SETTINGS_DIR}\PrinterPresets"
+  File setup\PrinterPresets\*.json
   CreateDirectory "${HIX_SETTINGS_DIR}\LocalSettings"
 
 
