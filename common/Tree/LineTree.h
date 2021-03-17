@@ -1,7 +1,7 @@
 #pragma once
 #include "NTreeDeque.h"
 #include <QVector3D>
-#include "../../DentEngine/src/Bounds3D.h"
+#include "../../render/Bounds3D.h"
 namespace Hix
 {
 	namespace Common

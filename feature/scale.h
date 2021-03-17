@@ -3,7 +3,7 @@
 #include "feature/interfaces/FlushSupport.h"
 #include <qvector3d.h>
 #include <qmatrix4x4.h>
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 namespace Hix
 {
 	namespace QML

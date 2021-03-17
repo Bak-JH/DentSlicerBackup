@@ -1,7 +1,7 @@
 #pragma once
 #include "../interfaces/Mode.h"
 #include "../interfaces/SliderMode.h"
-#include "../../DentEngine/src/Bounds3D.h"
+#include "../../render/Bounds3D.h"
 #include "CrossSectionPlane.h"
 namespace Hix
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "JSONParsedSetting.h"
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 #include <filesystem>
 namespace Hix
 {
@@ -13,8 +13,8 @@ namespace Hix
 			DeployInfo();
 			std::string version;
 			std::filesystem::path settingsDir;
-			std::filesystem::path localSettingsDir()const;
-			std::filesystem::path printerPresetsDir()const;
+			const std::filesystem::path defaultsDir;
+			std::filesystem::path jsonPath()override;
 
 		protected:
 			void initialize()override;

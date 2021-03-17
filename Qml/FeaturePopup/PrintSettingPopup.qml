@@ -7,7 +7,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Settings")
-	height: 220
+	height: 260
 	CtrDropdownBox {
 		id: printerPreset
 		label.text: "Printer Preset"
@@ -17,56 +17,47 @@ FeaturePopup {
 		anchors.top: parent.top
 		anchors.topMargin: 55
 	}
-	CtrRectButton {
+	CtrTextButton {
 		id: logoutButton
 		width: 224
 		height: 32
 		radius: 16
-		color: "transparent"
-		border.color: "#b2c4c6"
-
+		// color: "transparent"
+		// border.color: "#b2c4c6"
 		anchors.top: printerPreset.bottom
 		anchors.topMargin: 30
 		anchors.horizontalCenter: parent.horizontalCenter
-		Text 
-		{
-			color: "#859597"
-			font.pointSize: 10
-			text: "Logout"
-			font.family: openSemiBold.name
-				
-			anchors.horizontalCenter: parent.horizontalCenter
-			anchors.verticalCenter: parent.verticalCenter
-		}
-		onEntered: { color = "#dde5e6" }
-		onExited: { color = "transparent" }
+		buttonText: "Logout"
 	}
-
-		CtrRectButton {
+	CtrTextButton {
 		id: updateButton
 		width: 224
 		height: 32
 		radius: 16
-		color: "transparent"
-		border.color: "#b2c4c6"
+		// color: "transparent"
+		// border.color: "#b2c4c6"
 		anchors.top: logoutButton.bottom
 		anchors.topMargin: 10
 		anchors.horizontalCenter: parent.horizontalCenter
-
-		Text 
-		{
-			color: "#859597"
-			font.pointSize: 10
-			text: "Check for update"
-			font.family: openSemiBold.name
-				
-			anchors.horizontalCenter: parent.horizontalCenter
-			anchors.verticalCenter: parent.verticalCenter
-		}
-		onEntered: { color = "#dde5e6" }
-		onExited: { color = "transparent" }
+		buttonText: "Check for update"
+	}
+	CtrTextButton {
+		id: resetSettings
+		width: 224
+		height: 32
+		radius: 16
+		// color: "transparent"
+		// border.color: "#b2c4c6"
+		anchors.top: updateButton.bottom
+		anchors.topMargin: 10
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: "Restore default settings"
 	}
 
+
+
+		// onEntered: { color = "#dde5e6" }
+		// onExited: { color = "transparent" }
 
 	// CtrButtonBase {
 	// 	id: refreshButton

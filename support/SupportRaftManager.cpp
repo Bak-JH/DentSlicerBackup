@@ -16,6 +16,7 @@
 using namespace Qt3DCore;
 using namespace Hix::Support;
 using namespace Hix::Shapes2D;
+using namespace Hix::Engine3D;
 Hix::Support::SupportRaftManager::SupportRaftManager(): _root(new QEntity())
 {
 }

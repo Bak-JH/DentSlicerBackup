@@ -9,6 +9,7 @@
 #include "../Mesh/FaceSelectionUtils.h"
 
 using namespace Hix::Debug;
+using namespace Hix::Engine3D;
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 
 Hix::Features::ExtendMode::ExtendMode() 

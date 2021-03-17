@@ -10,10 +10,10 @@ using namespace Hix::Settings::JSON;
 
 constexpr auto SUPPORT_FILE("supportSettings.json");
 
-Hix::Settings::SupportSetting::SupportSetting(std::filesystem::path settingsPath)
+
+
+Hix::Settings::SupportSetting::SupportSetting(): JSONParsedSetting(SUPPORT_FILE)
 {
-	settingsPath.append(SUPPORT_FILE);
-	_jsonPath = settingsPath;
 }
 
 Hix::Settings::SupportSetting::~SupportSetting()
@@ -48,10 +48,7 @@ void Hix::Settings::SupportSetting::initialize()
 
 
 
-const std::filesystem::path& Hix::Settings::SupportSetting::jsonPath()
-{
-	return _jsonPath;
-}
+
 
 rapidjson::Document Hix::Settings::SupportSetting::doc()
 {

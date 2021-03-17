@@ -8,7 +8,6 @@
 class GLModel;
 namespace Hix
 {
-	using namespace Engine3D;
 	using namespace OverhangDetect;
 	namespace Support
 	{

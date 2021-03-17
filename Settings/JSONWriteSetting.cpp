@@ -6,6 +6,11 @@
 #include <fstream>
 #include <QDebug>
 
+void Hix::Settings::JSONWriteSetting::setWritePath(std::filesystem::path writeJson)
+{
+	_writeJsonPath = writeJson;
+}
+
 void Hix::Settings::JSONWriteSetting::writeJSON()
 {
 	//char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
@@ -16,7 +21,7 @@ void Hix::Settings::JSONWriteSetting::writeJSON()
 	//doc.AddMember("printerPresetPath", printerPresetPath, doc.GetAllocator());
 	//doc.AddMember("enableErrorReport", enableErrorReport, doc.GetAllocator());
 	auto document = doc();
-	std::ofstream of(jsonPath(), std::ios_base::trunc);
+	std::ofstream of(_writeJsonPath, std::ios_base::trunc);
 	rapidjson::OStreamWrapper osw{ of };
 	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
 	writer.SetMaxDecimalPlaces(6);

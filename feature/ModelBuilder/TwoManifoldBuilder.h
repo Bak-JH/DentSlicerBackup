@@ -1,5 +1,5 @@
 #pragma once
-#include "../../DentEngine/src/Mesh.h"
+#include "../../Mesh/mesh.h"
 #include "../interfaces/Feature.h"
 #include "../addModel.h"
 class GLModel;

@@ -1,13 +1,19 @@
 #include "PrinterSetting.h"
+#include "../application/ApplicationManager.h"
 #include <QDebug>
 using namespace Hix::Settings::JSON;
 using namespace Hix::Settings;
 constexpr size_t MAX_NAME_LEN = 200;
 
-
+const std::filesystem::path printerPresetFolder = "PrinterPresets";
 
 Hix::Settings::PrinterSetting::PrinterSetting(): _allocator(&_buffer, _buffer.size())
 {
+}
+
+std::filesystem::path Hix::Settings::PrinterSetting::printerPresetsPath()const
+{
+	return Hix::Application::ApplicationManager::getInstance().settings().deployInfo.settingsDir / printerPresetFolder;
 }
 
 double Hix::Settings::PrinterSetting::pixelPerMMX() const
@@ -30,6 +36,15 @@ double Hix::Settings::PrinterSetting::pixelSizeY() const
 	return screenY/ sliceImageResolutionY;
 }
 
+void Hix::Settings::PrinterSetting::setPrinterPreset(std::string presetName)
+{
+	auto presetdir = printerPresetFolder / presetName;
+	setJsonName(presetdir.string());
+	parseJSON();
+	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
+
+}
+
 void Hix::Settings::PrinterSetting::initialize()
 {
 	//default values
@@ -50,6 +65,7 @@ void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc
 	parse(doc, "screenX", screenX);
 	parse(doc, "screenY", screenY);
 	parse(doc, "bedHeight", bedHeight);
+	parse(doc, "invertX", invertX);
 	parseStrToEnum(doc, "bedShape", bedShape);
 	tryParse(doc, "bedOffsetX", bedOffsetX);
 	tryParse(doc, "bedOffsetY", bedOffsetY);

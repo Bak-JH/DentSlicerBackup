@@ -3,24 +3,49 @@
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/filereadstream.h"
 #include <QDebug>
+#include "../application/ApplicationManager.h"
 using namespace Hix::Settings;
-void Hix::Settings::JSONParsedSetting::parseJSON(const std::filesystem::path& jsonPath)
+
+Hix::Settings::JSONParsedSetting::JSONParsedSetting()
 {
-	_jsonPath = jsonPath;
-	parseJSON();
 }
 
-void Hix::Settings::JSONParsedSetting::parseJSON()
+Hix::Settings::JSONParsedSetting::JSONParsedSetting(std::string jsonName): _jsonName(jsonName)
+{
+}
+
+void Hix::Settings::JSONParsedSetting::setJsonName(std::string jsonName)
+{
+	_jsonName = jsonName;
+}
+
+std::filesystem::path Hix::Settings::JSONParsedSetting::jsonPath()
+{
+	return Hix::Application::ApplicationManager::getInstance().settings().deployInfo.settingsDir / _jsonName;
+}
+
+std::filesystem::path Hix::Settings::JSONParsedSetting::defaultPath()
+{
+	return Hix::Application::ApplicationManager::getInstance().settings().deployInfo.defaultsDir / _jsonName;
+}
+
+void Hix::Settings::JSONParsedSetting::toDefault()
+{
+	parseJSON(defaultPath());
+}
+
+void Hix::Settings::JSONParsedSetting::parseJSON(std::filesystem::path jsp)
 {
 	//initialize to default values
 	initialize();
 	//check path
-	auto status = std::filesystem::status(_jsonPath);
+	auto jsPath = jsp;
+	auto status = std::filesystem::status(jsPath);
 	if (status.type() == std::filesystem::file_type::regular)
 	{
 		auto file =
 #ifdef _MSC_VER
-			_wfopen(_jsonPath.c_str(), L"r");
+			_wfopen(jsPath.c_str(), L"r");
 #else
 			std::fopen(p.c_str(), "r");
 #endif
@@ -31,12 +56,28 @@ void Hix::Settings::JSONParsedSetting::parseJSON()
 		document.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
 		if (document.HasParseError())
 		{
-			qDebug() << "json parse failed";
+			throw std::runtime_error("parsing failed on setting file: " + jsp.string());
 		}
 		else
 		{
 			parseJSONImpl(document);
 		}
+	}
+	else
+	{
+		throw std::runtime_error("failed to open setting file: " + jsp.string());
+	}
+}
+
+void Hix::Settings::JSONParsedSetting::parseJSON()
+{
+	try
+	{
+		parseJSON(jsonPath());
+	}
+	catch (...)
+	{
+		toDefault();
 	}
 }
 

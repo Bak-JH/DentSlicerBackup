@@ -2,7 +2,7 @@
 #include <deque>
 #include <vector>
 #include <QVector3D>
-#include "../DentEngine/src/mesh.h"
+#include "../Mesh/mesh.h"
 
 namespace Hix
 {

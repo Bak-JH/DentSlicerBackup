@@ -1,6 +1,6 @@
 #include "BVH.h"
 #include "../glmodel.h"
-#include "../../DentEngine/src/Bounds3D.h"
+#include "../../render/Bounds3D.h"
 #include "../common/Tree/BVHBuilder.h"
 using namespace Hix;
 using namespace Hix::Engine3D;

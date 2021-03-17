@@ -1,10 +1,8 @@
 {
     "layerHeight": 0.1,
-    "invertX": true,
     "slicingMode": "Uniform",
-    "useGPU" : true,
-    "AAXY" : 1,
-    "AAZ" : 1,
-    "minHeight" : 0.0001
-
+    "useGPU": true,
+    "AAXY": 1,
+    "AAZ": 1,
+    "minHeight": 0.0001
 }

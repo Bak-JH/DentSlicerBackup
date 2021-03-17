@@ -5,7 +5,7 @@
 #include "../interfaces/SelectFaceMode.h"
 #include "../interfaces/FlushSupport.h"
 #include "../interfaces/DialogedMode.h"
-#include "../../DentEngine/src/Bounds3D.h"
+#include "../../render/Bounds3D.h"
 #include "../../Qml/components/ControlForwardInclude.h"
 
 class CorkTriMesh;

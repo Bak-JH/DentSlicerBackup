@@ -1,7 +1,7 @@
 #pragma once
 #include "Mode.h"
 #include <unordered_set>
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 class GLModel;
 namespace Hix
 {

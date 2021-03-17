@@ -1,5 +1,5 @@
 #pragma once
-#include "../../DentEngine/src/polyclipping/polyclipping.h"
+#include "../polyclipping/polyclipping.h"
 #include <qvector2d.h>
 #include <unordered_map>
 #include <unordered_set>

@@ -26,7 +26,7 @@ namespace Hix
 				Cross
 			};
 
-			SupportSetting(std::filesystem::path settingsPath);
+			SupportSetting();
 			~SupportSetting();
 
 			SupportType supportType;
@@ -45,7 +45,6 @@ namespace Hix
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
 			void initialize()override;
-			const std::filesystem::path& jsonPath()override;
 			rapidjson::Document doc()override;
 		};
 	}

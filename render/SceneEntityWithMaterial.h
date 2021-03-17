@@ -9,13 +9,12 @@ namespace Hix
 	{
 		using namespace Qt3DRender;
 		using namespace Qt3DExtras;
-		using namespace Hix::Engine3D;
 		class SceneEntityWithMaterial : public SceneEntity
 		{
 			Q_OBJECT
 		public:
 			// face selection enabled
-			std::unordered_set<FaceConstItr> selectedFaces;
+			std::unordered_set<Hix::Engine3D::FaceConstItr> selectedFaces;
 			void unselectMeshFaces();
 
 			SceneEntityWithMaterial(Qt3DCore::QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
@@ -26,7 +25,7 @@ namespace Hix
 		protected:
 
 			//unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
-			virtual QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr) = 0;
+			virtual QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr) = 0;
 			void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
 				Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)override;
 

@@ -4,7 +4,6 @@
 #include "ContourModel.h"
 namespace Hix
 {
-	using namespace Engine3D;
 	using namespace OverhangDetect;
 	namespace Support
 	{
@@ -17,7 +16,7 @@ namespace Hix
 
 
 		protected:
-			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)override;
 		private:
 			std::array<QVector3D, 2> _pts;
 			void generateMesh();

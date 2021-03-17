@@ -1,5 +1,5 @@
 #include "Shapes2D.h"
-#include "../DentEngine/src/ContourBuilder.h"
+#include "slice/ContourBuilder.h"
 
 using namespace ClipperLib;
 

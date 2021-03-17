@@ -1,6 +1,6 @@
 #pragma once
 #include"Mode.h"
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 class GLModel;
 
 namespace Qt3DRender
