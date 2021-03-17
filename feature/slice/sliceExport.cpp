@@ -28,16 +28,15 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	co.getControl(_layerHeightSpin, "layerHeight");
 	co.getControl(_aaxySpin, "aaxy");
 	co.getControl(_aazSpin, "aaz");
-	co.getControl(_invertXSwtch, "invertX");
 
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
 	modSettings.parseJSON();
 	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
+
 	_sliceTypeDrop->setEnums<SliceSetting::SlicingMode>(settings.slicingMode);
 	_layerHeightSpin->setValue(settings.layerHeight);
 	_aaxySpin->setValue(settings.AAXY);
 	_aazSpin->setValue(settings.AAZ);
-	_invertXSwtch->setChecked(settings.invertX);
 
 	
 	// bind inputs
@@ -54,9 +53,7 @@ Hix::Features::SliceExportMode::SliceExportMode()
 		modSettings.AAZ = _aazSpin->getValue();
 		});
 	
-	QObject::connect(_invertXSwtch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this, &modSettings]() {
-		modSettings.invertX = _invertXSwtch->isChecked();
-		});
+
 }
 
 Hix::Features::SliceExportMode::~SliceExportMode()

@@ -145,7 +145,7 @@ std::vector<float> Hix::Features::SliceExportGPU::toVtxBuffer(Hix::Engine3D::Bou
     vtcs.reserve(vtxCnt);
     for (auto& m : modelsAndChildren)
     {
-        genVertexBuffer(printerSetting.bedOffsetX, printerSetting.bedOffsetY, setting.invertX , vtcs, *m->getMesh(), bounds);
+        genVertexBuffer(printerSetting.bedOffsetX, printerSetting.bedOffsetY, printerSetting.invertX , vtcs, *m->getMesh(), bounds);
     }
     return vtcs;
 }

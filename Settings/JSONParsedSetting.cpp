@@ -56,18 +56,29 @@ void Hix::Settings::JSONParsedSetting::parseJSON(std::filesystem::path jsp)
 		document.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
 		if (document.HasParseError())
 		{
-			qDebug() << "json parse failed";
+			throw std::runtime_error("parsing failed on setting file: " + jsp.string());
 		}
 		else
 		{
 			parseJSONImpl(document);
 		}
 	}
+	else
+	{
+		throw std::runtime_error("failed to open setting file: " + jsp.string());
+	}
 }
 
 void Hix::Settings::JSONParsedSetting::parseJSON()
 {
-	parseJSON(jsonPath());
+	try
+	{
+		parseJSON(jsonPath());
+	}
+	catch (...)
+	{
+		toDefault();
+	}
 }
 
 //rapidjson::Value Hix::Settings::JSON::parseObj(const rapidjson::Document& doc, const std::string& key)
