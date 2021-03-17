@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include "JSONParsedSetting.h"
-#include "../DentEngine/src/Bounds3D.h"
+#include "../render/Bounds3D.h"
 #include <optional>
 namespace Hix
 {
@@ -29,6 +29,7 @@ namespace Hix
 			};
 			//struct like
 			std::string presetName;
+			std::filesystem::path printerPresetsPath()const;
 			InfoFileType infoFileType;
 			size_t sliceImageResolutionX;
 			size_t sliceImageResolutionY;
@@ -41,12 +42,15 @@ namespace Hix
 			double bedOffsetX;
 			double bedOffsetY;
 			double bedHeight;
+			bool invertX;
+
 			Hix::Engine3D::Bounds3D bedBound;
 			std::optional<rapidjson::Value> printerConstants;
 			double pixelPerMMX()const;
 			double pixelPerMMY()const;
 			double pixelSizeX()const;
 			double pixelSizeY()const;
+			void setPrinterPreset(std::string presetName);
 		protected:
 			std::array<char, 100> _buffer;
 			rapidjson::MemoryPoolAllocator<> _allocator;

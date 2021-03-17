@@ -13,10 +13,11 @@ namespace Hix
 		class JSONWriteSetting
 		{
 		public:
+			void setWritePath(std::filesystem::path writeJson);
 			virtual void writeJSON();
 		protected:
-			virtual const std::filesystem::path& jsonPath() = 0;
 			virtual rapidjson::Document doc() = 0;
+			std::filesystem::path _writeJsonPath;
 
 		};
 	}

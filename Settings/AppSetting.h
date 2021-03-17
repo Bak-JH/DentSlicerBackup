@@ -1,6 +1,7 @@
 #pragma once
 #include "PrinterSetting.h"
 #include "DeployInfo.h"
+#include "BasicSetting.h"
 #include "JSONWriteSetting.h"
 #include "SliceSetting.h"
 #include "SupportSetting.h"
@@ -15,30 +16,21 @@ namespace Hix
 			PRO
 		};
 
-		class AppSetting:public JSONParsedSetting, public JSONWriteSetting
+		class AppSetting
 		{
 		public:
 			AppSetting();
 			~AppSetting();
-			void parseJSON() override;
-			void settingChanged();
-			void writeJSON()override;
-			bool enableErrorReport;
-			DeployInfo deployInfo;
+			DeployInfo deployInfo; //this has to be first!
+			BasicSetting basicSetting;
 			SliceSetting sliceSetting;
 			SupportSetting supportSetting;
 			PrinterSetting printerSetting;
-			std::string printerPresetPath;
+
 			std::string version;
 			Liscense liscense = NONE;
-
-		protected:
-			void parseJSONImpl(const rapidjson::Document& doc)override;
-			void initialize()override;
-			const std::filesystem::path& jsonPath()override;
-			rapidjson::Document doc()override;
-
-
+			void parse();
+			void toDefault();
 		};
 	}
 }

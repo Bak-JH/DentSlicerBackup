@@ -3,34 +3,33 @@
 #include <unordered_map>
 
 #include <vector>
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "../Mesh/RayCaster.h"
 #include "feature/interfaces/Feature.h"
 namespace Hix
 {
-	using namespace Engine3D;
 	namespace OverhangDetect
 	{ 
 		class Overhang
 		{
 		public:
-			Overhang(const FaceConstItr& face, const QVector3D& coord);
-			Overhang(const VertexConstItr& vtx);
+			Overhang(const Hix::Engine3D::FaceConstItr& face, const QVector3D& coord);
+			Overhang(const Hix::Engine3D::VertexConstItr& vtx);
 			const QVector3D& coord()const;
 			bool operator==(const Overhang& o) const;
 			const Hix::Engine3D::Mesh* owner()const;
 			const QVector3D& normal()const;
 			const QVector3D& primitiveOverhang()const;
-			FaceConstItr nearestFace()const;
+			Hix::Engine3D::FaceConstItr nearestFace()const;
 			bool isVertex()const;
 			//void setRaycastResult(const RayHits& hit);
 			//const RayHits& rayHit()const;
 		private:
-			std::variant<FaceConstItr, VertexConstItr> _primitive;
+			std::variant<Hix::Engine3D::FaceConstItr, Hix::Engine3D::VertexConstItr> _primitive;
 			QVector3D _coord;
 			QVector3D _primNormal;
 			QVector3D _normal;
-			RayHits _rayHit;
+			Hix::Engine3D::RayHits _rayHit;
 		};
 
 	}
@@ -55,7 +54,6 @@ namespace std
 
 namespace Hix
 {
-	using namespace Engine3D;
 	namespace Slicer
 	{
 		class Planes;
@@ -67,13 +65,13 @@ namespace Hix
 		class Detector
 		{
 		public:
-			OverhangDetect::Overhangs detectOverhang(const Mesh* shellMesh);
+			OverhangDetect::Overhangs detectOverhang(const Hix::Engine3D::Mesh* shellMesh);
 		private:
-			std::unordered_set<VertexConstItr> localMinFacingDown(const Mesh* mesh);
-			std::unordered_multimap<FaceConstItr, QVector3D> faceOverhangDetect(const Mesh* mesh);
-			void faceOverhangPoint(const FaceConstItr& overhangFace, std::unordered_multimap<FaceConstItr, QVector3D>& output);
+			std::unordered_set<Hix::Engine3D::VertexConstItr> localMinFacingDown(const Hix::Engine3D::Mesh* mesh);
+			std::unordered_multimap<Hix::Engine3D::FaceConstItr, QVector3D> faceOverhangDetect(const Hix::Engine3D::Mesh* mesh);
+			void faceOverhangPoint(const Hix::Engine3D::FaceConstItr& overhangFace, std::unordered_multimap<Hix::Engine3D::FaceConstItr, QVector3D>& output);
 
-			std::unordered_map<FaceConstItr, QVector3D> _worldFNCache;
+			std::unordered_map<Hix::Engine3D::FaceConstItr, QVector3D> _worldFNCache;
 
 		};
 

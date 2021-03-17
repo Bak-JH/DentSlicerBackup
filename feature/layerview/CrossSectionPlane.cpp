@@ -3,7 +3,7 @@
 #include "../../slice/slicingengine.h"
 #include "../Shapes2D.h"
 #include "../../glmodel.h"
-#include "../../DentEngine/src/SlicerDebug.h"
+#include "../slice/SlicerDebug.h"
 #include "../cdt/HixCDT.h"
 
 using namespace Hix::Input;
@@ -11,7 +11,7 @@ using namespace Hix::Features;
 using namespace Hix::Render;
 using namespace Hix::Slicer;
 using namespace Hix::Polyclipping;
-
+using namespace Hix::Engine3D;
 
 Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): SceneEntityWithMaterial(owner)
 {

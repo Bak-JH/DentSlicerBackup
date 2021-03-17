@@ -2,7 +2,7 @@
 #include "../qml/components/Inputs.h"
 #include "../qml/components/ControlOwner.h"
 #include "feature/repair/meshrepair.h"
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "cut/ZAxialCut.h"
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"

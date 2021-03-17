@@ -18,14 +18,13 @@
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"
 
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include "../repair/meshrepair.h"
 #include "polylinecut.h"
 #include "../CSG/CSG.h"
 #include "../cdt/HixCDT.h"
 #include "../../common/Debug.h"
 
-using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace Hix::Features;
 using namespace Hix::Features::CSG;
@@ -39,7 +38,7 @@ Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QV
 void Hix::Features::Cut::PolylineCut::runImpl()
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
-	Mesh polylineWall;
+	Hix::Engine3D::Mesh polylineWall;
 
 	generateCuttingWalls(_cuttingPoints, _target->recursiveAabb(), polylineWall);
 	//convert all meshes to cork meshes

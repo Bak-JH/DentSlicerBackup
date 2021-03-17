@@ -6,7 +6,7 @@
 #include "../../render/PlaneMeshEntity.h"
 #include "../../render/Color.h"
 #include "../../feature/Plane3D.h"
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 #include <optional>
 #include <functional>
 //#include "glmodel.h"
@@ -27,7 +27,7 @@ namespace Hix
 	{
 		struct FaceColorSet
 		{
-			std::unordered_set<FaceConstItr> faces;
+			std::unordered_set<Hix::Engine3D::FaceConstItr> faces;
 			QVector4D color;
 		};
 		using namespace Hix::Render;
@@ -38,7 +38,7 @@ namespace Hix
 			void addPath(const std::vector<QVector3D>& vertices, const QColor& color = QColor(0,0,0, 255));
 			void addPaths(const std::vector< std::vector<QVector3D>>& paths, const QColor& color = QColor(0, 0, 0, 255));
 			void outlineFace(const Hix::Engine3D::FaceConstItr& face, const QColor& color = QColor(0, 0, 0, 255));
-			void registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces, const QVector4D& color);
+			void registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<Hix::Engine3D::FaceConstItr>& faces, const QVector4D& color);
 			void colorDebugFaces();
 			void showGLModelAabb(SceneEntityWithMaterial* target);
 			void clear();

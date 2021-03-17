@@ -8,70 +8,37 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> StringBuffer;
-constexpr auto SETTING_FILE("settings.json");
 
-Hix::Settings::AppSetting::AppSetting(): sliceSetting(deployInfo.settingsDir), supportSetting(deployInfo.settingsDir)
+Hix::Settings::AppSetting::AppSetting()
 {
-	std::filesystem::path appSettingsPath = deployInfo.settingsDir;
-	//appSettingsPath.append("/settings.json");
-	//parseJSON(appSettingsPath);
-	appSettingsPath.append(SETTING_FILE);
-	_jsonPath = appSettingsPath;
+
 }
 
 Hix::Settings::AppSetting::~AppSetting()
 {
 }
 
-void Hix::Settings::AppSetting::parseJSON()
+void Hix::Settings::AppSetting::parse()
 {
-	JSONParsedSetting::parseJSON();
-	settingChanged();
+	deployInfo.parseJSON();
+	basicSetting.setWritePath(basicSetting.jsonPath());
+	sliceSetting.setWritePath(sliceSetting.jsonPath());
+	supportSetting.setWritePath(supportSetting.jsonPath());
+	basicSetting.parseJSON();
+	sliceSetting.parseJSON();
+	supportSetting.parseJSON();
+}
+
+void Hix::Settings::AppSetting::toDefault()
+{
+	basicSetting.toDefault();
+	sliceSetting.toDefault();
+	supportSetting.toDefault();
+	basicSetting.writeJSON();
+	sliceSetting.writeJSON();
+	supportSetting.writeJSON();
+
 }
 
 
 
-void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
-{
-	parse(doc, "printerPresetPath", printerPresetPath);
-	tryParse(doc, "enableErrorReport", enableErrorReport);
-}
-
-
-void Hix::Settings::AppSetting::initialize()
-{
-	//auto defaultPreset = deployInfo.settingsDir;
-	//defaultPreset.append("PrinterPresets/HixC10.json");
-	//printerPresetPath = defaultPreset;
-	enableErrorReport = true;
-}
-
-void Hix::Settings::AppSetting::settingChanged()
-{
-	auto printerPath = deployInfo.printerPresetsDir();
-	printerPath.append(printerPresetPath);
-	printerSetting.parseJSON(printerPath);
-	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
-}
-
-void Hix::Settings::AppSetting::writeJSON()
-{
-	__super::writeJSON();
-	//sliceSetting.writeJSON();
-	//supportSetting.parseJSON();
-
-}
-
-const std::filesystem::path& Hix::Settings::AppSetting::jsonPath()
-{
-	return _jsonPath;
-}
-
-rapidjson::Document Hix::Settings::AppSetting::doc()
-{
-	rapidjson::Document doc;
-	doc.SetObject();
-	doc.AddMember("printerPresetPath", printerPresetPath, doc.GetAllocator());
-	doc.AddMember("enableErrorReport", enableErrorReport, doc.GetAllocator());
-	return doc;
-}

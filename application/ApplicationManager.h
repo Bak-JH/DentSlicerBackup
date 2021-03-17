@@ -105,6 +105,7 @@ namespace Hix
 			static Hix::Settings::AppSetting& settings(Hix::Application::ApplicationManager& appMan);
 			friend class Hix::Features::SettingMode;
 			friend class Hix::Features::SupportMode;
+			friend class Hix::Settings::BasicSetting;
 			friend class Hix::Features::SliceExportMode;
 			friend class Hix::Auth::AuthManager;
 			friend class Hix::Utils::UpdateChecker;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DentEngine/src/mesh.h"
+#include "../Mesh/mesh.h"
 #include "Shapes2D.h"
 #include <optional>
 namespace Hix

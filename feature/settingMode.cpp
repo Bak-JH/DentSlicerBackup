@@ -21,9 +21,10 @@ Hix::Features::SettingMode::SettingMode()
 	co.getControl(_printerPresets, "printerPreset");
 	co.getControl(_logoutBttn, "logoutButton");
 	co.getControl(_updateBttn, "updateButton");
+	co.getControl(_resetBttn, "resetSettings");
 
 	//get settings dir
-	auto printerPresetsDir = Hix::Application::ApplicationManager::getInstance().settings().deployInfo.printerPresetsDir();
+	auto printerPresetsDir = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.printerPresetsPath();
 	fs::directory_iterator presetItr(printerPresetsDir);
 	QStringList presets;
 	for (auto& e : presetItr)
@@ -34,7 +35,7 @@ Hix::Features::SettingMode::SettingMode()
 			presets.push_back(QString::fromStdString(e.path().filename().string()));
 		}
 	}
-	fs::path oldPreset = Hix::Application::ApplicationManager::getInstance().settings().printerPresetPath;
+	fs::path oldPreset = Hix::Application::ApplicationManager::getInstance().settings().basicSetting.printerPresetPath;
 	QString oldPresetStr = QString::fromStdString(oldPreset.filename().string());
 	_oldIndex = presets.indexOf(oldPresetStr);
 	_printerPresets->setList(presets);
@@ -47,6 +48,11 @@ Hix::Features::SettingMode::SettingMode()
 		});
 	QObject::connect(_updateBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		Hix::Application::ApplicationManager::getInstance().updater().forceCheckForUpdates();
+		});
+
+	QObject::connect(_resetBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+		moddableSetting.toDefault();
 		});
 
 }
@@ -62,11 +68,9 @@ void Hix::Features::SettingMode::applyButtonClicked()
 		//set settings
 		auto path = _presetPaths[_printerPresets->getIndex()];
 		auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
-		moddableSetting.printerPresetPath = path.filename().string();
-
+		moddableSetting.basicSetting.printerPresetPath = path.filename().string();
 		//save settings
-		moddableSetting.writeJSON();
-		moddableSetting.settingChanged();
+		moddableSetting.basicSetting.writeJSON();
 	}
 }
 

@@ -5,27 +5,18 @@
 using namespace Hix::Settings::JSON;
 using namespace Hix::Settings;
 using namespace Hix::QtUtils;
-Hix::Settings::DeployInfo::DeployInfo()
+Hix::Settings::DeployInfo::DeployInfo():JSONParsedSetting("deploy.json"), defaultsDir(toStdPath(QCoreApplication::applicationDirPath()))
 {
-	auto qStrPath = QCoreApplication::applicationDirPath();
-	qStrPath += "/deploy.json";
-	parseJSON(toStdPath(qStrPath));
 }
 
-std::filesystem::path Hix::Settings::DeployInfo::localSettingsDir() const
-{
-	return settingsDir / "LocalSettings";
-}
-
-std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
-{
-	return settingsDir/ "PrinterPresets";
-}
 
 void Hix::Settings::DeployInfo::initialize()
 {
-	auto qStrPath = QCoreApplication::applicationDirPath();
-	settingsDir = toStdPath(qStrPath);
+}
+
+std::filesystem::path Hix::Settings::DeployInfo::jsonPath()
+{
+	return defaultPath();
 }
 
 void Hix::Settings::DeployInfo::parseJSONImpl(const rapidjson::Document& doc)

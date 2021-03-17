@@ -8,29 +8,25 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 
+const std::filesystem::path LocalSetting::localSettingsDir = "LocalSettings";
 
 
-Hix::Settings::LocalSetting::LocalSetting(const std::string& settingName)
+Hix::Settings::LocalSetting::LocalSetting(const std::string& settingName): JSONParsedSetting((localSettingsDir / settingName).string())
 {
-	auto settingPath = Hix::Application::ApplicationManager::getInstance().settings().deployInfo.localSettingsDir();
-	settingPath.append(settingName);
+	//auto settingPath = localSettingsDir;
+	//settingPath.append(settingName);
 	//create if doesn't exist
-	if (!std::filesystem::is_regular_file(settingPath))
+	auto jsp = jsonPath();
+	if (!std::filesystem::is_regular_file(jsp))
 	{
-		std::ofstream ofs(settingPath);
+		std::ofstream ofs(jsp);
 		ofs.close();
 	}
-	_jsonPath = settingPath;
+
+	setWritePath(jsp);
+
 }
 
 Hix::Settings::LocalSetting::~LocalSetting()
 {
 }
-
-
-
-const std::filesystem::path& Hix::Settings::LocalSetting::jsonPath()
-{
-	return _jsonPath;
-}
-

@@ -1,5 +1,5 @@
 #pragma once
-#include "DentEngine/src/mesh.h"
+#include "Mesh/mesh.h"
 #include <qvector3d.h>
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderMode.h"
@@ -19,12 +19,10 @@ namespace Hix
 
 	namespace Features
 	{
-		using namespace Engine3D;
-
 		struct ExtendArg
 		{
 			QVector3D normal;
-			std::unordered_set<FaceConstItr> extensionFaces;
+			std::unordered_set<Engine3D::FaceConstItr> extensionFaces;
 		};
 
 
@@ -32,18 +30,18 @@ namespace Hix
 		{
 		public:
 			Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
-					const std::unordered_set<FaceConstItr>& targetFaces, double distance);
+					const std::unordered_set<Engine3D::FaceConstItr>& targetFaces, double distance);
 			virtual ~Extend();
 		protected:
 			void undoImpl()override;
 			void redoImpl()override;
 			void runImpl()override;
 		private:
-			void coverCap(GLModel* model, QVector3D normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance);
+			void coverCap(GLModel* model, QVector3D normal, const std::unordered_set<Engine3D::FaceConstItr>& extension_faces, double distance);
 
 			GLModel* _model;
 			QVector3D _normal;
-			std::unordered_set<FaceConstItr> _extensionFaces;
+			std::unordered_set<Engine3D::FaceConstItr> _extensionFaces;
 			double _distance;
 			std::unique_ptr<Hix::Engine3D::Mesh> _prevMesh;
 		};

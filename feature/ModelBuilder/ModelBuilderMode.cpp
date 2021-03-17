@@ -15,7 +15,7 @@
 #include "../repair/meshrepair.h"
 #include "application/ApplicationManager.h"
 #include "../widget/RotateWidget.h"
-#include "../../DentEngine/src/mesh.h"
+#include "../../Mesh/mesh.h"
 
 #include <boost/geometry.hpp>
 #include <boost/geometry/geometries/point.hpp>
@@ -26,7 +26,6 @@
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::CSG;
-using namespace Hix::Engine3D;
 constexpr float ZMARGIN = 3;
 
 const static std::unordered_map<MBEditMode, std::string> __modeTexts = { 
@@ -394,7 +393,7 @@ void Hix::Features::MBPrep::run()
 	auto fileName = _fileUrl.fileName();
 	std::filesystem::path filePath(_fileUrl.toLocalFile().toStdWString());
 	std::fstream file(filePath);
-	auto mesh = new Mesh();
+	auto mesh = new Hix::Engine3D::Mesh();
 	if (boost::iequals(filePath.extension().string(), ".stl")) {
 
 		if (!FileLoader::loadMeshSTL(mesh, file))
@@ -437,6 +436,12 @@ Hix::Features::FaceSelector::FaceSelector(const Hix::Render::SceneEntity& subjec
 {
 }
 
+Hix::Features::FaceSelector::~FaceSelector()
+{
+
+	freeCorkTriMesh(&_subject);
+}
+
 
 namespace bg = boost::geometry;
 typedef bg::model::point<float, 2, bg::cs::cartesian> point;
@@ -452,15 +457,15 @@ polygon toPolygon(const std::vector<QVector3D>& polyline)
 	return poly;
 }
 
-std::unordered_set<VertexConstItr> Hix::Features::FaceSelector::doSelection(const Hix::Features::SelectionPlane& selectionPlane, const std::vector<QVector3D>& polyline)
+std::unordered_set<Hix::Engine3D::VertexConstItr> Hix::Features::FaceSelector::doSelection(const Hix::Features::SelectionPlane& selectionPlane, const std::vector<QVector3D>& polyline)
 {
 
 	auto transform = selectionPlane.transform().matrix().inverted();
 
 	polygon selectionPoly = toPolygon(polyline);
-	std::unordered_set<VertexConstItr> selectedVtcs;
+	std::unordered_set<Hix::Engine3D::VertexConstItr> selectedVtcs;
 	auto& vtcs = _subjectOrig.getVertices();
-	std::unordered_set<VertexConstItr> discard;
+	std::unordered_set<Hix::Engine3D::VertexConstItr> discard;
 	auto vEnd = vtcs.cend();
 	for (auto itr = vtcs.cbegin(); itr != vEnd; ++itr)
 	{
