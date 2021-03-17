@@ -23,10 +23,10 @@ namespace Hix
 				public Hix::Render::PlaneMeshEntity, public Hix::Input::HitTestAble, public Hix::Input::Clickable
 			{
 			public:
-				DrawingPlane(Qt3DCore::QEntity* owner,
-					float width =	Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX(),
-					float height = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY(),
-					QColor color = QColor(140, 140, 140), float alpha = 0.1f, bool isDoubleSided = true);
+
+				DrawingPlane(Qt3DCore::QEntity* owner,float width,float height, QColor color, float alpha, bool isDoubleSided);
+				DrawingPlane(Qt3DCore::QEntity* owner, float alpha);
+				DrawingPlane(Qt3DCore::QEntity* owner);
 
 				virtual ~DrawingPlane();
 				void enablePlane(bool isEnable);

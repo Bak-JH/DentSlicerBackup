@@ -94,6 +94,11 @@ MouseCursorManager& Hix::Application::ApplicationManager::cursorManager()
 	return _cursorManager;
 }
 
+I18nManager& Hix::Application::ApplicationManager::i18n()
+{
+	return _i18nManager;
+}
+
 Hix::Input::RayCastController& Hix::Application::ApplicationManager::getRayCaster()
 {
 	return _rayCastController;

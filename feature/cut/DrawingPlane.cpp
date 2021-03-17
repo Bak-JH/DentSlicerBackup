@@ -5,12 +5,34 @@ using namespace Hix::Input;
 using namespace Hix::Features::Cut;
 
 
+
+
+auto inline defaultWidth()
+{
+	return  Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX();
+}
+
+auto inline defaultHeight()
+{
+	return  Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY();
+}
+const QColor defaultColor(140, 140, 140);
+constexpr float defaultAlpha = 0.2f;
+constexpr bool defaultDoubleSided = true;
+
 Hix::Features::Cut::DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner, float width, float height, QColor color, float alpha, bool isDoubleSided):
 	Hix::Render::PlaneMeshEntity(owner, width, height, color, isDoubleSided, alpha)
 {
 	initHitTest();
 	setEnabled(false);
 	setHitTestable(false);
+}
+Hix::Features::Cut::DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner, float alpha): DrawingPlane(owner, defaultWidth(), defaultHeight(), defaultColor, alpha, defaultDoubleSided)
+{
+}
+
+Hix::Features::Cut::DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner):DrawingPlane(owner, defaultWidth(), defaultHeight(), defaultColor, defaultAlpha, defaultDoubleSided)
+{
 }
 
 Hix::Features::Cut::DrawingPlane::~DrawingPlane()

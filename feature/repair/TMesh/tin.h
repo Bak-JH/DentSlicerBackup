@@ -33,6 +33,7 @@
 
 #include "tmesh.h"
 #include <deque>
+
 namespace T_MESH
 {
 
@@ -607,8 +608,6 @@ class Basic_TMesh
 		//! Returns the number of components removed.
 		int       removeSmallestComponents();
 		std::deque<Basic_TMesh>       seperateComponents();
-
-
 		//! Checks that triangles are consistently oriented and, if they are not,
 		//! invert some of them to achieve an overall consistency. If the mesh is
 		//! not orientable cut it. Returns: 0 if mesh was already oriented; 1 if
@@ -766,6 +765,7 @@ class Basic_TMesh
 	protected:
 		Vertex *watsonInsert(Point *, List *, int);
 	};
+
 
 #define FOREACHTRIANGLEOFMESH(SubjectMesh, Tt, n) for (n = SubjectMesh.T.head(), Tt = (n)?((Triangle *)n->data):NULL; n != NULL; n=n->next(), Tt = (n)?((Triangle *)n->data):NULL)
 #define FOREACHTRIANGLE(Tt, n) for (n = T.head(), Tt = (n)?((Triangle *)n->data):NULL; n != NULL; n=n->next(), Tt = (n)?((Triangle *)n->data):NULL)
