@@ -22,7 +22,6 @@ namespace Hix
 
 			double layerHeight;
 			SlicingMode slicingMode;
-			bool invertX;
 			bool useGPU;
 			size_t AAXY;
 			size_t AAZ;

@@ -65,6 +65,7 @@ void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc
 	parse(doc, "screenX", screenX);
 	parse(doc, "screenY", screenY);
 	parse(doc, "bedHeight", bedHeight);
+	parse(doc, "invertX", invertX);
 	parseStrToEnum(doc, "bedShape", bedShape);
 	tryParse(doc, "bedOffsetX", bedOffsetX);
 	tryParse(doc, "bedOffsetY", bedOffsetY);

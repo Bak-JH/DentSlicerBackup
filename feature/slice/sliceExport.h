@@ -25,9 +25,6 @@ namespace Hix
 			Hix::QML::Controls::InputSpinBox* _aaxySpin;
 			Hix::QML::Controls::InputSpinBox* _aazSpin;
 
-			Hix::QML::Controls::ToggleSwitch* _invertXSwtch;
-
-
 			static void applySettings();
 
 		};

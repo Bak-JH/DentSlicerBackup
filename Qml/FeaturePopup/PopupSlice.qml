@@ -6,7 +6,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Slice")
-	height: 290
+	height: 270
 
 	CtrDropdownBox {
 		id: sliceType
@@ -60,26 +60,5 @@ FeaturePopup {
 		anchors.top: aaxy.bottom
 		anchors.topMargin: 16
 	}
-
-	CtrToggleSwitch {
-		id: invertX
-		sizeMult: 1.2
-		isChecked: false
-		anchors.left: parent.left
-		anchors.leftMargin: 32	// 16 = triangle height
-		anchors.top: aaz.bottom
-		anchors.topMargin: 16
-		leftText
-		{
-			text: "No Inversion"
-		}
-		rightText
-		{
-			text: "Invert X"
-		}
-	}
-
-
-
 
 }

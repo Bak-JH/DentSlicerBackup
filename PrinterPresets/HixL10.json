@@ -6,6 +6,7 @@
     "sliceImageResolutionY": 1080,
     "screenX": 120.96,
     "screenY": 68.04,
+    "invertX": true,
     "bedShape": "Rect",
     "bedX": 123.8,
     "bedY": 69.2,

@@ -6,6 +6,7 @@
     "sliceImageResolutionY": 1440,
     "screenX": 120.96,
     "screenY": 68.04,
+    "invertX": true,
     "bedShape": "Circle",
     "bedRadius": 16.0,
     "bedOffsetX": 6.5,

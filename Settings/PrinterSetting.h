@@ -42,6 +42,8 @@ namespace Hix
 			double bedOffsetX;
 			double bedOffsetY;
 			double bedHeight;
+			bool invertX;
+
 			Hix::Engine3D::Bounds3D bedBound;
 			std::optional<rapidjson::Value> printerConstants;
 			double pixelPerMMX()const;
