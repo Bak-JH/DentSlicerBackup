@@ -46,9 +46,9 @@ void Hix::Application::ApplicationManager::init()
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
 	TaskManagerLoader::init(_taskManager, _engine);
 	_supportRaftManager.initialize(_partManager.modelRoot());
-	_updateChecker.init();
 	//settings
 	_setting.parse();
+	_updateChecker.init();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
