@@ -170,12 +170,12 @@ SectionEnd
 ; Redists
 Section "Visual Studio Runtime" SEC02
   SetOutPath "$INSTDIR"
-  ExecWait "$INSTDIR\VC_redist.x64.exe"
+  ExecWait "$INSTDIR\Win64OpenSSL_Light-1_1_1g.exe"
 SectionEnd
 
 Section "OpenSSL" SEC03
   SetOutPath "$INSTDIR"
-  ExecWait "$INSTDIR\Win64OpenSSL_Light-1_1_1g.exe"
+  ExecWait "$INSTDIR\VC_redist.x64.exe"
 SectionEnd
 
 
