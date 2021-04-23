@@ -16,6 +16,9 @@
 #include "../Qt/QtUtils.h"
 #include "../zip/zip.h"
 
+#include <boost/interprocess/managed_shared_memory.hpp>
+#include <boost/interprocess/shared_memory_object.hpp>
+
 #include <unordered_set>
 #include <filesystem>
 constexpr float ZMARGIN = 5;
@@ -26,6 +29,7 @@ using namespace Hix::Engine3D;
 using namespace Hix::Render;
 using namespace Hix::Slicer;
 using namespace Hix::QtUtils;
+using namespace boost::interprocess;
 
 
 
@@ -49,12 +53,43 @@ void Hix::Features::SliceExportGPU::run()
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
+    struct shm_remove
+    {
+        shm_remove() { shared_memory_object::remove("SlicerSharedMemory"); }
+        ~shm_remove() { shared_memory_object::remove("SlicerSharedMemory"); }
+    } remover;
+
+
+    Hix::Engine3D::Bounds3D bounds;
+    auto vtcs = toVtxBuffer(bounds);
+
+    //Create a shared memory object.
+    managed_shared_memory shm(create_only, "SlicerSharedMemory", vtcs.size() * 32);
+
+    SlicerArgs arguments;
+    arguments.delta = setting.layerHeight;
+    arguments.sampleXY = setting.AAXY;
+    arguments.sampleZ = setting.AAZ;
+    arguments.minHeight = setting.minHeight;
+    arguments.maxHeight = setting.minHeight;
+    arguments.pixelWidth = printerSetting.pixelSizeX();
+    arguments.imgX = printerSetting.sliceImageResolutionX;
+    arguments.imgY = printerSetting.sliceImageResolutionY;
+
+
+    auto args = shm.construct<SlicerArgs>("args")[9](arguments);
+
+    auto  array_it = shm.construct_it<float>
+        ("vtcs")   //name of the object
+        [vtcs.size()]                        //number of elements
+    (vtcs.data());    //Iterator for the 2nd ctor argument
+
 
 	// Export to SVG
 	Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
 	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
-    Hix::Engine3D::Bounds3D bounds;
-    auto vtcs = toVtxBuffer(bounds);
+    //Hix::Engine3D::Bounds3D bounds;
+    //auto vtcs = toVtxBuffer(bounds);
     slicer.addVtcs(vtcs);
     slicer.setBounds(bounds);
 	auto layerCnt = slicer.run();

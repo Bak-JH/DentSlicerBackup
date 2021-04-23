@@ -25,6 +25,19 @@ namespace Hix
 			std::vector<float> toVtxBuffer(Hix::Engine3D::Bounds3D& bounds);
 
 		private:
+			struct SlicerArgs
+			{
+				float delta;
+				size_t sampleXY;
+				size_t sampleZ;
+				float minHeight;
+				float maxHeight;
+				float pixelWidth;
+				size_t imgX;
+				size_t imgY;
+				size_t vtcCount;
+			};
+
 			std::unordered_set<GLModel*> _models;
 			QString _path;
 
