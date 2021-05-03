@@ -35,7 +35,6 @@ namespace Hix
 				float pixelWidth;
 				size_t imgX;
 				size_t imgY;
-				size_t vtcCount;
 			};
 
 			std::unordered_set<GLModel*> _models;

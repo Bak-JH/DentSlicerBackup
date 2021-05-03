@@ -33,19 +33,19 @@ namespace Hix
 		public:
 			SlicerGL(float delta, std::filesystem::path outPath, size_t sampleXY, size_t sampleZ, float minHeight);
 			~SlicerGL();
-			void addVtcs(const std::vector<float>& vtcs);
 			void setScreen(float pixelWidth, size_t imgX, size_t imgY);
 			void setBounds(const Hix::Engine3D::Bounds3D& bound);
-			size_t run();
+			size_t run(const std::vector<float>& vtcs);
 		private:
-			void prepareSlice();
+			void setFrameBuffer();
+			void addVtcs(const std::vector<float>& vtcs);
 			void glfwSlice(Shader& shader, float height, size_t index);
 
 			void setUniforms(Shader& shader, float height, float maxBright);
 			void writeToFile(const std::vector<uint8_t>& data, size_t index);
 			size_t _concurrentWriteMax;
 			float _layer = 0.1;
-			unsigned int  _VAO, _vertVBO, _maskVAO, _maskVBO, _sliceFBO, _sliceTex, _sliceBuf;
+			unsigned int  _VAO, _vertVBO, _sliceFBO, _sliceTex, _intermediateFBO, _screenTexture;
 			size_t _vertCnt;
 			Hix::Engine3D::Bounds3D _bounds;
 
