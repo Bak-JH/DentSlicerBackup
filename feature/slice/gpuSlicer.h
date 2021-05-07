@@ -37,7 +37,7 @@ namespace Hix
 			void setBounds(const Hix::Engine3D::Bounds3D& bound);
 			size_t run(const std::vector<float>& vtcs);
 		private:
-			void setFrameBuffer();
+			void setFrameBuffer(bool isMultiSampleEnable);
 			void addVtcs(const std::vector<float>& vtcs);
 			void glfwSlice(Shader& shader, float height, size_t index);
 
@@ -45,7 +45,7 @@ namespace Hix
 			void writeToFile(const std::vector<uint8_t>& data, size_t index);
 			size_t _concurrentWriteMax;
 			float _layer = 0.1;
-			unsigned int  _VAO, _vertVBO, _sliceFBO, _sliceTex, _intermediateFBO, _screenTexture;
+			unsigned int  _VAO, _vertVBO, _sliceFBO, _sliceRBO, _stencilRBO, _maskVAO, _maskVBO, _blittedFBO, _blittedRBO, _blitStencilRBO;
 			size_t _vertCnt;
 			Hix::Engine3D::Bounds3D _bounds;
 
