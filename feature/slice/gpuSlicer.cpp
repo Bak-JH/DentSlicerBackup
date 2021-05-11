@@ -30,8 +30,6 @@
 
 using GLlimit =  std::numeric_limits<GLfloat>;
 
-auto offset = 1000;
-
 using namespace Hix::Slicer;
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -256,7 +254,7 @@ void Hix::Slicer::SlicerGL::setScreen(float pixelWidth, size_t imgX, size_t imgY
 #endif
 
     // set the window's display mode
-    _window = glfwCreateWindow(768, 768, "STL viewer", NULL, NULL);
+    _window = glfwCreateWindow(_resX, _resY, "STL viewer", NULL, NULL);
 
     if (!_window)
     {
