@@ -1,7 +1,6 @@
 #include "../slice/gpuSlicer.h"
 
 #include "sliceExportGPU.h"
-#include <QFileDialog>
 #include "../glmodel.h"
 #include "../addModel.h"
 #include "../application/ApplicationManager.h"
@@ -15,6 +14,10 @@
 #include "../glmodel.h"
 #include "../Qt/QtUtils.h"
 #include "../zip/zip.h"
+
+#include <QFileDialog>
+#include <QtCore/QCoreApplication>
+#include <QDebug>
 
 #include <unordered_set>
 #include <filesystem>
@@ -49,15 +52,13 @@ void Hix::Features::SliceExportGPU::run()
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
-
 	// Export to SVG
 	Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
 	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
     Hix::Engine3D::Bounds3D bounds;
     auto vtcs = toVtxBuffer(bounds);
-    slicer.addVtcs(vtcs);
     slicer.setBounds(bounds);
-	auto layerCnt = slicer.run();
+	auto layerCnt = slicer.run(vtcs);
 	//write info files
 	Hix::Slicer::InfoWriter iw(tmpPath, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
 	iw.createInfoFile();
