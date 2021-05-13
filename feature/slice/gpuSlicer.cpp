@@ -30,7 +30,6 @@
 
 using GLlimit =  std::numeric_limits<GLfloat>;
 
-
 using namespace Hix::Slicer;
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -54,9 +53,7 @@ static void glMessageCallback(GLenum, GLenum, GLuint, GLenum, GLsizei,
 
 void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxBright)
 {
-
-    //glm::mat4 proj = glm::ortho(-_imgX, _imgX, -_imgY, _imgY, -total_thickness, total_thickness);
-    glm::mat4 proj = glm::ortho(-(float)_imgX, (float)_imgX, -(float)_imgY, (float)_imgY,(float) -GLlimit::epsilon(), (float)(_bounds.zMax() + GLlimit::epsilon()));
+    glm::mat4 proj = glm::ortho(-_imgX, _imgX, -_imgY, _imgY,(float) -GLlimit::epsilon(), (float)(_bounds.zMax() + GLlimit::epsilon()));
     glm::mat4 view = glm::lookAt(
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 0.0f, -1.0f),
@@ -68,8 +65,6 @@ void Hix::Slicer::SlicerGL::setUniforms(Shader& shader, float height, float maxB
     glm::mat4 mvp = proj * view * model; // Remember, matrix multiplication is the other way around
     shader.setMat4("mvp", mvp);
     shader.setFloat("maxBright", maxBright);
-
-
 }
 
 void Hix::Slicer::SlicerGL::writeToFile(const std::vector<uint8_t>& data, size_t index)
@@ -84,19 +79,60 @@ void Hix::Slicer::SlicerGL::writeToFile(const std::vector<uint8_t>& data, size_t
 
 
 
-void Hix::Slicer::SlicerGL::prepareSlice()
+void Hix::Slicer::SlicerGL::setFrameBuffer(bool isMultiSampleEnable)
 {
     glGenFramebuffers(1, &_sliceFBO);
-    glGenTextures(1, &_sliceTex);
-    glGenRenderbuffers(1, &_sliceBuf);
+    glBindFramebuffer(GL_FRAMEBUFFER, _sliceFBO);
 
-    glBindTexture(GL_TEXTURE_2D, _sliceTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _resX, _resY, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glGenRenderbuffers(1, &_sliceRBO);
+    glGenRenderbuffers(1, &_stencilRBO);
+
+    //slice RGB RBO
+    glBindRenderbuffer(GL_RENDERBUFFER, _sliceRBO);
+    if (isMultiSampleEnable)
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, _sampleXY, GL_RGB, _resX, _resY);
+    else
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, _resX, _resY);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _sliceRBO);
+
+    //slice stencil RBO
+    glBindRenderbuffer(GL_RENDERBUFFER, _stencilRBO);
+    if (isMultiSampleEnable)
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, _sampleXY, GL_DEPTH24_STENCIL8, _resX, _resY);
+    else
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _resX, _resY);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _stencilRBO);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _stencilRBO);
+
+    auto t0 = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (t0 != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << t0 << std::endl;
+
+    if (isMultiSampleEnable)
+    {
+        glEnable(GL_MULTISAMPLE);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glGenFramebuffers(1, &_blittedFBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, _blittedFBO);
+
+        glGenRenderbuffers(1, &_blittedRBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, _blittedRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_RGB, _resX, _resY);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _blittedRBO);
+
+        //blit stencil RBO
+        glGenRenderbuffers(1, &_blitStencilRBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, _blitStencilRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, _resX, _resY);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _blitStencilRBO);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _blitStencilRBO);
+    }
 }
 
 
@@ -117,6 +153,11 @@ void Hix::Slicer::SlicerGL::glfwSlice(Shader& shader, float height, size_t index
     GLfloat SSZ = _layer / (GLfloat)_sampleZ / 2.0;
     for (size_t i = 0; i < _sampleZ; ++i)
     {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, _sliceFBO);
+
+        glViewport(0, 0, _resX, _resY);
+
         currentAAZ += SSZ;
         glEnable(GL_STENCIL_TEST);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -137,14 +178,26 @@ void Hix::Slicer::SlicerGL::glfwSlice(Shader& shader, float height, size_t index
         glDrawArrays(GL_TRIANGLES, 0, _vertCnt);
         glDisable(GL_CULL_FACE);
 
+
         glClear(GL_COLOR_BUFFER_BIT);
+
         glBindVertexArray(_maskVAO);
         glStencilFunc(GL_NOTEQUAL, 0, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glDisable(GL_STENCIL_TEST);
+
+        if (_sampleXY > 1)
+        {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, _sliceFBO);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _blittedFBO);
+            glBlitFramebuffer(0, 0, _resX, _resY, 0, 0, _resX, _resY, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer(GL_FRAMEBUFFER, _blittedFBO);
+        }
+
         glReadPixels(0, 0, _resX, _resY, GL_RED, GL_UNSIGNED_BYTE, _singlePassBuffer.data());
-        //std::transform(std::execution::seq, _finalBuffers[bufferIndex].begin(), _finalBuffers[bufferIndex].end(), _singlePassBuffer.begin(), _finalBuffers[bufferIndex].begin(), plus_overflow());
+
         std::transform(std::execution::par_unseq, _finalBuffers[bufferIndex].begin(), _finalBuffers[bufferIndex].end(), _singlePassBuffer.begin(), _finalBuffers[bufferIndex].begin(), plus_overflow());
 
         glfwSwapBuffers(_window);
@@ -211,7 +264,6 @@ void Hix::Slicer::SlicerGL::setScreen(float pixelWidth, size_t imgX, size_t imgY
 
     // make the windows context current
     glfwMakeContextCurrent(_window);
-    glfwSetFramebufferSizeCallback(_window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -231,15 +283,12 @@ void Hix::Slicer::SlicerGL::setScreen(float pixelWidth, size_t imgX, size_t imgY
     //glDebugMessageCallback(glMessageCallback, NULL);
 #endif
 
-    glViewport(0, 0, _resX, _resY);
-    glEnable(GL_MULTISAMPLE);
-
     //for the sake of performance, all memories used in this operation are allocated once, here.
-    _singlePassBuffer.assign(_resX* _resY, 0);
+    _singlePassBuffer.assign(_resX * _resY, 0);
     _finalBuffers.assign(_concurrentWriteMax, {});
     for (auto& each : _finalBuffers)
     {
-        each.assign(_resX* _resY, 0);
+        each.assign(_resX * _resY, 0);
     }
 }
 
@@ -257,39 +306,46 @@ Hix::Slicer::SlicerGL::~SlicerGL()
 void Hix::Slicer::SlicerGL::addVtcs(const std::vector<float>& vtcs)
 {
     _vertCnt = vtcs.size();
+
     glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_vertVBO);
     glBindVertexArray(_VAO);
+
+    glGenBuffers(1, &_vertVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _vertVBO);
     glBufferData(GL_ARRAY_BUFFER, _vertCnt * sizeof(GLfloat), vtcs.data(), GL_STATIC_DRAW);
+
+    //try
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+
+
 
     GLfloat maskVert[] = {
-    -_imgX, -_imgY, 0.0f,
-    _imgX, -_imgY, 0.0f,
-    _imgX, _imgY, 0.0f,
+        -_imgX, -_imgY, 0.0f,
+        _imgX, -_imgY, 0.0f,
+        _imgX, _imgY, 0.0f,
 
-    -_imgX, -_imgY, 0.0f,
-    _imgX, _imgY, 0.0f,
-    -_imgX, _imgY, 0.0f,
+        -_imgX, -_imgY, 0.0f,
+        _imgX, _imgY, 0.0f,
+        -_imgX, _imgY, 0.0f,
     };
 
-
     glGenVertexArrays(1, &_maskVAO);
-    glGenBuffers(1, &_maskVBO);
     glBindVertexArray(_maskVAO);
+
+    glGenBuffers(1, &_maskVBO);
     glBindBuffer(GL_ARRAY_BUFFER, _maskVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(maskVert), &maskVert, GL_STATIC_DRAW);
+
+    //try
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
-
 }
 
 
-size_t Hix::Slicer::SlicerGL::run()
+size_t Hix::Slicer::SlicerGL::run(const std::vector<float>& vtcs)
 {
     //shitty qt code below
     QFile vertFile(":/shaders/slice.vert");
@@ -301,14 +357,14 @@ size_t Hix::Slicer::SlicerGL::run()
     auto vertStr = vertFile.readAll().toStdString();
     auto fragStr = fragFile.readAll().toStdString();
 
-    //auto test = FRAG.toLocalFile();
     Shader sliceShader(vertStr, fragStr, std::string());
+    sliceShader.use();
 
-    prepareSlice();
     size_t i = 0;
-
-
     GLfloat height = _minHeight; // slice height
+
+    addVtcs(vtcs);
+    setFrameBuffer(_sampleXY > 1);
 
     while (height < _bounds.zMax() - GLlimit::epsilon())
     {

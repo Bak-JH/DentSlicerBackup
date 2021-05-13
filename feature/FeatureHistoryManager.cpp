@@ -24,7 +24,7 @@ void Hix::Features::FeatureHistoryManager::addFeature(Hix::Features::Feature* fe
 	}
 	   
 	// max size
-	if (_history.size() >= 10)
+	if (_history.size() >= 100)
 	{
 		_history.pop_front();
 	}

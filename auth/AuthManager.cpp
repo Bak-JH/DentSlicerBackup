@@ -18,7 +18,7 @@
 using frozen::operator"" _fstr;
 
 #ifdef _DEBUG
-//#define DISABLE_AUTH
+// #define DISABLE_AUTH
 #endif
 //constexpr auto HOST = "127.0.0.1"_fstr;
 //constexpr auto PORT = "8000"_fstr;
