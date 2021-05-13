@@ -140,7 +140,7 @@ namespace Hix
 			virtual void parseJSON();
 			virtual std::filesystem::path jsonPath();
 			virtual std::filesystem::path defaultPath();
-			void toDefault();
+			void toDefault()noexcept;
 		protected:
 			void parseJSON(std::filesystem::path jsonPath);
 			//set default values
