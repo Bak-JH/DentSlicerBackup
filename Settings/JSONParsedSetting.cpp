@@ -29,9 +29,16 @@ std::filesystem::path Hix::Settings::JSONParsedSetting::defaultPath()
 	return Hix::Application::ApplicationManager::getInstance().settings().deployInfo.defaultsDir / _jsonName;
 }
 
-void Hix::Settings::JSONParsedSetting::toDefault()
+void Hix::Settings::JSONParsedSetting::toDefault()noexcept
 {
-	parseJSON(defaultPath());
+	//ignore errors when parsing default json
+	try
+	{
+		parseJSON(defaultPath());
+	}
+	catch (...)
+	{
+	}
 }
 
 void Hix::Settings::JSONParsedSetting::parseJSON(std::filesystem::path jsp)
@@ -77,7 +84,14 @@ void Hix::Settings::JSONParsedSetting::parseJSON()
 	}
 	catch (...)
 	{
-		toDefault();
+		//try {
+			toDefault();
+
+		//}
+		//catch (...)
+		//{
+
+		//}
 	}
 }
 

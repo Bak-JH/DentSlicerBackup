@@ -19,6 +19,10 @@ Hix::Settings::LocalSetting::LocalSetting(const std::string& settingName): JSONP
 	auto jsp = jsonPath();
 	if (!std::filesystem::is_regular_file(jsp))
 	{
+		std::error_code ec;
+		std::filesystem::create_directory(localSettingsDir, ec);
+
+		
 		std::ofstream ofs(jsp);
 		ofs.close();
 	}
