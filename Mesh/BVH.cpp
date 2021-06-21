@@ -120,6 +120,7 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 		working_list.pop_front();
 
 		// Is 'node' intersected by the box?
+		//if (node->intersect(pclOrderBound))
 		if (node->intersect(pclOrderBound) && rayIntersectsAABB(dirFrac, rayFrom, *node))
 		{
 			// We have to check the children of the intersected 'node'
