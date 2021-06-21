@@ -942,6 +942,7 @@
     <ClInclude Include="feature\repair\Kernel\heap.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
     <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
+    <ClInclude Include="feature\sampling.h" />
     <ClInclude Include="render\Bounds3D.h" />
     <ClInclude Include="feature\slice\ContourBuilder.h" />
     <ClInclude Include="feature\slice\Planes.h" />

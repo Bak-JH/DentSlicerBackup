@@ -37,6 +37,7 @@ namespace Hix
 			void undoImpl()override;
 			void redoImpl()override;
 			void runImpl()override;
+			void uniformSampling(float offset);
 
 		private:
 			float _offset;
