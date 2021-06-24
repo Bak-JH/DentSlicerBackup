@@ -1,6 +1,7 @@
 #pragma once
 #include <QVector3D>
 #include "Mesh/mesh.h"
+#include <QDebug>
 
 QVector3D PtOnTri(const QVector3D point, std::array<Hix::Engine3D::ConstItrInfo::VertexItrType, 3> face)
 {
@@ -229,44 +230,15 @@ QVector3D PtOnTri(const QVector3D point, std::array<Hix::Engine3D::ConstItrInfo:
 		}
 	}
 
+	qDebug() << s << t;
+
 	auto nearestVertex = face[0].worldPosition() + edge0 * s + edge1 * t;
+
+	qDebug() << QVector3D::crossProduct(point, nearestVertex);
 
 	return nearestVertex;
 }
 
-
-QVector3D getClosestPoint(Triangle triangle, QVector3D point)
-{
-	Plane plane = new Plane(triangle.p0, triangle.p1, triangle.p2);
-	point = ClosestPoint(plane, point);
-
-	if (PointInTriangle(triangle, point)) {
-		return new Point(point);
-	}
-
-	Line AB = new Line(triangle.p0, triangle.p1);
-	Line BC = new Line(triangle.p1, triangle.p2);
-	Line CA = new Line(triangle.p2, triangle.p0);
-
-	QVector3D c1 = ClosestPoint(AB, point);
-	QVector3D c2 = ClosestPoint(BC, point);
-	QVector3D c3 = ClosestPoint(CA, point);
-
-	float mag1 = (point.ToVector() - c1.ToVector()).LengthSquared();
-	float mag2 = (point.ToVector() - c2.ToVector()).LengthSquared();
-	float mag3 = (point.ToVector() - c3.ToVector()).LengthSquared();
-
-	float min = Math.Min(mag1, mag2);
-	min = Math.Min(min, mag3);
-
-	if (min == mag1) {
-		return c1;
-	}
-	else if (min == mag2) {
-		return c2;
-	}
-	return c3;
-}
 
 //
 //
@@ -278,106 +250,3 @@ QVector3D getClosestPoint(Triangle triangle, QVector3D point)
 //	std::filesystem::path file = (idxStr);
 //	stbi_write_png(file.c_str(), 1000, 1000, 1, vertices.cbegin().ref(), 1000);
 //}
-
-void drawbmp(const char* filename, TrackedIndexedList<Hix::Engine3D::MeshVertex, std::allocator<Hix::Engine3D::MeshVertex>, Hix::Engine3D::VertexItrFactory>& vertices,
-			float width, float height) {
-
-	unsigned int headers[13];
-	FILE* outfile;
-	int extrabytes;
-	int paddedsize;
-	int x; int y; int n;
-	int red, green, blue;
-
-	extrabytes = 4 - (((int)width * 3) % 4);                 // How many bytes of padding to add to each
-														// horizontal line - the size of which must
-														// be a multiple of 4 bytes.
-	if (extrabytes == 4)
-		extrabytes = 0;
-
-	paddedsize = (((int)width * 3) + extrabytes) * (int)height;
-
-	// Headers...
-	// Note that the "BM" identifier in bytes 0 and 1 is NOT included in these "headers".
-
-	headers[0] = paddedsize + 54;      // bfSize (whole file size)
-	headers[1] = 0;                    // bfReserved (both)
-	headers[2] = 54;                   // bfOffbits
-	headers[3] = 40;                   // biSize
-	headers[4] = 2560;  // biWidth
-	headers[5] = 1620; // biHeight
-
-	// Would have biPlanes and biBitCount in position 6, but they're shorts.
-	// It's easier to write them out separately (see below) than pretend
-	// they're a single int, especially with endian issues...
-
-	headers[7] = 0;                    // biCompression
-	headers[8] = paddedsize;           // biSizeImage
-	headers[9] = 0;                    // biXPelsPerMeter
-	headers[10] = 0;                    // biYPelsPerMeter
-	headers[11] = 0;                    // biClrUsed
-	headers[12] = 0;                    // biClrImportant
-
-	outfile = fopen(filename, "wb");
-
-	//
-	// Headers begin...
-	// When printing ints and shorts, we write out 1 character at a time to avoid endian issues.
-	//
-
-	fprintf(outfile, "BM");
-
-	for (n = 0; n <= 5; n++)
-	{
-		fprintf(outfile, "%c", headers[n] & 0x000000FF);
-		fprintf(outfile, "%c", (headers[n] & 0x0000FF00) >> 8);
-		fprintf(outfile, "%c", (headers[n] & 0x00FF0000) >> 16);
-		fprintf(outfile, "%c", (headers[n] & (unsigned int)0xFF000000) >> 24);
-	}
-
-	// These next 4 characters are for the biPlanes and biBitCount fields.
-
-	fprintf(outfile, "%c", 1);
-	fprintf(outfile, "%c", 0);
-	fprintf(outfile, "%c", 24);
-	fprintf(outfile, "%c", 0);
-
-	for (n = 7; n <= 12; n++)
-	{
-		fprintf(outfile, "%c", headers[n] & 0x000000FF);
-		fprintf(outfile, "%c", (headers[n] & 0x0000FF00) >> 8);
-		fprintf(outfile, "%c", (headers[n] & 0x00FF0000) >> 16);
-		fprintf(outfile, "%c", (headers[n] & (unsigned int)0xFF000000) >> 24);
-	}
-
-	//
-	// Headers done, now write the data...
-	//
-
-	for (y = (int)height - 1; y >= 0; y--)     // BMP image format is written from bottom to top...
-	{
-		for (x = 0; x <= (int)width - 1; x++)
-		{
-
-			red = 255;
-			green = 255;
-			blue = 255;
-
-			// Also, it's written in (b,g,r) format...
-
-			fprintf(outfile, "%c", blue);
-			fprintf(outfile, "%c", green);
-			fprintf(outfile, "%c", red);
-		}
-		if (extrabytes)      // See above - BMP lines must be of lengths divisible by 4.
-		{
-			for (n = 1; n <= extrabytes; n++)
-			{
-				fprintf(outfile, "%c", 0);
-			}
-		}
-	}
-
-	fclose(outfile);
-	return;
-}
