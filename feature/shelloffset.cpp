@@ -405,9 +405,11 @@ QVector3D getAbs(const QVector3D vec)
 	return QVector3D(std::abs(vec.x()), std::abs(vec.y()), std::abs(vec.z()));
 }
 
-float getDistance(const QVector3D p1, const QVector3D p2)
+float getDistanceSquared(const QVector3D p1, const QVector3D p2)
 {
-	return std::powf((std::powf((p2.x() - p1.x()), 2.0f) + std::powf((p2.y() - p1.y()), 2.0f) + std::powf((p2.z() - p1.z()), 2.0f)), 1 / 2);
+	return (p1 - p2).lengthSquared();
+	//return p1.distanceToPoint(p2);
+	//return std::powf((std::powf((p2.x() - p1.x()), 2.0f) + std::powf((p2.y() - p1.y()), 2.0f) + std::powf((p2.z() - p1.z()), 2.0f)), 1 / 2);
 }
 
 
@@ -497,22 +499,23 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 
 	const Mesh* originalMesh = _target->getMesh();
 	Mesh* newMesh = new Mesh();
-	std::vector<QVector3D> DF;
+	std::vector<float> DF;
 	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
 
-	auto xMin = -1280;
-	auto xMax = 1280;
-	auto yMin = -810;
-	auto yMax = 810;
+	auto xMin = -25;
+	auto xMax = 25;
+	auto yMin = -25;
+	auto yMax = 25;
 	auto zMin = _target->aabb().zMin();
 	auto zMax = _target->aabb().zMax();
 
-	for (auto x = xMin; x < xMax; ++x)
+	for (auto y = yMin; y < yMax; ++y)
 	{
-		for (auto y = yMin; y < yMax; ++y)
+		for (auto x = xMin; x < xMax; ++x)
 		{
-			for (auto z = zMin; z < zMax; ++z)
-			{
+			//for (auto z = zMin; z < zMax; ++z)
+			//{
+			auto z = zMin;
 				auto closest_distance = 9999.0f;
 				QVector3D closest_point;
 
@@ -520,17 +523,15 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 				{
 
 					qDebug() << PtOnTri(QVector3D(x, y, z), face.meshVertices());
-					auto temp_distance = getDistance(QVector3D(x, y, z), PtOnTri(QVector3D(x, y, z), face.meshVertices()));
+					auto temp_distance = getDistanceSquared(QVector3D(x, y, z), PtOnTri(QVector3D(x, y, z), face.meshVertices()));
 					if (temp_distance < closest_distance)
 					{
 						qDebug() << temp_distance;
-						closest_distance = temp_distance;
-						closest_point = getAbs(QVector3D(x, y, z) - PtOnTri(QVector3D(x, y, z), face.meshVertices()));
-					}
+						closest_distance = temp_distance;					}
 				}
 
-				DF.push_back(closest_point);
-			}
+				DF.push_back(closest_distance);
+			//}
 		}
 	}
 
@@ -538,16 +539,6 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	auto tmpPath = std::filesystem::temp_directory_path() / "tmpSlice";
 	//Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
 	//slicer.setScreen(0.1f, 2560, 1620);
-	
-
-	std::vector<float> buffer;
-	for (auto pt : DF)
-	{
-
-		buffer.emplace_back(pt.x());
-		buffer.emplace_back(pt.y());
-		buffer.emplace_back(pt.z());
-	}
 
 
 	auto t = originalMesh->getFaces().begin().meshVertices();
@@ -565,8 +556,15 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	tbuffer.push_back(0.0f);
 	tbuffer.push_back(0.0f);
 
-	//stbi_write_png(file.c_str(), buffer.size(), y_cnt, 1, buffer.data(), x_cnt);
+	// mapping
+	std::vector<uint8_t> mapped_DF;
+	auto max_dist = std::max_element(DF.begin(), DF.end());
+	for (auto dist : DF)
+	{
+		mapped_DF.push_back((uint8_t)(dist / (*max_dist) * 255));
+	}
 
+	stbi_write_png(file.c_str(), 50, 50, 1, mapped_DF.data(), 50);
 
 
 	//pcl::PointCloud<pcl::PointNormal> outPts;
