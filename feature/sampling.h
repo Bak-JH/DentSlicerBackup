@@ -3,11 +3,12 @@
 #include "Mesh/mesh.h"
 #include <QDebug>
 
-QVector3D PtOnTri(const QVector3D point, std::array<Hix::Engine3D::ConstItrInfo::VertexItrType, 3> face)
+QVector3D PtOnTri(const QVector3D point, Hix::Engine3D::FaceConstItr face)
 {
-	auto diff = face[0].worldPosition() - point;
-	auto edge0 = face[1].worldPosition() - face[0].worldPosition();
-	auto edge1 = face[2].worldPosition() - face[0].worldPosition();
+	auto meshVertex = face.meshVertices();
+	auto diff = meshVertex[0].worldPosition() - point;
+	auto edge0 = meshVertex[1].worldPosition() - meshVertex[0].worldPosition();
+	auto edge1 = meshVertex[2].worldPosition() - meshVertex[0].worldPosition();
 	auto a00 = QVector3D::dotProduct(edge0, edge0);
 	auto a01 = QVector3D::dotProduct(edge0, edge1);
 	auto a11 = QVector3D::dotProduct(edge1, edge1);
@@ -230,18 +231,12 @@ QVector3D PtOnTri(const QVector3D point, std::array<Hix::Engine3D::ConstItrInfo:
 		}
 	}
 
-	qDebug() << s << t;
-
-	auto nearestVertex = face[0].worldPosition() + edge0 * s + edge1 * t;
-
-	qDebug() << QVector3D::crossProduct(point, nearestVertex);
-
+	auto nearestVertex = meshVertex[0].localPosition() + edge0 * s + edge1 * t;
 	return nearestVertex;
 }
 
 
-//
-//
+
 //void writeToFile(TrackedIndexedList<Hix::Engine3D::MeshVertex, std::allocator<Hix::Engine3D::MeshVertex>, Hix::Engine3D::VertexItrFactory>& vertices, int index)
 //{
 //	std::stringstream idxStream;

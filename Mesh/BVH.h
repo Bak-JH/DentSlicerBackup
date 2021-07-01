@@ -19,6 +19,7 @@ namespace Hix
 			void initModel(const GLModel& model);
 			virtual ~BVH();
 			std::deque<FaceConstItr> getRayCandidates(const QVector3D& rayFrom, const QVector3D& rayTo)override;
+			std::deque<FaceConstItr> getClosest(const QVector3D& point)override;
 			std::deque<FaceConstItr> getRayCandidatesDirection(const QVector3D& rayFrom, const QVector3D& rayDirection)override;
 			QVector3D getCachedPos(const VertexConstItr& vtx)const override;
 
