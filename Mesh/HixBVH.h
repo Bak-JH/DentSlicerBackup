@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <pcl/recognition/ransac_based/auxiliary.h>
+#include <QVector3D>
 
 namespace Hix
 {
@@ -149,6 +150,26 @@ namespace Hix
 
 					return true;
 				}
+				inline bool
+					intersect(const QVector3D& pt) const
+				{
+					if (pt.x() < bounds_[0] || pt.y() < bounds_[2] || pt.z() < bounds_[4] ||
+						pt.x() > bounds_[1] || pt.y() > bounds_[3] || pt.z() > bounds_[5])
+						return false;
+
+					return true;
+				}
+
+				//inline bool
+				//	intersect(const float x, const float y, const float z) const
+				//{
+				//	if (x < bounds_[0] || y < bounds_[2] || z < bounds_[4] ||
+				//		x > bounds_[1] || y > bounds_[3] || z > bounds_[5])
+				//		return false;
+
+				//	return true;
+				//}
+
 				const float* getBound()const
 				{
 					return bounds_;

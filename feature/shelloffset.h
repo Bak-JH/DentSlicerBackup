@@ -4,6 +4,9 @@
 #include "glmodel.h"
 #include "interfaces/DialogedMode.h"
 
+#include "Mesh/BVH.h"
+#include "Mesh/MTRayCaster.h"
+
 namespace Hix
 {
 	namespace QML
@@ -43,6 +46,9 @@ namespace Hix
 			float _offset;
 			GLModel* _target;
 			std::unique_ptr<Hix::Engine3D::Mesh> _prevMesh;
+
+			std::unique_ptr<Hix::Engine3D::RayCaster> _rayCaster;
+			std::unique_ptr<Hix::Engine3D::RayAccelerator> _rayAccel;
 		};
 
 		class ShellOffset : public Hix::Features::FeatureContainer

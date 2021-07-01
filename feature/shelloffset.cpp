@@ -7,6 +7,9 @@
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"
 
+
+#include <QString>
+
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/surface/marching_cubes_hoppe.h>
@@ -17,9 +20,14 @@
 
 #include <algorithm>
 #include <execution>
+#include <limits>
+#include <chrono>
 
 #include "sampling.h"
 #include "slice/gpuSlicer.h"
+
+
+
 
 #define STBI_WINDOWS_UTF16
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -296,15 +304,15 @@ Eigen::Matrix3f  MeshRepairPrivate::calcCovarianceMatrix(const std::unordered_se
 	point_count = neigbors.size();
 	for (auto& vtx : neigbors)
 	{
-		accu[0] += vtx.localPosition().x() * vtx.localPosition().x();
-		accu[1] += vtx.localPosition().x() * vtx.localPosition().y();
-		accu[2] += vtx.localPosition().x() * vtx.localPosition().z();
-		accu[3] += vtx.localPosition().y() * vtx.localPosition().y();
-		accu[4] += vtx.localPosition().y() * vtx.localPosition().z();
-		accu[5] += vtx.localPosition().z() * vtx.localPosition().z();
-		accu[6] += vtx.localPosition().x();
-		accu[7] += vtx.localPosition().y();
-		accu[8] += vtx.localPosition().z();
+		accu[0] += vtx.worldPosition().x() * vtx.worldPosition().x();
+		accu[1] += vtx.worldPosition().x() * vtx.worldPosition().y();
+		accu[2] += vtx.worldPosition().x() * vtx.worldPosition().z();
+		accu[3] += vtx.worldPosition().y() * vtx.worldPosition().y();
+		accu[4] += vtx.worldPosition().y() * vtx.worldPosition().z();
+		accu[5] += vtx.worldPosition().z() * vtx.worldPosition().z();
+		accu[6] += vtx.worldPosition().x();
+		accu[7] += vtx.worldPosition().y();
+		accu[8] += vtx.worldPosition().z();
 	}
 
 
@@ -343,63 +351,6 @@ struct MeshTraits
 	using IsManifold = std::integral_constant <bool, IsManifoldT>;
 };
 
-void generateVertexBuffer(float xOffset, float yOffset, bool xInverted, std::vector<float>& buffer, const Hix::Engine3D::Mesh& mesh, Hix::Engine3D::Bounds3D& bound)
-{
-	auto& faces = mesh.getFaces();
-	if (xInverted)
-	{
-		for (auto itr = faces.cbegin(); itr != faces.cend(); ++itr)
-		{
-
-			auto mvs = itr.meshVertices();
-
-			for (int j = 2; j >= 0; --j)
-			{
-				auto mv = mvs[j].worldPosition();
-				QVector3D pt{ -mv.x() + xOffset, mv.y() + yOffset, mv.z() };
-				bound.update(pt);
-				buffer.emplace_back(pt.x());
-				buffer.emplace_back(pt.y());
-				buffer.emplace_back(pt.z());
-			}
-		}
-	}
-	else
-	{
-		for (auto itr = faces.cbegin(); itr != faces.cend(); ++itr)
-		{
-
-			auto mvs = itr.meshVertices();
-			for (int j = 0; j < 3; ++j)
-			{
-				auto pt = mvs[j].worldPosition();
-				bound.update(pt);
-				buffer.emplace_back(pt.x() + xOffset);
-				buffer.emplace_back(pt.y() + yOffset);
-				buffer.emplace_back(pt.z());
-			}
-		}
-	}
-}
-
-std::vector<float> toVtxBuffer(Hix::Engine3D::Bounds3D& bounds, Mesh& mesh)
-{
-	std::vector<float> vtcs;
-
-	size_t vtxCnt = 0;
-
-	vtxCnt += mesh.getVertices().size();
-
-	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
-	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
-
-	;
-	vtcs.reserve(vtxCnt);
-	generateVertexBuffer(0,0,false, vtcs, mesh, bounds);
-
-	return vtcs;
-}
-
 QVector3D getAbs(const QVector3D vec)
 {
 	return QVector3D(std::abs(vec.x()), std::abs(vec.y()), std::abs(vec.z()));
@@ -415,187 +366,141 @@ float getDistanceSquared(const QVector3D p1, const QVector3D p2)
 
 void Hix::Features::HollowMesh::uniformSampling(float offset)
 {
+	auto start = std::chrono::high_resolution_clock::now();
+
 	Hix::Engine3D::Bounds3D aabb = _target->aabb();
-
-	QVector3D center = aabb.minPt() - aabb.maxPt();
-	float distance = toNorm(center);
-
-	QVector3D diagonal = QVector3D(distance / 10.0f + std::abs(offset), 
-								   distance / 10.0f + std::abs(offset), 
-								   distance / 10.0f + std::abs(offset));
-
-	Hix::Engine3D::Mesh* offsetMesh = _target->getMeshModd();
-
-	QVector3D offsetMinPt = aabb.minPt() - diagonal;
-	QVector3D offsetMaxPt = aabb.maxPt() + diagonal;
-
-	aabb.setMinPt(offsetMinPt);
-	aabb.setMaxPt(offsetMaxPt);
-
-	QVector3D box_size = aabb.maxPt() - aabb.minPt();
-	float cellSize = distance / 50.0f;
-
-	QVector3D volumeDim;
-	BestDim(box_size, cellSize, volumeDim);
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="offset"></param>
-	float default_iso_level = 0.1f;
-	float default_extend_percentage = 10.0f;
-	int default_grid_res = 100;
-	float default_off_surface_displacement = 0.01f;
-	pcl::PointCloud<pcl::PointNormal> cloud;
-
-	auto* mesh = _target->getMesh();
-	auto vtxCend = mesh->getVertices().cend();
-
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudPt(new pcl::PointCloud<pcl::PointXYZ>);
-	for (auto vtxItr : mesh->getVertices())
-	{
-		pcl::PointXYZ pclPt = pcl::PointXYZ(vtxItr.position.x(), vtxItr.position.y(), vtxItr.position.z());
-		cloudPt->push_back(pclPt);
-	}
-
-	pcl::NormalEstimation<pcl::PointXYZ, pcl::PointNormal> normalEstimation;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-
-	pcl::UniformSampling<pcl::PointXYZ> filter;
-	filter.setInputCloud(cloudPt);     // 입력 
-	filter.setRadiusSearch(1.0F);   // 탐색 범위 0.01F
-	filter.filter(*cloud_filtered);  // 필터 적용 
-
-	pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
-	tree->setInputCloud(cloud_filtered);
-	normalEstimation.setInputCloud(cloud_filtered);
-	normalEstimation.setSearchMethod(tree);
-	normalEstimation.setKSearch(20);
-	normalEstimation.compute(cloud);
-
-	pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
-	pcl::concatenateFields(*cloud_filtered, cloud, *cloud_with_normals);
-
-	int index = 0;
-	long temp_size = cloud_filtered->points.size();
-
-	for (unsigned int i = 0; i < temp_size; i = i + 20) {
-		// x range -35m to 35 m, y ranges -25 to 25m, z ranges 0 to 66
-		auto pt = cloud_filtered->points[i];
-		auto ptX = cloud_filtered->points[i].x;
-		auto ptY = cloud_filtered->points[i].y;
-		auto ptZ = cloud_filtered->points[i].z;
-		cloud.points[index].x = cloud_filtered->points[i].x;
-		cloud.points[index].y = cloud_filtered->points[i].y;
-		cloud.points[index].z = cloud_filtered->points[i].z;
-		index++;
-	}
-
-
-
-
-
-
+	//aabb.localBoundUpdate(*_target->getMesh());
+	//aabb = aabb.centred();
 
 	const Mesh* originalMesh = _target->getMesh();
 	Mesh* newMesh = new Mesh();
-	std::vector<float> DF;
-	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
+	std::vector<std::pair<float, float>> DF;
 
-	auto xMin = -25;
-	auto xMax = 25;
-	auto yMin = -25;
-	auto yMax = 25;
-	auto zMin = _target->aabb().zMin();
-	auto zMax = _target->aabb().zMax();
+	//int xMin = aabb.xMin();
+	//int xMax = aabb.xMax();
+	//int yMin = aabb.yMin();
+	//int yMax = aabb.yMax();
+	//int zMin = aabb.zMin();
+	//int zMax = aabb.zMax();
 
-	for (auto y = yMin; y < yMax; ++y)
-	{
-		for (auto x = xMin; x < xMax; ++x)
+	constexpr auto half = 20;
+
+	float xMin = -half;
+	float xMax = half;
+	float yMin = -half;
+	float yMax = half;
+	float zMin = aabb.zMin();
+	float zMax = aabb.zMax();
+
+	constexpr float resolution = 1.0f;
+
+	qDebug() << "center: " << aabb.centre();
+
+	//_rayCaster.reset(new MTRayCaster());
+	_rayAccel.reset(new Hix::Engine3D::BVH(*_target, false));
+	//_rayCaster->addAccelerator(_rayAccel.get());
+
+	auto settingdone = std::chrono::high_resolution_clock::now();
+
+	//for (auto z1 = zMin; z1 < zMax; z1 += resolution)
+	//{
+		for (auto y = yMin; y < yMax; y += resolution)
 		{
-			//for (auto z = zMin; z < zMax; ++z)
-			//{
-			auto z = zMin;
-				auto closest_distance = 9999.0f;
-				QVector3D closest_point;
+			for (auto x = xMin; x < xMax; x += resolution)
+			{
+				auto loopstart = std::chrono::high_resolution_clock::now();
 
-				for (auto face = originalMesh->getFaces().cbegin(); face != originalMesh->getFaces().cend(); ++face)
+				auto z = (zMin + ((zMax - zMin) / 2));
+				auto closestDistance = std::numeric_limits<float>::max();
+
+				QVector3D closestPoint;
+				Hix::Engine3D::FaceConstItr closestFace;
+
+				QVector3D currPt = QVector3D(x,y,z);
+
+				auto useRay = std::chrono::high_resolution_clock::now();
+
+				//auto r = _rayAccel->getClosest(currPt);
+				//if (r.size() == 0)
+				//	qDebug() << "not found";
+				auto faceloopStart = std::chrono::high_resolution_clock::now();
+
+				for (auto face = _target->getMesh()->getFaces().begin(); face != _target->getMesh()->getFaces().end(); ++face)
+				//for(auto& face : r)
 				{
-
-					qDebug() << PtOnTri(QVector3D(x, y, z), face.meshVertices());
-					auto temp_distance = getDistanceSquared(QVector3D(x, y, z), PtOnTri(QVector3D(x, y, z), face.meshVertices()));
-					if (temp_distance < closest_distance)
+					auto tmpClosest = PtOnTri(currPt, face);
+					auto tempDistance = getDistanceSquared(currPt, tmpClosest);
+					if (tempDistance < closestDistance)
 					{
-						qDebug() << temp_distance;
-						closest_distance = temp_distance;					}
+						closestDistance = tempDistance;
+						closestPoint = tmpClosest;
+						closestFace = face;
+					}
 				}
 
-				DF.push_back(closest_distance);
-			//}
+				auto pushBack = std::chrono::high_resolution_clock::now();
+
+				auto normalST = currPt - closestPoint;
+				normalST.normalize();
+				auto dot = QVector3D::dotProduct(normalST, closestFace.localFn());
+				//qDebug() << "closest: " << closestPoint;
+				//qDebug() << "normalize: " << normalST;
+				//qDebug() << "localFn: " << closestFace.localFn();
+				//qDebug() << "dot: " << dot;
+				auto closestDistance_sign = dot > 0.0f ? 1.0f : -1.0f;
+				DF.push_back(std::make_pair(closestDistance, closestDistance_sign));
+
+				//qDebug() << (settingdone - start).count();
+				//qDebug() << (useRay - loopstart).count();
+				//qDebug() << (faceloopStart - useRay).count();
+				//qDebug() << (pushBack - faceloopStart).count();
+			}
 		}
-	}
+	//}
+	auto loopend = std::chrono::high_resolution_clock::now();
+
+	qDebug() << "end";
 
 
 	auto tmpPath = std::filesystem::temp_directory_path() / "tmpSlice";
 	//Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
 	//slicer.setScreen(0.1f, 2560, 1620);
 
+	std::filesystem::path file = tmpPath / "test.png";
 
-	auto t = originalMesh->getFaces().begin().meshVertices();
-	std::filesystem::path file = tmpPath / "2.png";
-
-
-	std::vector<float> tbuffer;
-	tbuffer.push_back(1.0f);
-	tbuffer.push_back(0.0f);
-	tbuffer.push_back(0.0f);
-	tbuffer.push_back(1.0f);
-	tbuffer.push_back(0.0f);
-	tbuffer.push_back(0.0f);
-	tbuffer.push_back(1.0f);
-	tbuffer.push_back(0.0f);
-	tbuffer.push_back(0.0f);
 
 	// mapping
 	std::vector<uint8_t> mapped_DF;
+	std::unordered_set<float> pixSet;
+	std::unordered_set<uint8_t> pixSet_t;
 	auto max_dist = std::max_element(DF.begin(), DF.end());
+	int cnt = 0;
 	for (auto dist : DF)
 	{
-		mapped_DF.push_back((uint8_t)(dist / (*max_dist) * 255));
+		pixSet.insert(dist.first);
+		//auto pixel = 122;
+		//if (dist.second < 0.0)
+		//	pixel = 255;
+
+		//auto pixel = (uint8_t)((dist.first / max_dist->first) * dist.second * 127 + 127) ;
+		auto pixel = (dist.first / max_dist->first) * 255;
+		pixSet_t.insert(pixel);
+		//qDebug() << pixel;
+		//if (pixel == 255)
+		//{
+		//	
+		//	pixel = 0;
+		//}
+		mapped_DF.push_back(pixel);
+		++cnt;
+
 	}
+	qDebug() << pixSet.size();
+	qDebug() << pixSet_t.size();
 
-	stbi_write_png(file.c_str(), 50, 50, 1, mapped_DF.data(), 50);
+	uint8_t res_x = aabb.xMax() - aabb.xMin();
+	uint8_t res_y = aabb.yMax() - aabb.yMin();
 
-
-	//pcl::PointCloud<pcl::PointNormal> outPts;
-	//std::vector<pcl::Vertices> outPoly;
-	//pcl::PolygonMesh output;
-
-	//pcl::MarchingCubesHoppe<pcl::PointNormal> mc;
-	//mc.setIsoLevel(default_iso_level);
-	//mc.setGridResolution(default_grid_res, default_grid_res, default_grid_res);
-	//mc.setPercentageExtendGrid(default_extend_percentage);
-	//mc.setInputCloud(cloud_with_normals);
-	//mc.reconstruct(outPts, outPoly);
-
-	////add back to mesh;
-	////polygon should be triangular due to the nature of marching cubes
-	//using trianglemesh = pcl::geometry::TriangleMesh<MeshTraits<true>>;
-	//trianglemesh trimesh;
-	//pcl::geometry::toFaceVertexMesh(trimesh, output);
-	//auto& facedata = trimesh.getFaceDataCloud();
-
-	//for (auto& tri : outPoly)
-	//{
-	//	if (tri.vertices.size() != 3)
-	//	{
-	//		throw std::runtime_error("output mesh from marching cubes is not triangular");
-	//	}
-	//	newMesh->addFace(
-	//		pclToQtPt(outPts[tri.vertices[0]]),
-	//		pclToQtPt(outPts[tri.vertices[1]]),
-	//		pclToQtPt(outPts[tri.vertices[2]])
-	//	);
-	//}
-	//_target->setMesh(newMesh);
+	//stbi_write_png(file.c_str(), res_x, res_y, 1, mapped_DF.data(), res_x);
+	stbi_write_png(file.c_str(), half*2, half*2, 1, mapped_DF.data(), half*2);
 }

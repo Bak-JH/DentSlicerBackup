@@ -140,6 +140,63 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 	return intersected_objects;
 }
 
+std::deque<FaceConstItr> Hix::Engine3D::BVH::getClosest(const QVector3D& point)
+{
+	//Bounds3D bound;
+	//bound.update(rayFrom);
+	//bound.update(rayTo);
+	//auto& rawBound = bound.bound();
+	//float pclOrderBound[6];
+	//pclOrderBound[0] = rawBound[1];
+	//pclOrderBound[1] = rawBound[0];
+	//pclOrderBound[2] = rawBound[3];
+	//pclOrderBound[3] = rawBound[2];
+	//pclOrderBound[4] = rawBound[5];
+	//pclOrderBound[5] = rawBound[4];
+	//////hix: max min, pcl: min max
+
+
+	//QVector3D rayDirection(rayTo - rayFrom);
+	//rayDirection.normalize();
+	std::deque<FaceConstItr> intersected_objects;
+	if (!root_)
+	{
+		qDebug() << root_->hasChildren();
+		return intersected_objects;
+	}
+
+	bool got_intersection = false;
+	// Start the intersection process at the root
+	std::list<Node*> working_list;
+	working_list.push_back(root_);
+
+	while (!working_list.empty())
+	{
+		Node* node = working_list.front();
+		working_list.pop_front();
+
+		// Is 'node' intersected by the box?
+		if (node->intersect(point))
+		{
+			// We have to check the children of the intersected 'node'
+			if (node->hasChildren())
+			{
+				working_list.push_back(node->getLeftChild());
+				working_list.push_back(node->getRightChild());
+			}
+			else // 'node' is a leaf -> save it's object in the output list
+			{
+				intersected_objects.push_back(node->getObject()->getData());
+				got_intersection = true;
+			}
+		}
+	}
+
+	return intersected_objects;
+}
+
+
+
 std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidatesDirection(const QVector3D& rayFrom, const QVector3D& rayDirection)
 {
 	std::deque<FaceConstItr> intersected_objects;
