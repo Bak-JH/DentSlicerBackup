@@ -304,15 +304,15 @@ Eigen::Matrix3f  MeshRepairPrivate::calcCovarianceMatrix(const std::unordered_se
 	point_count = neigbors.size();
 	for (auto& vtx : neigbors)
 	{
-		accu[0] += vtx.worldPosition().x() * vtx.worldPosition().x();
-		accu[1] += vtx.worldPosition().x() * vtx.worldPosition().y();
-		accu[2] += vtx.worldPosition().x() * vtx.worldPosition().z();
-		accu[3] += vtx.worldPosition().y() * vtx.worldPosition().y();
-		accu[4] += vtx.worldPosition().y() * vtx.worldPosition().z();
-		accu[5] += vtx.worldPosition().z() * vtx.worldPosition().z();
-		accu[6] += vtx.worldPosition().x();
-		accu[7] += vtx.worldPosition().y();
-		accu[8] += vtx.worldPosition().z();
+		accu[0] += vtx.localPosition().x() * vtx.localPosition().x();
+		accu[1] += vtx.localPosition().x() * vtx.localPosition().y();
+		accu[2] += vtx.localPosition().x() * vtx.localPosition().z();
+		accu[3] += vtx.localPosition().y() * vtx.localPosition().y();
+		accu[4] += vtx.localPosition().y() * vtx.localPosition().z();
+		accu[5] += vtx.localPosition().z() * vtx.localPosition().z();
+		accu[6] += vtx.localPosition().x();
+		accu[7] += vtx.localPosition().y();
+		accu[8] += vtx.localPosition().z();
 	}
 
 
@@ -369,28 +369,31 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	auto start = std::chrono::high_resolution_clock::now();
 
 	Hix::Engine3D::Bounds3D aabb = _target->aabb();
-	//aabb.localBoundUpdate(*_target->getMesh());
-	//aabb = aabb.centred();
+	
+
+
+	aabb.localBoundUpdate(*_target->getMesh());
+	aabb = aabb.centred();
+
+	int xMin = aabb.xMin();
+	int xMax = aabb.xMax();
+	int yMin = aabb.yMin();
+	int yMax = aabb.yMax();
+	int zMin = aabb.zMin();
+	int zMax = aabb.zMax();
 
 	const Mesh* originalMesh = _target->getMesh();
 	Mesh* newMesh = new Mesh();
 	std::vector<std::pair<float, float>> DF;
 
-	//int xMin = aabb.xMin();
-	//int xMax = aabb.xMax();
-	//int yMin = aabb.yMin();
-	//int yMax = aabb.yMax();
-	//int zMin = aabb.zMin();
-	//int zMax = aabb.zMax();
+	//constexpr auto half = 20;
 
-	constexpr auto half = 20;
-
-	float xMin = -half;
-	float xMax = half;
-	float yMin = -half;
-	float yMax = half;
-	float zMin = aabb.zMin();
-	float zMax = aabb.zMax();
+	//float xMin = -half;
+	//float xMax = half;
+	//float yMin = -half;
+	//float yMax = half;
+	//float zMin = aabb.zMin();
+	//float zMax = aabb.zMax();
 
 	constexpr float resolution = 1.0f;
 
@@ -404,9 +407,9 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 
 	//for (auto z1 = zMin; z1 < zMax; z1 += resolution)
 	//{
-		for (auto y = yMin; y < yMax; y += resolution)
+		for (float y = yMin; y < yMax; y += resolution)
 		{
-			for (auto x = xMin; x < xMax; x += resolution)
+			for (float x = xMin; x < xMax; x += resolution)
 			{
 				auto loopstart = std::chrono::high_resolution_clock::now();
 
@@ -420,13 +423,17 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 
 				auto useRay = std::chrono::high_resolution_clock::now();
 
-				//auto r = _rayAccel->getClosest(currPt);
-				//if (r.size() == 0)
-				//	qDebug() << "not found";
+				auto r = _rayAccel->getClosest(currPt, 0.0f);
+				auto all = _target->getMesh()->getFaces().size();
+				if (r.size() != all)
+				{
+					qDebug() << "bvh";
+					qDebug() << currPt;
+				}
 				auto faceloopStart = std::chrono::high_resolution_clock::now();
 
-				for (auto face = _target->getMesh()->getFaces().begin(); face != _target->getMesh()->getFaces().end(); ++face)
-				//for(auto& face : r)
+				//for (auto face = _target->getMesh()->getFaces().begin(); face != _target->getMesh()->getFaces().end(); ++face)
+				for(auto& face : r)
 				{
 					auto tmpClosest = PtOnTri(currPt, face);
 					auto tempDistance = getDistanceSquared(currPt, tmpClosest);
@@ -443,10 +450,10 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 				auto normalST = currPt - closestPoint;
 				normalST.normalize();
 				auto dot = QVector3D::dotProduct(normalST, closestFace.localFn());
-				//qDebug() << "closest: " << closestPoint;
-				//qDebug() << "normalize: " << normalST;
-				//qDebug() << "localFn: " << closestFace.localFn();
-				//qDebug() << "dot: " << dot;
+				qDebug() << "closest: " << closestPoint;
+				qDebug() << "normalize: " << normalST;
+				qDebug() << "localFn: " << closestFace.localFn();
+				qDebug() << "dot: " << dot;
 				auto closestDistance_sign = dot > 0.0f ? 1.0f : -1.0f;
 				DF.push_back(std::make_pair(closestDistance, closestDistance_sign));
 
@@ -477,30 +484,23 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	int cnt = 0;
 	for (auto dist : DF)
 	{
-		pixSet.insert(dist.first);
-		//auto pixel = 122;
-		//if (dist.second < 0.0)
-		//	pixel = 255;
-
-		//auto pixel = (uint8_t)((dist.first / max_dist->first) * dist.second * 127 + 127) ;
 		auto pixel = (dist.first / max_dist->first) * 255;
-		pixSet_t.insert(pixel);
-		//qDebug() << pixel;
-		//if (pixel == 255)
-		//{
-		//	
-		//	pixel = 0;
-		//}
+
 		mapped_DF.push_back(pixel);
+
+		if (dist.second > 0)
+			mapped_DF.push_back(0);
+		else
+			mapped_DF.push_back(255);
+		mapped_DF.push_back(0);
 		++cnt;
 
 	}
 	qDebug() << pixSet.size();
 	qDebug() << pixSet_t.size();
 
-	uint8_t res_x = aabb.xMax() - aabb.xMin();
-	uint8_t res_y = aabb.yMax() - aabb.yMin();
+	uint8_t res_x = (xMax - xMin) / resolution;
+	uint8_t res_y = (yMax - yMin) / resolution;
 
-	//stbi_write_png(file.c_str(), res_x, res_y, 1, mapped_DF.data(), res_x);
-	stbi_write_png(file.c_str(), half*2, half*2, 1, mapped_DF.data(), half*2);
+	stbi_write_png(file.c_str(), res_x, res_y, 3, mapped_DF.data(), res_x*3);
 }

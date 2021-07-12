@@ -6,9 +6,9 @@
 QVector3D PtOnTri(const QVector3D point, Hix::Engine3D::FaceConstItr face)
 {
 	auto meshVertex = face.meshVertices();
-	auto diff = meshVertex[0].worldPosition() - point;
-	auto edge0 = meshVertex[1].worldPosition() - meshVertex[0].worldPosition();
-	auto edge1 = meshVertex[2].worldPosition() - meshVertex[0].worldPosition();
+	auto diff = meshVertex[0].localPosition() - point;
+	auto edge0 = meshVertex[1].localPosition() - meshVertex[0].localPosition();
+	auto edge1 = meshVertex[2].localPosition() - meshVertex[0].localPosition();
 	auto a00 = QVector3D::dotProduct(edge0, edge0);
 	auto a01 = QVector3D::dotProduct(edge0, edge1);
 	auto a11 = QVector3D::dotProduct(edge1, edge1);

@@ -48,6 +48,7 @@ namespace Hix
 			std::unique_ptr<Hix::Engine3D::Mesh> _prevMesh;
 
 			std::unique_ptr<Hix::Engine3D::RayCaster> _rayCaster;
+
 			std::unique_ptr<Hix::Engine3D::RayAccelerator> _rayAccel;
 		};
 
