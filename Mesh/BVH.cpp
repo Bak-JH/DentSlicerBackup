@@ -140,54 +140,84 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 	return intersected_objects;
 }
 
-std::deque<FaceConstItr> Hix::Engine3D::BVH::getClosest(const QVector3D& point)
+std::deque<FaceConstItr> Hix::Engine3D::BVH::getClosest(const QVector3D& point, const float maxDistance)
 {
-	//Bounds3D bound;
-	//bound.update(rayFrom);
-	//bound.update(rayTo);
-	//auto& rawBound = bound.bound();
-	//float pclOrderBound[6];
-	//pclOrderBound[0] = rawBound[1];
-	//pclOrderBound[1] = rawBound[0];
-	//pclOrderBound[2] = rawBound[3];
-	//pclOrderBound[3] = rawBound[2];
-	//pclOrderBound[4] = rawBound[5];
-	//pclOrderBound[5] = rawBound[4];
-	//////hix: max min, pcl: min max
-
-
-	//QVector3D rayDirection(rayTo - rayFrom);
-	//rayDirection.normalize();
+	QVector3D queryPoint = point;
 	std::deque<FaceConstItr> intersected_objects;
 	if (!root_)
-	{
-		qDebug() << root_->hasChildren();
 		return intersected_objects;
-	}
 
 	bool got_intersection = false;
 	// Start the intersection process at the root
 	std::list<Node*> working_list;
 	working_list.push_back(root_);
+	float closestDist = std::numeric_limits<double>::max();
 
 	while (!working_list.empty())
 	{
 		Node* node = working_list.front();
 		working_list.pop_front();
 
-		// Is 'node' intersected by the box?
-		if (node->intersect(point))
+		float currentDist = node->getDistanceSquared(queryPoint);
+		if (node == root_)
 		{
-			// We have to check the children of the intersected 'node'
-			if (node->hasChildren())
+			auto leftDist = node->getLeftChild()->getDistanceSquared(queryPoint);
+			auto rightDist = node->getRightChild()->getDistanceSquared(queryPoint);
+
+			if (leftDist == rightDist)
 			{
 				working_list.push_back(node->getLeftChild());
 				working_list.push_back(node->getRightChild());
 			}
-			else // 'node' is a leaf -> save it's object in the output list
+			else if (leftDist < rightDist)
+				working_list.push_back(node->getLeftChild());
+			else
+				working_list.push_back(node->getRightChild());
+
+			continue;
+		}
+
+		if (currentDist <= closestDist) // current distance must be smaller than closest before
+		{
+			closestDist = currentDist;
+
+			if (node->hasChildren())
+			{
+				auto leftDist = node->getLeftChild()->getDistanceSquared(queryPoint);
+				auto rightDist = node->getRightChild()->getDistanceSquared(queryPoint);
+				auto closestLR = leftDist < rightDist ? leftDist : rightDist;
+				bool isLeft = leftDist < rightDist;
+
+				if (closestLR < closestDist) // compare with children
+				{
+					if(leftDist == rightDist)
+					{
+						working_list.push_back(node->getLeftChild());
+						working_list.push_back(node->getRightChild());
+					}
+					else if(leftDist < rightDist)
+						working_list.push_back(node->getLeftChild());
+					else
+						working_list.push_back(node->getRightChild());
+				}
+				else
+				{
+					for (auto i : node->getAllObjects())
+					{
+						intersected_objects.push_back(i->getData());
+					}
+				}
+			}
+			else // current node is a leaf
 			{
 				intersected_objects.push_back(node->getObject()->getData());
-				got_intersection = true;
+			}
+		}
+		else // current node is the closest
+		{
+			for (auto i : node->getAllObjects())
+			{
+				intersected_objects.push_back(i->getData());
 			}
 		}
 	}
