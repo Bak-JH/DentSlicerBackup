@@ -14,12 +14,14 @@ namespace Hix
 		{
 		public:
 			BVH(const GLModel& model, bool isWorld = true);
+			BVH(const Mesh& mesh, bool isWorld = true);
 			BVH(const std::unordered_set<const GLModel*>& model, bool isWorld = true);
 
 			void initModel(const GLModel& model);
+			void initModel(const Mesh& mesh);
 			virtual ~BVH();
 			std::deque<FaceConstItr> getRayCandidates(const QVector3D& rayFrom, const QVector3D& rayTo)override;
-			std::deque<FaceConstItr> getClosest(const QVector3D& point, const float maxDistance)override;
+			float getClosestDistance(const QVector3D& point)override;
 			std::deque<FaceConstItr> getRayCandidatesDirection(const QVector3D& rayFrom, const QVector3D& rayDirection)override;
 			QVector3D getCachedPos(const VertexConstItr& vtx)const override;
 

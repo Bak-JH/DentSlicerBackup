@@ -891,7 +891,7 @@
     <ClInclude Include="widget\Widget.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
-    <ClInclude Include="unitTest\tests\BVHTest.h" />
+    <ClInclude Include="unitTest\tests\BVHAccuracy.h" />
     <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
     <ClInclude Include="unitTest\tests\IndexedListTest.h" />
     <ClInclude Include="unitTest\RunTests.h" />
@@ -1169,6 +1169,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\sampling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\BVHBench.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\BVHTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

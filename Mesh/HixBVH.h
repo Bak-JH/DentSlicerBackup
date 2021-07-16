@@ -129,6 +129,11 @@ namespace Hix
 					return children_[1];
 				}
 
+				Node** getChildren()
+				{
+					return children_;
+				}
+
 				BoundedObject*
 					getObject()
 				{
@@ -152,12 +157,8 @@ namespace Hix
 					return true;
 				}
 				inline float
-					getDistanceSquared(const QVector3D& pt) const
+					distanceSquared(const QVector3D& pt) const
 				{
-					QVector3D boundLength = QVector3D(bounds_[1] - bounds_[0], bounds_[3] - bounds_[2], bounds_[5] - bounds_[4]);
-					QVector3D boundCentre = QVector3D(bounds_[0] + (boundLength.x() / 2), bounds_[2] + (boundLength.y() / 2), bounds_[4] + (boundLength.z() / 2));
-
-
 					auto dx = std::max(std::min(pt.x(), bounds_[1]) , bounds_[0]);
 					auto dy = std::max(std::min(pt.y(), bounds_[3]) , bounds_[2]);
 					auto dz = std::max(std::min(pt.z(), bounds_[5]) , bounds_[4]);
@@ -219,7 +220,7 @@ namespace Hix
 			protected:
 				float bounds_[6];
 				Node* children_[2];
-				BoundedObject* object_;
+				BoundedObject* object_ = nullptr;
 			};
 
 		public:

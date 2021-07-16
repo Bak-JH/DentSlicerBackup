@@ -1196,6 +1196,8 @@
     <ClInclude Include="support\CylindricalRaft.h" />
     <ClInclude Include="support\ModelAttachedSupport.h" />
     <ClInclude Include="support\RaftModel.h" />
+    <ClInclude Include="unitTest\tests\BVHBench.h" />
+    <ClInclude Include="unitTest\tests\BVHTest.h" />
     <ClInclude Include="widget\GridBed.h" />
     <ClInclude Include="widget\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
@@ -1223,7 +1225,7 @@
     </ClInclude>
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="common\RandomGen.h" />
-    <ClInclude Include="unitTest\tests\BVHTest.h" />
+    <ClInclude Include="unitTest\tests\BVHAccuracy.h" />
     <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
     <ClInclude Include="unitTest\tests\IndexedListTest.h" />
     <ClInclude Include="unitTest\RunTests.h" />

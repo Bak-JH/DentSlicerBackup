@@ -1,9 +1,8 @@
 #pragma once
 #include <QVector3D>
 #include "Mesh/mesh.h"
-#include <QDebug>
 
-QVector3D PtOnTri(const QVector3D point, Hix::Engine3D::FaceConstItr face)
+inline QVector3D getClosestVertex(const QVector3D point, Hix::Engine3D::FaceConstItr face)
 {
 	auto meshVertex = face.meshVertices();
 	auto diff = meshVertex[0].localPosition() - point;

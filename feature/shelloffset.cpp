@@ -10,14 +10,6 @@
 
 #include <QString>
 
-#include <pcl/PCLPointCloud2.h>
-#include <pcl/features/normal_3d_omp.h>
-#include <pcl/surface/marching_cubes_hoppe.h>
-#include <pcl/geometry/triangle_mesh.h>
-#include <pcl/geometry/mesh_conversion.h>
-#include <pcl/surface/poisson.h>
-#include <pcl/keypoints/uniform_sampling.h>
-
 #include <algorithm>
 #include <execution>
 #include <limits>
@@ -28,10 +20,10 @@
 
 
 
-
-#define STBI_WINDOWS_UTF16
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "slice/include/stb_image_write.h"
+//
+//#define STBI_WINDOWS_UTF16
+//#define STB_IMAGE_WRITE_IMPLEMENTATION
+//#include "slice/include/stb_image_write.h"
 
 // offset shell with mm
 
@@ -219,7 +211,7 @@ void Hix::Features::HollowMesh::runImpl()
 	//_prevMesh->reverseFaces();
 	auto hollowMesh = new Mesh(*orig);
 
-	uniformSampling(_offset);
+	//uniformSampling(_offset);
 
 	////Mesh offsetMesh(*orig);
 	//hollowMesh->vertexOffset(-_offset);
@@ -341,37 +333,16 @@ QVector3D pclToQtPt(const PointClass& input)
 	return pt;
 }
 
-template <bool IsManifoldT>
-struct MeshTraits
-{
-	using VertexData = pcl::PointXYZ;
-	using HalfEdgeData = pcl::geometry::NoData;
-	using EdgeData = pcl::geometry::NoData;
-	using FaceData = pcl::geometry::NoData;
-	using IsManifold = std::integral_constant <bool, IsManifoldT>;
-};
-
 QVector3D getAbs(const QVector3D vec)
 {
 	return QVector3D(std::abs(vec.x()), std::abs(vec.y()), std::abs(vec.z()));
 }
-
-float getDistanceSquared(const QVector3D p1, const QVector3D p2)
-{
-	return (p1 - p2).lengthSquared();
-	//return p1.distanceToPoint(p2);
-	//return std::powf((std::powf((p2.x() - p1.x()), 2.0f) + std::powf((p2.y() - p1.y()), 2.0f) + std::powf((p2.z() - p1.z()), 2.0f)), 1 / 2);
-}
-
 
 void Hix::Features::HollowMesh::uniformSampling(float offset)
 {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	Hix::Engine3D::Bounds3D aabb = _target->aabb();
-	
-
-
 	aabb.localBoundUpdate(*_target->getMesh());
 	aabb = aabb.centred();
 
@@ -397,11 +368,7 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 
 	constexpr float resolution = 1.0f;
 
-	qDebug() << "center: " << aabb.centre();
-
-	//_rayCaster.reset(new MTRayCaster());
 	_rayAccel.reset(new Hix::Engine3D::BVH(*_target, false));
-	//_rayCaster->addAccelerator(_rayAccel.get());
 
 	auto settingdone = std::chrono::high_resolution_clock::now();
 
@@ -423,27 +390,12 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 
 				auto useRay = std::chrono::high_resolution_clock::now();
 
-				auto r = _rayAccel->getClosest(currPt, 0.0f);
+				auto r = _rayAccel->getClosestDistance(currPt);
 				auto all = _target->getMesh()->getFaces().size();
-				if (r.size() != all)
-				{
-					qDebug() << "bvh";
-					qDebug() << currPt;
-				}
+
 				auto faceloopStart = std::chrono::high_resolution_clock::now();
 
 				//for (auto face = _target->getMesh()->getFaces().begin(); face != _target->getMesh()->getFaces().end(); ++face)
-				for(auto& face : r)
-				{
-					auto tmpClosest = PtOnTri(currPt, face);
-					auto tempDistance = getDistanceSquared(currPt, tmpClosest);
-					if (tempDistance < closestDistance)
-					{
-						closestDistance = tempDistance;
-						closestPoint = tmpClosest;
-						closestFace = face;
-					}
-				}
 
 				auto pushBack = std::chrono::high_resolution_clock::now();
 
@@ -502,5 +454,5 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	uint8_t res_x = (xMax - xMin) / resolution;
 	uint8_t res_y = (yMax - yMin) / resolution;
 
-	stbi_write_png(file.c_str(), res_x, res_y, 3, mapped_DF.data(), res_x*3);
+	//stbi_write_png(file.c_str(), res_x, res_y, 3, mapped_DF.data(), res_x*3);
 }
