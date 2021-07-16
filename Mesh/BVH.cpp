@@ -2,6 +2,8 @@
 #include "../glmodel.h"
 #include "../../render/Bounds3D.h"
 #include "../common/Tree/BVHBuilder.h"
+#include "feature/sampling.h"
+
 using namespace Hix;
 using namespace Hix::Engine3D;
 typedef Hix::Temp::BVH<FaceConstItr> BVHImpl;
@@ -12,7 +14,7 @@ class BoundedObjectFactory
 public:
 	BoundedObjectFactory(const std::unordered_map<VertexConstItr, QVector3D>& wPosCache);
 	std::vector<BVHImpl::BoundedObject*> getBounds(const std::unordered_set<const GLModel*>& models);
-
+	std::vector<BVHImpl::BoundedObject*> getBounds(const Mesh& mesh); // delete later
 
 private:
 	BVHImpl::BoundedObject* toBoundedObjectHeap(const FaceConstItr& face);
@@ -77,6 +79,23 @@ std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const std::
 	}
 	return bounds;
 }
+
+std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const Mesh& mesh) // delete later
+{
+	std::vector<BVHImpl::BoundedObject*> bounds;
+	size_t faceCount = 0;
+		faceCount += mesh.getFaces().size();
+
+	bounds.reserve(faceCount);
+		auto faceEnd = mesh.getFaces().cend();
+		for (auto faceItr = mesh.getFaces().cbegin(); faceItr != faceEnd; ++faceItr)
+		{
+			bounds.push_back(toBoundedObjectHeap(faceItr));
+		}
+	
+	return bounds;
+}
+
 Hix::Engine3D::BVH::~BVH()
 {
 	for (auto each : _boundedObjects)
@@ -140,89 +159,55 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 	return intersected_objects;
 }
 
-std::deque<FaceConstItr> Hix::Engine3D::BVH::getClosest(const QVector3D& point, const float maxDistance)
+float Hix::Engine3D::BVH::getClosestDistance(const QVector3D& point)
 {
-	QVector3D queryPoint = point;
-	std::deque<FaceConstItr> intersected_objects;
-	if (!root_)
-		return intersected_objects;
+	std::multimap< float, Node* > frontier;
+	std::pair< float, Node* > closestLeaf = std::make_pair(std::numeric_limits<float>::max(), nullptr);
+	std::unordered_set<Node*> closedNodes;
 
-	bool got_intersection = false;
-	// Start the intersection process at the root
-	std::list<Node*> working_list;
-	working_list.push_back(root_);
-	float closestDist = std::numeric_limits<double>::max();
+	frontier.insert({ root_->distanceSquared(point), root_ });
 
-	while (!working_list.empty())
+	while (!frontier.empty())
 	{
-		Node* node = working_list.front();
-		working_list.pop_front();
+		//get current
+		auto currentItr = std::min_element(frontier.begin(), frontier.end());
+		Node* currentNode = currentItr->second;
+		// exit condition on here //
 
-		float currentDist = node->getDistanceSquared(queryPoint);
-		if (node == root_)
+		auto a = currentItr->second;
+
+		if (currentItr->second != nullptr && closestLeaf.first < currentItr->first)
+		{			
+			return closestLeaf.first;
+		}
+
+		frontier.erase(currentItr);
+
+		// expends children
+		auto nodeChildren = currentNode->getChildren();
+		
+		for (auto idx = 0; idx < 2; ++idx)
 		{
-			auto leftDist = node->getLeftChild()->getDistanceSquared(queryPoint);
-			auto rightDist = node->getRightChild()->getDistanceSquared(queryPoint);
-
-			if (leftDist == rightDist)
+			if (nodeChildren[idx]->isLeaf())
 			{
-				working_list.push_back(node->getLeftChild());
-				working_list.push_back(node->getRightChild());
+				auto closestPt = getClosestVertex(point, nodeChildren[idx]->getObject()->getData());
+				auto dist = (point - closestPt).lengthSquared();
+				if (dist < closestLeaf.first)
+				{
+					closestLeaf.first = dist;
+					closestLeaf.second = nodeChildren[idx];
+				}
 			}
-			else if (leftDist < rightDist)
-				working_list.push_back(node->getLeftChild());
 			else
-				working_list.push_back(node->getRightChild());
-
-			continue;
-		}
-
-		if (currentDist <= closestDist) // current distance must be smaller than closest before
-		{
-			closestDist = currentDist;
-
-			if (node->hasChildren())
 			{
-				auto leftDist = node->getLeftChild()->getDistanceSquared(queryPoint);
-				auto rightDist = node->getRightChild()->getDistanceSquared(queryPoint);
-				auto closestLR = leftDist < rightDist ? leftDist : rightDist;
-				bool isLeft = leftDist < rightDist;
-
-				if (closestLR < closestDist) // compare with children
-				{
-					if(leftDist == rightDist)
-					{
-						working_list.push_back(node->getLeftChild());
-						working_list.push_back(node->getRightChild());
-					}
-					else if(leftDist < rightDist)
-						working_list.push_back(node->getLeftChild());
-					else
-						working_list.push_back(node->getRightChild());
-				}
-				else
-				{
-					for (auto i : node->getAllObjects())
-					{
-						intersected_objects.push_back(i->getData());
-					}
-				}
-			}
-			else // current node is a leaf
-			{
-				intersected_objects.push_back(node->getObject()->getData());
+				auto dist = nodeChildren[idx]->distanceSquared(point);
+				frontier.insert({ nodeChildren[idx]->distanceSquared(point), nodeChildren[idx] });
 			}
 		}
-		else // current node is the closest
-		{
-			for (auto i : node->getAllObjects())
-			{
-				intersected_objects.push_back(i->getData());
-			}
-		}
+	
 	}
 
-	return intersected_objects;
+	return closestLeaf.first;
 }
 
 
@@ -320,6 +305,16 @@ Hix::Engine3D::BVH::BVH(const GLModel& model, bool isWorld) : _isWorld(isWorld)
 
 }
 
+Hix::Engine3D::BVH::BVH(const Mesh& mesh, bool isWorld) : _isWorld(isWorld)
+{	
+	initModel(mesh);
+	BoundedObjectFactory boundFactory(_wPosCache);
+	_boundedObjects = boundFactory.getBounds(mesh);
+	//do not call parent::build, without Node factory patten, defaults to pcl::...Node class
+	build(_boundedObjects);
+
+}
+
 Hix::Engine3D::BVH::BVH(const std::unordered_set<const GLModel*>& model, bool isWorld) : _isWorld(isWorld)
 {
 	//cache world vertex positions and triangle bounding boxes
@@ -339,6 +334,23 @@ void Hix::Engine3D::BVH::initModel(const GLModel& model)
 {
 	auto vtxEnd = model.getMesh()->getVertices().cend();
 	for (auto vtxItr = model.getMesh()->getVertices().cbegin(); vtxItr != vtxEnd; ++vtxItr)
+	{
+		if (_isWorld)
+		{
+			_wPosCache[vtxItr] = vtxItr.worldPosition();
+
+		}
+		else
+		{
+			_wPosCache[vtxItr] = vtxItr.localPosition();
+		}
+	}
+}
+
+void Hix::Engine3D::BVH::initModel(const Mesh& mesh)
+{
+	auto vtxEnd = mesh.getVertices().cend();
+	for (auto vtxItr = mesh.getVertices().cbegin(); vtxItr != vtxEnd; ++vtxItr)
 	{
 		if (_isWorld)
 		{
