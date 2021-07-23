@@ -9,7 +9,7 @@ namespace BVHTest
 	TEST_CASE("BVH Distance Field BenchMarking Test", "[BVH DF BENCH]")
 	{
 		Bounds3D bound;
-		const std::filesystem::path& path = L"D:/test/20mm_cube.stl";
+		const std::filesystem::path& path = L"D:/test/tttttt.stl";
 
 		auto mesh = new Hix::Engine3D::Mesh();
 		std::fstream file(path);
@@ -28,28 +28,22 @@ namespace BVHTest
 		const Mesh* constMesh = new Mesh(*mesh);
 
 		bound.localBoundUpdate(*mesh);
-		bound.centred();
-
-		int xMin = bound.xMin();
-		int xMax = bound.xMax();
-		int yMin = bound.yMin();
-		int yMax = bound.yMax();
-		int zMin = bound.zMin();
-		int zMax = bound.zMax();
+		bound = bound.centred();
 
 
 		SECTION("compare with querying all faces")
 		{
 
 
-			BENCHMARK("Query All Faces")
+			//BENCHMARK("Query All Faces")
+			//{
+			//	generateDFbyBVH(*mesh, bound);
+			//};
+			BENCHMARK("Query BVH Faces By Priority Queue")
 			{
-				generateDFbyQueryAllFace(*mesh, bound);
+				generateDFbyBVHByPQ(*mesh, bound);
 			};
-			BENCHMARK("Query BVH Faces")
-			{
-				generateDFbyBVH(*mesh, bound);
-			};
+
 		}
 	}
 }

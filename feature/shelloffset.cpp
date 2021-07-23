@@ -211,7 +211,7 @@ void Hix::Features::HollowMesh::runImpl()
 	//_prevMesh->reverseFaces();
 	auto hollowMesh = new Mesh(*orig);
 
-	//uniformSampling(_offset);
+	uniformSampling(_offset);
 
 	////Mesh offsetMesh(*orig);
 	//hollowMesh->vertexOffset(-_offset);
@@ -340,82 +340,79 @@ QVector3D getAbs(const QVector3D vec)
 
 void Hix::Features::HollowMesh::uniformSampling(float offset)
 {
-	auto start = std::chrono::high_resolution_clock::now();
+	constexpr float resolution = 1.0f;
 
 	Hix::Engine3D::Bounds3D aabb = _target->aabb();
 	aabb.localBoundUpdate(*_target->getMesh());
 	aabb = aabb.centred();
 
-	int xMin = aabb.xMin();
-	int xMax = aabb.xMax();
-	int yMin = aabb.yMin();
-	int yMax = aabb.yMax();
-	int zMin = aabb.zMin();
-	int zMax = aabb.zMax();
+	//int xMin = std::floorf(aabb.xMin());
+	//int xMax = std::ceilf(aabb.xMax());
+	//int yMin = std::floorf(aabb.yMin());
+	//int yMax = std::ceilf(aabb.yMax());
+	//int zMin = std::floorf(aabb.zMin());
+	//int zMax = std::ceilf(aabb.zMax());
+
+	auto half = 50.0f;
+
+	float xMin = -half;
+	float xMax = half;
+	float yMin = -half;
+	float yMax = half;
+	float zMin = aabb.zMin();
+	float zMax = aabb.zMax();
+
+	int lengthX = std::ceilf((xMax - xMin) / resolution);
+	int lengthY = std::ceilf((yMax - yMin) / resolution);
+	int lengthZ = std::ceilf((zMax - zMin) / resolution);
 
 	const Mesh* originalMesh = _target->getMesh();
 	Mesh* newMesh = new Mesh();
-	std::vector<std::pair<float, float>> DF;
+	std::vector<std::pair<float, int>> DF(lengthX * lengthY * lengthZ);
 
-	//constexpr auto half = 20;
 
-	//float xMin = -half;
-	//float xMax = half;
-	//float yMin = -half;
-	//float yMax = half;
-	//float zMin = aabb.zMin();
-	//float zMax = aabb.zMax();
-
-	constexpr float resolution = 1.0f;
+	std::vector<float> zVec;
+	for (float z = zMin; z < zMax; z += resolution)
+		zVec.push_back(z);
 
 	_rayAccel.reset(new Hix::Engine3D::BVH(*_target, false));
 
-	auto settingdone = std::chrono::high_resolution_clock::now();
 
-	//for (auto z1 = zMin; z1 < zMax; z1 += resolution)
-	//{
+	std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
+	{
 		for (float y = yMin; y < yMax; y += resolution)
 		{
 			for (float x = xMin; x < xMax; x += resolution)
 			{
-				auto loopstart = std::chrono::high_resolution_clock::now();
+				QVector3D currPt = QVector3D(x, y, z);
+				auto bvhdist = _rayAccel->getClosestDistance(currPt);
 
-				auto z = (zMin + ((zMax - zMin) / 2));
-				auto closestDistance = std::numeric_limits<float>::max();
+				//DF[((x + std::abs(xMin)) / resolution) +
+				//	(((y + std::abs(yMin)) / resolution) * lengthX) +
+				//	((z + std::abs(zMin)) / resolution) * (lengthX * lengthY)] = bvhdist;
+				//DF[((x + std::abs(xMin)) / resolution) +
+				//	(((y + std::abs(yMin)) / resolution) * lengthX) +
+				//	((z + std::abs(zMin)) / resolution) * (lengthX * lengthY)] = bvhdist;
 
-				QVector3D closestPoint;
-				Hix::Engine3D::FaceConstItr closestFace;
+				//auto normalST = currPt - closestPoint;
+				//normalST.normalize();
+				//auto dot = QVector3D::dotProduct(normalST, closestFace.localFn());
+				//auto closestDistance_sign = dot > 0.0f ? 1.0f : -1.0f;
 
-				QVector3D currPt = QVector3D(x,y,z);
+				//qDebug() << "closest: " << closestPoint;
+				//qDebug() << "normalize: " << normalST;
+				//qDebug() << "localFn: " << closestFace.localFn();
+				//qDebug() << "dot: " << dot;
 
-				auto useRay = std::chrono::high_resolution_clock::now();
+				//DF.push_back(std::make_pair(bvhdist.first, bvhdist.second));
 
-				auto r = _rayAccel->getClosestDistance(currPt);
-				auto all = _target->getMesh()->getFaces().size();
-
-				auto faceloopStart = std::chrono::high_resolution_clock::now();
-
-				//for (auto face = _target->getMesh()->getFaces().begin(); face != _target->getMesh()->getFaces().end(); ++face)
-
-				auto pushBack = std::chrono::high_resolution_clock::now();
-
-				auto normalST = currPt - closestPoint;
-				normalST.normalize();
-				auto dot = QVector3D::dotProduct(normalST, closestFace.localFn());
-				qDebug() << "closest: " << closestPoint;
-				qDebug() << "normalize: " << normalST;
-				qDebug() << "localFn: " << closestFace.localFn();
-				qDebug() << "dot: " << dot;
-				auto closestDistance_sign = dot > 0.0f ? 1.0f : -1.0f;
-				DF.push_back(std::make_pair(closestDistance, closestDistance_sign));
-
-				//qDebug() << (settingdone - start).count();
+				//qDebug() << (settingdone - start)z.count();
 				//qDebug() << (useRay - loopstart).count();
 				//qDebug() << (faceloopStart - useRay).count();
 				//qDebug() << (pushBack - faceloopStart).count();
 			}
 		}
-	//}
+	});
 	auto loopend = std::chrono::high_resolution_clock::now();
 
 	qDebug() << "end";
@@ -426,7 +423,6 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	//slicer.setScreen(0.1f, 2560, 1620);
 
 	std::filesystem::path file = tmpPath / "test.png";
-
 
 	// mapping
 	std::vector<uint8_t> mapped_DF;
@@ -454,5 +450,5 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	uint8_t res_x = (xMax - xMin) / resolution;
 	uint8_t res_y = (yMax - yMin) / resolution;
 
-	//stbi_write_png(file.c_str(), res_x, res_y, 3, mapped_DF.data(), res_x*3);
+	//stbi_write_png(file.c_str(), lengthX, lengthY, 3, mapped_DF.data(), lengthX*3);
 }

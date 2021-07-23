@@ -161,53 +161,69 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 
 float Hix::Engine3D::BVH::getClosestDistance(const QVector3D& point)
 {
-	std::multimap< float, Node* > frontier;
-	std::pair< float, Node* > closestLeaf = std::make_pair(std::numeric_limits<float>::max(), nullptr);
-	std::unordered_set<Node*> closedNodes;
+	struct LeafInfo
+	{
+		float dist;
+		Node* leafnode;
+		QVector3D closestPt;
+	};
 
-	frontier.insert({ root_->distanceSquared(point), root_ });
+	std::priority_queue< std::pair<float, Node*>, std::vector<std::pair<float, Node*>>, std::greater<std::pair<float, Node*>> > frontier;
+	LeafInfo closestLeaf = {std::numeric_limits<float>::max(), nullptr, QVector3D()};
+
+	frontier.push({ root_->distanceSquared(point), root_ });
 
 	while (!frontier.empty())
 	{
 		//get current
-		auto currentItr = std::min_element(frontier.begin(), frontier.end());
-		Node* currentNode = currentItr->second;
+		auto currentItr = frontier.top();
+		Node* currentNode = currentItr.second;
 		// exit condition on here //
 
-		auto a = currentItr->second;
+		if (currentItr.second != nullptr && closestLeaf.dist < currentItr.first)
+		{
+			auto normalST = point - closestLeaf.closestPt;
+			normalST.normalize();
+			auto dot = QVector3D::dotProduct(normalST, closestLeaf.leafnode->getObject()->getData().localFn());
+			auto closestDistance_sign = dot > 0.0f ? 1 : -1;
 
-		if (currentItr->second != nullptr && closestLeaf.first < currentItr->first)
-		{			
-			return closestLeaf.first;
+			return closestLeaf.dist * closestDistance_sign;
 		}
 
-		frontier.erase(currentItr);
+		frontier.pop();
 
 		// expends children
 		auto nodeChildren = currentNode->getChildren();
-		
+
 		for (auto idx = 0; idx < 2; ++idx)
 		{
 			if (nodeChildren[idx]->isLeaf())
 			{
 				auto closestPt = getClosestVertex(point, nodeChildren[idx]->getObject()->getData());
 				auto dist = (point - closestPt).lengthSquared();
-				if (dist < closestLeaf.first)
+				if (dist < closestLeaf.dist)
 				{
-					closestLeaf.first = dist;
-					closestLeaf.second = nodeChildren[idx];
+					closestLeaf.dist = dist;
+					closestLeaf.leafnode = nodeChildren[idx];
+					closestLeaf.closestPt = closestPt;
 				}
 			}
 			else
 			{
 				auto dist = nodeChildren[idx]->distanceSquared(point);
-				frontier.insert({ nodeChildren[idx]->distanceSquared(point), nodeChildren[idx] });
+				frontier.push({ nodeChildren[idx]->distanceSquared(point), nodeChildren[idx] });
 			}
 		}
-	
+
 	}
 
-	return closestLeaf.first;
+
+	auto normalST = point - closestLeaf.closestPt;
+	normalST.normalize();
+	auto dot = QVector3D::dotProduct(normalST, closestLeaf.leafnode->getObject()->getData().localFn());
+	auto closestDistance_sign = dot > 0.0f ? 1 : -1;
+
+	return closestLeaf.dist * closestDistance_sign;
 }
 
 

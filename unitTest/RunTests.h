@@ -5,5 +5,5 @@
 
 // Simply by including test files here, they will be run
 //#include"tests/SlicerTest.h"
-#include "tests/BVHAccuracy.h"
-#include "tests/BVHBench.h"
+//#include "tests/BVHAccuracy.h"
+#include "tests/BVHbench.h"
