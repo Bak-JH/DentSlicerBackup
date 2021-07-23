@@ -2,6 +2,9 @@
 //
 #include "BVHTest.h"
 
+#define STBI_WINDOWS_UTF16
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "feature/slice/include/stb_image_write.h"
 
 //#include "../IteratorWrapper.h"
 
@@ -13,7 +16,7 @@ namespace BVHTest
 	TEST_CASE("BVH Distance Field Accuracy Test", "[BVH DF]")
 	{
 		Bounds3D bound;
-		const std::filesystem::path& path = L"D:/test/20mm_cube.stl";
+		const std::filesystem::path& path = L"D:/test/dddddd.stl";
 
 		auto mesh = new Hix::Engine3D::Mesh();
 		std::fstream file(path);
@@ -32,59 +35,55 @@ namespace BVHTest
 		const Mesh* constMesh = new Mesh(*mesh);
 
 		bound.localBoundUpdate(*mesh);
-		bound.centred();
-
-		int xMin = bound.xMin();
-		int xMax = bound.xMax();
-		int yMin = bound.yMin();
-		int yMax = bound.yMax();
-		int zMin = bound.zMin();
-		int zMax = bound.zMax();
+		bound = bound.centred();
 
 		SECTION("bvh accuracy test")
 		{
+			
+			auto bvh = generateDFbyBVHByPQ(*mesh, bound);
+			auto all = generateDFbyQueryAllFace(*mesh, bound);
 
-			auto bvh = generateDFbyQueryAllFace(*mesh, bound);
-			auto all = generateDFbyBVH(*mesh, bound);
+
+			for (auto i = 0; i < bvh.size(); ++i)
+			{
+				if (bvh.at(i) != all.at(i))
+				{
+					qDebug() << i << bvh.at(i) << all.at(i);
+				}
+			}
 
 			REQUIRE(bvh.size() == all.size());
 			for (auto i = 0; i < bvh.size(); ++i)
 			{
+				if (bvh.at(i) != all.at(i))
+				{
+					qDebug() << i;
+				}
 				REQUIRE(bvh.at(i) == all.at(i));
 			}
 
+			std::vector<uint8_t> mapped_DF; 
+			std::unordered_set<float> pixSet;
+			std::unordered_set<uint8_t> pixSet_t;
+			auto max_dist = std::max_element(all.begin(), all.end());
+			for (auto dist : all)
+			{
+				auto pixel = (dist / *max_dist) * 255;
+				mapped_DF.push_back(pixel);
 
-			//auto bvhDF = generateDFbyBVH(*mesh, bound);
-			//auto allDF = generateDFbyQueryAllFace(*mesh, bound);
+				if (dist > 0)
+					mapped_DF.push_back(255);
+				else
+					mapped_DF.push_back(0);
 
-			//for (auto idx = 0; idx < allDF.size()-1; ++idx)
-			//{
-			//	if (bvhDF.at(idx) != allDF.at(idx))
-			//	{
-			//		qDebug() << bvhDF.at(idx);
-			//		qDebug() << allDF.at(idx);
-			//		qDebug() << "dddd";
-			//	}
-			//	REQUIRE(bvhDF.at(idx) == allDF.at(idx));
+				mapped_DF.push_back(0);
 
-			//}
+			}
 
-			//std::vector<uint8_t> mapped_DF; 
-			//std::unordered_set<float> pixSet;
-			//std::unordered_set<uint8_t> pixSet_t;
-			//auto max_dist = std::max_element(DF.begin(), DF.end());
-			//for (auto dist : DF)
-			//{
-			//	auto pixel = (dist / *max_dist) * 255;
-			//	mapped_DF.push_back(pixel);
-			//	++cnt;
+			auto lenX = std::ceilf(bound.lengthX() / resolution);
+			auto lenY = std::ceilf(bound.lengthY() / resolution);
 
-			//}
-
-			//uint8_t res_x = (xMax - xMin) / resolution;
-			//uint8_t res_y = (yMax - yMin) / resolution;
-
-			//stbi_write_png(L"D:/test/ttt.png", res_x, res_y, 1, mapped_DF.data(), res_x);
+			stbi_write_png(L"D:/test/ttt.png", lenX, lenY, 3, mapped_DF.data(), lenX*3);
 		}
 	}
 }
