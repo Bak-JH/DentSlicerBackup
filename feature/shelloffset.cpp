@@ -342,7 +342,7 @@ QVector3D getAbs(const QVector3D vec)
 void Hix::Features::HollowMesh::uniformSampling(float offset)
 {
 	Hix::Engine3D::Bounds3D aabb = _target->aabb();
-	//aabb.localBoundUpdate(*_target->getMesh());
+	aabb.localBoundUpdate(*_target->getMesh());
 	aabb = aabb.centred();
 
 	postUIthread([this, &aabb]()
@@ -357,9 +357,9 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 	int zMin = std::floorf(aabb.zMin());
 	int zMax = std::ceilf(aabb.zMax());
 
-	int lengthX = std::ceilf((xMax - xMin) / _resolution);
-	int lengthY = std::ceilf((yMax - yMin) / _resolution);
-	int lengthZ = std::ceilf((zMax - zMin) / _resolution);
+	int lengthX = std::ceilf((xMax - xMin) / _resolution)+1;
+	int lengthY = std::ceilf((yMax - yMin) / _resolution)+1;
+	int lengthZ = std::ceilf((zMax - zMin) / _resolution)+1;
 
 	const Mesh* originalMesh = _target->getMesh();
 	Mesh* newMesh = new Mesh();
@@ -374,11 +374,11 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 
 	std::vector<QVector3D> voxel;
 	//std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
-	for(float z = zMin; z < zMax; z += _resolution)
+	for(float z = zMin; z <= zMax; z += _resolution)
 	{
-		for (float y = yMin; y < yMax; y += _resolution)
+		for (float y = yMin; y <= yMax; y += _resolution)
 		{
-			for (float x = xMin; x < xMax; x += _resolution)
+			for (float x = xMin; x <= xMax; x += _resolution)
 			{
 				QVector3D currPt = QVector3D(x, y, z);
 				auto bvhdist = _rayAccel->getClosestDistance(currPt);
@@ -395,11 +395,11 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 		}
 	}
 
-	for (float z = zMin; z < zMax - _resolution; z += _resolution)
+	for (float z = zMin; z <= zMax - _resolution; z += _resolution)
 	{
-		for (float y = yMin + _resolution; y < yMax; y += _resolution)
+		for (float y = yMin + _resolution; y <= yMax; y += _resolution)
 		{
-			for (float x = xMin + _resolution; x < xMax; x += _resolution)
+			for (float x = xMin + _resolution; x <= xMax; x += _resolution)
 			{
 				auto cubeindex = 0;
 
@@ -423,7 +423,7 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 				auto v6 = getSDFValue(p6);
 				auto v7 = getSDFValue(p7);
 
-				auto isolevel = 0.0f;
+				auto isolevel = -1.0f;
 
 				if (v0 < isolevel) cubeindex |= 1;
 				if (v1 < isolevel) cubeindex |= 2;
@@ -486,7 +486,11 @@ void Hix::Features::HollowMesh::uniformSampling(float offset)
 		}
 	}
 
-	_target->setMesh(newMesh);
+	newMesh->reverseFaces();
+	auto mesh = _target->getMeshModd();
+	*mesh += *newMesh;
+
+	_target->setMesh(mesh);
 
 	postUIthread([this, voxel]()
 		{
@@ -541,9 +545,13 @@ float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
 	int zMin = std::floorf(aabb.zMin());
 	int zMax = std::ceilf(aabb.zMax());
 
-	int lengthX = std::ceilf((xMax - xMin) / _resolution);
-	int lengthY = std::ceilf((yMax - yMin) / _resolution);
-	int lengthZ = std::ceilf((zMax - zMin) / _resolution);
+	int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
+	int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
+	int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
+
+	auto t = ((point.x() + std::abs(xMin)) / _resolution) +
+		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
+		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY);
 
 	return _SDF[((point.x() + std::abs(xMin)) / _resolution) +
 				(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
