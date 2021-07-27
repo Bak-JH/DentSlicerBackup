@@ -311,6 +311,9 @@
     <ClCompile Include="Settings\BasicSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\PointMeshEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1177,6 +1180,9 @@
     <ClInclude Include="unitTest\tests\BVHTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="unitTest\tests\marchingcubeTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1292,6 +1298,7 @@
     <QtMoc Include="utils\httpreq.h" />
     <QtMoc Include="utils\linemeshgeometry.h" />
     <QtMoc Include="input\raycastcontroller.h" />
+    <QtMoc Include="render\PointMeshEntity.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
     <QtMoc Include="render\PlaneMeshEntity.h" />
     <QtMoc Include="Qml\components\Buttons.h" />
