@@ -44,9 +44,9 @@ namespace BVHTest
 		int zMin = std::floorf(bound.zMin());
 		int zMax = std::ceilf(bound.zMax());
 
-		int lengthX = std::ceilf((xMax - xMin) / resolution);
-		int lengthY = std::ceilf((yMax - yMin) / resolution);
-		int lengthZ = std::ceilf((zMax - zMin) / resolution);
+		int lengthX = std::ceilf((xMax - xMin) / _resolution);
+		int lengthY = std::ceilf((yMax - yMin) / _resolution);
+		int lengthZ = std::ceilf((zMax - zMin) / _resolution);
 
 		SECTION("bvh accuracy test")
 		{
@@ -73,8 +73,8 @@ namespace BVHTest
 					mapped_DF.push_back(pixel);
 			}
 
-			auto lenX = std::ceilf(bound.lengthX() / resolution);
-			auto lenY = std::ceilf(bound.lengthY() / resolution);
+			auto lenX = std::ceilf(bound.lengthX() / _resolution);
+			auto lenY = std::ceilf(bound.lengthY() / _resolution);
 
 			qDebug() << lenX << lenY;
 
