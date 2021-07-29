@@ -2,7 +2,7 @@
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 //run unit test?
-//#define _UNIT_TEST
+#define _UNIT_TEST
 #endif
 
 #ifdef _UNIT_TEST

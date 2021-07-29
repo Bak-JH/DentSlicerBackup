@@ -40,7 +40,6 @@ namespace Hix
 			void undoImpl()override;
 			void redoImpl()override;
 			void runImpl()override;
-			void uniformSampling(float offset);
 
 		private:
 			float _offset;
@@ -52,6 +51,7 @@ namespace Hix
 			std::unique_ptr<Hix::Engine3D::RayAccelerator> _rayAccel;
 
 			std::vector<float> _SDF;
+			Hix::Engine3D::Bounds3D _samplingBound;
 
 			float getSDFValue(QVector3D point);
 			QVector3D VertexInterp(float isolevel, QVector3D p1, QVector3D p2, float valp1, float valp2);

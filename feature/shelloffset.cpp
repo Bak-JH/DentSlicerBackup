@@ -207,26 +207,140 @@ void Hix::Features::HollowMesh::redoImpl()
 
 void Hix::Features::HollowMesh::runImpl()
 {
-	Hix::Engine3D::Mesh* orig = _target->getMeshModd();
-	_prevMesh.reset(orig);
-	//_prevMesh->reverseFaces();
-	auto hollowMesh = new Mesh(*orig);
+	Hix::Engine3D::Mesh* originalMesh = _target->getMeshModd();
+	_prevMesh.reset(originalMesh);
+	auto hollowMesh = new Mesh(*originalMesh);
 
-	uniformSampling(_offset);
+	Mesh* newMesh = new Mesh();
+	_samplingBound.localBoundUpdate(*hollowMesh);
+	_samplingBound = _samplingBound.centred();
 
-	////Mesh offsetMesh(*orig);
-	//hollowMesh->vertexOffset(-_offset);
-	////auto testeste = new Mesh(offsetMesh);
+	int xMin = std::floorf(_samplingBound.xMin());
+	int xMax = std::ceilf(_samplingBound.xMax());
+	int yMin = std::floorf(_samplingBound.yMin());
+	int yMax = std::ceilf(_samplingBound.yMax());
+	int zMin = std::floorf(_samplingBound.zMin());
+	int zMax = std::ceilf(_samplingBound.zMax());
 
-	//// 
-	////offsetMesh.reverseFaces();
-	////*hollowMesh += offsetMesh;
+	_samplingBound.setMinPt(QVector3D(xMin, yMin, zMin));
+	_samplingBound.setMaxPt(QVector3D(xMax, yMax, zMax));
+
+	int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
+	int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
+	int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
+
+	_SDF.resize(lengthX * lengthY * lengthZ);
 
 
-	//postUIthread([this, &hollowMesh]() {
-	//	_target->setMesh(hollowMesh);
-	//});
+	std::vector<float> zVec;
+	for (float z = zMin; z < zMax; z += _resolution)
+		zVec.push_back(z);
 
+	_rayAccel.reset(new Hix::Engine3D::BVH(*_target, false));
+
+	std::vector<QVector3D> voxel;
+	std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
+		{
+			for (float y = yMin; y <= yMax; y += _resolution)
+			{
+				for (float x = xMin; x <= xMax; x += _resolution)
+				{
+					QVector3D currPt = QVector3D(x, y, z);
+					auto bvhdist = _rayAccel->getClosestDistance(currPt);
+
+					_SDF[((x + std::abs(xMin)) / _resolution) +
+						(((y + std::abs(yMin)) / _resolution) * lengthX) +
+						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY)] = bvhdist;
+
+				}
+			}
+		});
+
+	for (float z = zMin + _resolution; z <= zMax; z += _resolution) 
+	{
+		for (float y = yMin + _resolution; y <= yMax; y += _resolution)
+		{
+			for (float x = xMin + _resolution; x <= xMax; x += _resolution)
+			{
+				auto cubeindex = 0;
+
+				auto p0 = QVector3D(x - _resolution, y, z - _resolution);
+				auto p1 = QVector3D(x, y, z - _resolution);
+				auto p2 = QVector3D(x, y - _resolution, z - _resolution);
+				auto p3 = QVector3D(x - _resolution, y - _resolution, z - _resolution);
+				auto p4 = QVector3D(x - _resolution, y, z);
+				auto p5 = QVector3D(x, y, z);
+				auto p6 = QVector3D(x, y - _resolution, z);
+				auto p7 = QVector3D(x - _resolution, y - _resolution, z);
+
+				auto v0 = getSDFValue(p0);
+				auto v1 = getSDFValue(p1);
+				auto v2 = getSDFValue(p2);
+				auto v3 = getSDFValue(p3);
+				auto v4 = getSDFValue(p4);
+				auto v5 = getSDFValue(p5);
+				auto v6 = getSDFValue(p6);
+				auto v7 = getSDFValue(p7);
+
+				auto isolevel = -_offset;
+
+				if (v0 < isolevel) cubeindex |= 1;
+				if (v1 < isolevel) cubeindex |= 2;
+				if (v2 < isolevel) cubeindex |= 4;
+				if (v3 < isolevel) cubeindex |= 8;
+				if (v4 < isolevel) cubeindex |= 16;
+				if (v5 < isolevel) cubeindex |= 32;
+				if (v6 < isolevel) cubeindex |= 64;
+				if (v7 < isolevel) cubeindex |= 128;
+
+				QVector3D edgeList[12];
+
+
+				/* Find the vertices where the surface intersects the cube */
+				if (edgeTable[cubeindex] & 1)
+					edgeList[0] = VertexInterp(isolevel, p0, p1, v0, v1);
+				if (edgeTable[cubeindex] & 2)
+					edgeList[1] = VertexInterp(isolevel, p1, p2, v1, v2);
+				if (edgeTable[cubeindex] & 4)
+					edgeList[2] = VertexInterp(isolevel, p2, p3, v2, v3);
+				if (edgeTable[cubeindex] & 8)
+					edgeList[3] = VertexInterp(isolevel, p3, p0, v3, v0);
+				if (edgeTable[cubeindex] & 16)
+					edgeList[4] = VertexInterp(isolevel, p4, p5, v4, v5);
+				if (edgeTable[cubeindex] & 32)
+					edgeList[5] = VertexInterp(isolevel, p5, p6, v5, v6);
+				if (edgeTable[cubeindex] & 64)
+					edgeList[6] = VertexInterp(isolevel, p6, p7, v6, v7);
+				if (edgeTable[cubeindex] & 128)
+					edgeList[7] = VertexInterp(isolevel, p7, p4, v7, v4);
+				if (edgeTable[cubeindex] & 256)
+					edgeList[8] = VertexInterp(isolevel, p0, p4, v0, v4);
+				if (edgeTable[cubeindex] & 512)
+					edgeList[9] = VertexInterp(isolevel, p1, p5, v1, v5);
+				if (edgeTable[cubeindex] & 1024)
+					edgeList[10] = VertexInterp(isolevel, p2, p6, v2, v6);
+				if (edgeTable[cubeindex] & 2048)
+					edgeList[11] = VertexInterp(isolevel, p3, p7, v3, v7);
+
+
+				auto ntriang = 0;
+				for (auto i = 0; triTable[cubeindex][i] != -1; i += 3) {
+					newMesh->addFace(edgeList[triTable[cubeindex][i]],
+						edgeList[triTable[cubeindex][i + 1]],
+						edgeList[triTable[cubeindex][i + 2]]);
+				}
+
+			}
+		}
+	}
+
+	newMesh->reverseFaces();
+	*hollowMesh += *newMesh;
+
+	_target->setMesh(hollowMesh);
+
+	auto repair = new MeshRepair(_target);
+	tryRunFeature(*repair);
 }
 
 namespace MeshRepairPrivate
@@ -339,219 +453,18 @@ QVector3D getAbs(const QVector3D vec)
 	return QVector3D(std::abs(vec.x()), std::abs(vec.y()), std::abs(vec.z()));
 }
 
-void Hix::Features::HollowMesh::uniformSampling(float offset)
-{
-	Hix::Engine3D::Bounds3D aabb = _target->aabb();
-	aabb.localBoundUpdate(*_target->getMesh());
-	aabb = aabb.centred();
-
-	postUIthread([this, &aabb]()
-		{
-			Hix::Debug::DebugRenderObject::getInstance().showAabb(aabb);
-		});
-
-	int xMin = std::floorf(aabb.xMin());
-	int xMax = std::ceilf(aabb.xMax());
-	int yMin = std::floorf(aabb.yMin());
-	int yMax = std::ceilf(aabb.yMax());
-	int zMin = std::floorf(aabb.zMin());
-	int zMax = std::ceilf(aabb.zMax());
-
-	int lengthX = std::ceilf((xMax - xMin) / _resolution)+1;
-	int lengthY = std::ceilf((yMax - yMin) / _resolution)+1;
-	int lengthZ = std::ceilf((zMax - zMin) / _resolution)+1;
-
-	const Mesh* originalMesh = _target->getMesh();
-	Mesh* newMesh = new Mesh();
-	_SDF.resize(lengthX * lengthY * lengthZ);
-
-
-	std::vector<float> zVec;
-	for (float z = zMin; z < zMax; z += _resolution)
-		zVec.push_back(z);
-
-	_rayAccel.reset(new Hix::Engine3D::BVH(*_target, false));
-
-	std::vector<QVector3D> voxel;
-	//std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
-	for(float z = zMin; z <= zMax; z += _resolution)
-	{
-		for (float y = yMin; y <= yMax; y += _resolution)
-		{
-			for (float x = xMin; x <= xMax; x += _resolution)
-			{
-				QVector3D currPt = QVector3D(x, y, z);
-				auto bvhdist = _rayAccel->getClosestDistance(currPt);
-
-				if (-0.5f < bvhdist && bvhdist < 0.5f)
-				{
-					voxel.push_back(currPt);
-				}
-
-				_SDF[((x + std::abs(xMin)) / _resolution) +
-					 (((y + std::abs(yMin)) / _resolution) * lengthX) +
-					 ((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY)] = bvhdist;
-			}
-		}
-	}
-
-	for (float z = zMin; z <= zMax - _resolution; z += _resolution)
-	{
-		for (float y = yMin + _resolution; y <= yMax; y += _resolution)
-		{
-			for (float x = xMin + _resolution; x <= xMax; x += _resolution)
-			{
-				auto cubeindex = 0;
-
-				auto p0 = QVector3D(x - _resolution, y			  , z);
-				auto p1 = QVector3D(x			   , y			  , z);
-				auto p2 = QVector3D(x			   , y-_resolution, z);
-				auto p3 = QVector3D(x - _resolution, y-_resolution, z);
-				
-				auto p4 = QVector3D(x - _resolution, y			  ,	z+_resolution);
-				auto p5 = QVector3D(x			   , y			  , z+_resolution);
-				auto p6 = QVector3D(x			   , y-_resolution, z+_resolution);
-				auto p7 = QVector3D(x - _resolution, y-_resolution, z+_resolution);
-
-				auto v0 = getSDFValue(p0);
-				auto v1 = getSDFValue(p1);
-				auto v2 = getSDFValue(p2);
-				auto v3 = getSDFValue(p3);
-
-				auto v4 = getSDFValue(p4);
-				auto v5 = getSDFValue(p5);
-				auto v6 = getSDFValue(p6);
-				auto v7 = getSDFValue(p7);
-
-				auto isolevel = -1.0f;
-
-				if (v0 < isolevel) cubeindex |= 1;
-				if (v1 < isolevel) cubeindex |= 2;
-				if (v2 < isolevel) cubeindex |= 4;
-				if (v3 < isolevel) cubeindex |= 8;
-				if (v4 < isolevel) cubeindex |= 16;
-				if (v5 < isolevel) cubeindex |= 32;
-				if (v6 < isolevel) cubeindex |= 64;
-				if (v7 < isolevel) cubeindex |= 128;
-
-				QVector3D edgeList[12];
-
-
-				/* Find the vertices where the surface intersects the cube */
-				if (edgeTable[cubeindex] & 1)
-					edgeList[0] =
-					VertexInterp(isolevel, p0, p1, v0, v1);
-				if (edgeTable[cubeindex] & 2)
-					edgeList[1] =
-					VertexInterp(isolevel, p1, p2, v1, v2);
-				if (edgeTable[cubeindex] & 4)
-					edgeList[2] =
-					VertexInterp(isolevel, p2, p3, v2, v3);
-				if (edgeTable[cubeindex] & 8)
-					edgeList[3] =
-					VertexInterp(isolevel, p3, p0, v3, v0);
-				if (edgeTable[cubeindex] & 16)
-					edgeList[4] =
-					VertexInterp(isolevel, p4, p5, v4, v5);
-				if (edgeTable[cubeindex] & 32)
-					edgeList[5] =
-					VertexInterp(isolevel, p5, p6, v5, v6);
-				if (edgeTable[cubeindex] & 64)
-					edgeList[6] =
-					VertexInterp(isolevel, p6, p7, v6, v7);
-				if (edgeTable[cubeindex] & 128)
-					edgeList[7] =
-					VertexInterp(isolevel, p7, p4, v7, v4);
-				if (edgeTable[cubeindex] & 256)
-					edgeList[8] =
-					VertexInterp(isolevel, p0, p4, v0, v4);
-				if (edgeTable[cubeindex] & 512)
-					edgeList[9] =
-					VertexInterp(isolevel, p1, p5, v1, v5);
-				if (edgeTable[cubeindex] & 1024)
-					edgeList[10] =
-					VertexInterp(isolevel, p2, p6, v2, v6);
-				if (edgeTable[cubeindex] & 2048)
-					edgeList[11] =
-					VertexInterp(isolevel, p3, p7, v3, v7);
-
-				auto ntriang = 0;
-				for (auto i = 0; triTable[cubeindex][i] != -1; i += 3) {
-					newMesh->addFace(edgeList[triTable[cubeindex][i]],
-									 edgeList[triTable[cubeindex][i + 1]],
-									 edgeList[triTable[cubeindex][i + 2]]);
-				}
-
-			}
-		}
-	}
-
-	newMesh->reverseFaces();
-	auto mesh = _target->getMeshModd();
-	*mesh += *newMesh;
-
-	_target->setMesh(mesh);
-
-	postUIthread([this, voxel]()
-		{
-			Hix::Debug::DebugRenderObject::getInstance().addVertices(voxel);
-		});
-
-	auto tmpPath = std::filesystem::temp_directory_path() / "tmpSlice";
-	//Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
-	//slicer.setScreen(0.1f, 2560, 1620);
-
-	std::filesystem::path file = tmpPath / "test.png";
-
-	// mapping
-	std::vector<uint8_t> mapped_DF;
-	std::unordered_set<float> pixSet;
-	std::unordered_set<uint8_t> pixSet_t;
-	auto max_dist = std::max_element(_SDF.begin(), _SDF.end());
-	int cnt = 0;
-	for (auto dist : _SDF)
-	{
-		auto pixel = (dist / *max_dist) * 255;
-
-		mapped_DF.push_back(pixel);
-
-		if (dist > 0)
-			mapped_DF.push_back(0);
-		else
-			mapped_DF.push_back(255);
-		mapped_DF.push_back(0);
-		++cnt;
-
-	}
-	qDebug() << pixSet.size();
-	qDebug() << pixSet_t.size();
-
-	uint8_t res_x = (xMax - xMin) / _resolution;
-	uint8_t res_y = (yMax - yMin) / _resolution;
-
-	//stbi_write_png(file.c_str(), lengthX, lengthY, 3, mapped_DF.data(), lengthX*3);
-}
-
 float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
 {
-	Hix::Engine3D::Bounds3D aabb = _target->aabb();
-	aabb.localBoundUpdate(*_target->getMesh());
-	aabb = aabb.centred();
-
-	int xMin = std::floorf(aabb.xMin());
-	int xMax = std::ceilf(aabb.xMax());
-	int yMin = std::floorf(aabb.yMin());
-	int yMax = std::ceilf(aabb.yMax());
-	int zMin = std::floorf(aabb.zMin());
-	int zMax = std::ceilf(aabb.zMax());
+	int xMin = std::floorf(_samplingBound.xMin());
+	int xMax = std::ceilf(_samplingBound.xMax());
+	int yMin = std::floorf(_samplingBound.yMin());
+	int yMax = std::ceilf(_samplingBound.yMax());
+	int zMin = std::floorf(_samplingBound.zMin());
+	int zMax = std::ceilf(_samplingBound.zMax());
 
 	int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
 	int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
 	int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
-
-	auto t = ((point.x() + std::abs(xMin)) / _resolution) +
-		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
-		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY);
 
 	return _SDF[((point.x() + std::abs(xMin)) / _resolution) +
 				(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
