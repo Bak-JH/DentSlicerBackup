@@ -1,9 +1,9 @@
 
 
-#if defined(_DEBUG) || defined(QT_DEBUG )
+//#if defined(_DEBUG) || defined(QT_DEBUG )
 //run unit test?
-#define _UNIT_TEST
-#endif
+//#define _UNIT_TEST
+//#endif
 
 #ifdef _UNIT_TEST
 #include "unitTest/RunTests.h"

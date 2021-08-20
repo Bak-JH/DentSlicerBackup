@@ -785,6 +785,8 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 		Qt3DCore::QTransform emptyTransform;
 		for (auto& comp : seperated)
 		{
+			if (comp->getFaces().size() == 0)
+				continue;
 			auto addModel = new AddModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
 			tryRunFeature(*addModel);
 			addFeature(addModel);

@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <iostream>
 #include <string>
 #include <queue>
@@ -17,6 +16,7 @@
 #include "feature/sampling.h"
 
 #include "Mesh/RayAccelerator.h"
+#include "Mesh/MTRayCaster.h"
 #include "Mesh/BVH.h"
 #include "Mesh/HixBVH.h"
 #include "../../glmodel.h"
@@ -32,6 +32,7 @@ namespace BVHTest
 	using namespace Hix::Engine3D;
 
 	float _resolution = 2.0f;
+	std::unique_ptr<Hix::Engine3D::RayCaster> _rayCaster;
 	std::unique_ptr<Hix::Engine3D::RayAccelerator> _rayAccel;
 
 	std::vector<float> _SDF;
@@ -329,6 +330,9 @@ namespace BVHTest
 		{0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
 		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 	}; 
+
+	int _xMin, _xMax, _yMin, _yMax, _zMin, _zMax;
+	int _lengthX, _lengthY, _lengthZ;
 	
 	float getSDFValue(QVector3D point)
 	{
@@ -339,13 +343,16 @@ namespace BVHTest
 		int zMin = std::floorf(_samplingBound.zMin());
 		int zMax = std::ceilf(_samplingBound.zMax());
 
-		int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
-		int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
-		int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
+		int lengthX = std::ceilf((xMax - xMin + 1) / _resolution);
+		int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
+		int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
 
-		return _SDF[((point.x() + std::abs(xMin)) / _resolution) +
+
+		int indxex = std::floorf(((point.x() + std::abs(xMin)) / _resolution) +
 			(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
-			((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY)];
+			((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+
+		return _SDF[indxex];
 	}
 
 	QVector3D VertexInterp(float isolevel, QVector3D p1, QVector3D p2, float valp1, float valp2)
@@ -369,176 +376,128 @@ namespace BVHTest
 		return(p);
 	}
 
-	//std::vector<float> generateDFbyBVH(const Mesh& mesh, Bounds3D& bound)
-	//{
-	//	std::vector<float> DF;
-	//	std::unique_ptr<Hix::Engine3D::RayAccelerator> bvhAccel;
-	//	bvhAccel.reset(new Hix::Engine3D::BVH(mesh, false));
-
-	//	int xMin = std::floorf(bound.xMin());
-	//	int xMax = std::ceilf(bound.xMax());
-	//	int yMin = std::floorf(bound.yMin());
-	//	int yMax = std::ceilf(bound.yMax());
-	//	int zMin = std::floorf(bound.zMin());
-	//	int zMax = std::ceilf(bound.zMax());
-
-	//	int cnt = 0;
-
-	//	for (float z = zMin; z < zMax; z += resolution)
-	//	{
-	//		for (float y = yMin; y < yMax; y += resolution)
-	//		{
-	//			for (float x = xMin; x < xMax; x += resolution)
-	//			{
-	//				QVector3D currPt = QVector3D(x, y, z);
-	//				auto bvhdist = bvhAccel->getClosestDistance(currPt);
-
-
-	//				DF.push_back(bvhdist);
-	//			}
-	//		}
-	//	}
-
-	//	return DF;
-	//}
-
-	void generateDFbyBVHByPQ(const Mesh& mesh, Bounds3D& bound)
+	std::vector<float> generateDFbyRayNormal(const Mesh& mesh, Bounds3D& bound, const float z)
 	{
-		auto originalMesh = new Mesh(mesh);
-		Mesh* newMesh = new Mesh();
+		auto hollowMesh = new Mesh(mesh);
 
-		_samplingBound.localBoundUpdate(*originalMesh);
+		Mesh* newMesh = new Mesh();
+		_samplingBound.localBoundUpdate(*hollowMesh);
 		_samplingBound = _samplingBound.centred();
 
-		int xMin = std::floorf(_samplingBound.xMin());
-		int xMax = std::ceilf(_samplingBound.xMax());
-		int yMin = std::floorf(_samplingBound.yMin());
-		int yMax = std::ceilf(_samplingBound.yMax());
-		int zMin = std::floorf(_samplingBound.zMin());
-		int zMax = std::ceilf(_samplingBound.zMax());
+		_xMin = std::floorf(_samplingBound.xMin());
+		_xMax = std::ceilf(_samplingBound.xMax());
+		_yMin = std::floorf(_samplingBound.yMin());
+		_yMax = std::ceilf(_samplingBound.yMax());
+		_zMin = std::floorf(_samplingBound.zMin());
+		_zMax = std::ceilf(_samplingBound.zMax());
 
-		_samplingBound.setMinPt(QVector3D(xMin, yMin, zMin));
-		_samplingBound.setMaxPt(QVector3D(xMax, yMax, zMax));
+		_samplingBound.setMinPt(QVector3D(_xMin, _yMin, _zMin));
+		_samplingBound.setMaxPt(QVector3D(_xMax, _yMax, _zMax));
 
-		int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
-		int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
-		int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
+		_lengthX = std::ceilf((_xMax - _xMin + 1) / _resolution);
+		_lengthY = std::ceilf((_yMax - _yMin + 1) / _resolution);
+		_lengthZ = std::ceilf((_zMax - _zMin + 1) / _resolution);
 
-		_SDF.resize(lengthX * lengthY * lengthZ);
+		_SDF.resize(_lengthX * _lengthY);
 
 
 		std::vector<float> zVec;
-		for (float z = zMin; z < zMax; z += _resolution)
+		for (float z = _zMin; z <= _zMax; z += _resolution)
 			zVec.push_back(z);
 
+		_rayCaster.reset(new MTRayCaster());
 		_rayAccel.reset(new Hix::Engine3D::BVH(mesh, false));
+		_rayCaster->addAccelerator(_rayAccel.get());
 
 		std::vector<QVector3D> voxel;
-		std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
-			//for (float z = zMin; z <= zMax; z += _resolution)
-			{
-				for (float y = yMin; y <= yMax; y += _resolution)
+
+		//std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](float z)
+		//	{
+				for (float y = _yMin; y <= _yMax; y += _resolution)
 				{
-					for (float x = xMin; x <= xMax; x += _resolution)
+					for (float x = _xMin; x <= _xMax; x += _resolution)
 					{
-						QVector3D currPt = QVector3D(x, y, z);
+						QVector3D currPt = QVector3D(x, y, 5);
 						auto bvhdist = _rayAccel->getClosestDistance(currPt);
+						//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
 
-						_SDF[((x + std::abs(xMin)) / _resolution) +
-							(((y + std::abs(yMin)) / _resolution) * lengthX) +
-							((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY)] = bvhdist;
+						int indxex = std::floorf(((x + std::abs(_xMin)) / _resolution) +
+							(((y + std::abs(_yMin)) / _resolution) * _lengthX));/* +
+							((z + std::abs(_zMin)) / _resolution) * (_lengthX * _lengthY));*/
 
+						auto normal = _rayCaster->rayIntersect(currPt, bound.centre());
+						auto distSign = normal.size() % 2 == 1 ? -1.0f : 1.0f;
+
+						if (bvhdist.first * distSign < 0.0f)
+							voxel.push_back(currPt);
+
+						_SDF[indxex] = bvhdist.first * distSign;
+						//_SDF[indxex] = bvhdist;
 					}
 				}
-			});
+			//});
+		return _SDF;
+	}
 
-		auto edges = new QVector3D[lengthX * lengthY * lengthZ * 12];
+	std::vector<float> generateDFbyFaceNormal(const Mesh& mesh, Bounds3D& bound, const float z)
+	{
+		auto hollowMesh = new Mesh(mesh);
 
-		for (float z = zMin + _resolution; z <= zMax; z += _resolution)
+		Mesh* newMesh = new Mesh();
+		_samplingBound.localBoundUpdate(*hollowMesh);
+		_samplingBound = _samplingBound.centred();
+
+		_xMin = std::floorf(_samplingBound.xMin());
+		_xMax = std::ceilf(_samplingBound.xMax());
+		_yMin = std::floorf(_samplingBound.yMin());
+		_yMax = std::ceilf(_samplingBound.yMax());
+		_zMin = std::floorf(_samplingBound.zMin());
+		_zMax = std::ceilf(_samplingBound.zMax());
+
+		_samplingBound.setMinPt(QVector3D(_xMin, _yMin, _zMin));
+		_samplingBound.setMaxPt(QVector3D(_xMax, _yMax, _zMax));
+
+		_lengthX = std::ceilf((_xMax - _xMin + 1) / _resolution);
+		_lengthY = std::ceilf((_yMax - _yMin + 1) / _resolution);
+		_lengthZ = std::ceilf((_zMax - _zMin + 1) / _resolution);
+
+		_SDF.resize(_lengthX * _lengthY);
+
+
+		std::vector<float> zVec;
+		for (float z = _zMin; z <= _zMax; z += _resolution)
+			zVec.push_back(z);
+
+		_rayCaster.reset(new MTRayCaster());
+		_rayAccel.reset(new Hix::Engine3D::BVH(mesh, false));
+		_rayCaster->addAccelerator(_rayAccel.get());
+
+		std::vector<QVector3D> voxel;
+
+		//std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](float z)
+		//	{
+		for (float y = _yMin; y <= _yMax; y += _resolution)
 		{
-			for (float y = yMin + _resolution; y <= yMax; y += _resolution)
+			for (float x = _xMin; x <= _xMax; x += _resolution)
 			{
-				for (float x = xMin + _resolution; x <= xMax; x += _resolution)
-				{
-					auto cubeindex = 0;
+				QVector3D currPt = QVector3D(x, y, z);
+				auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
+				//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
 
-					auto p0 = QVector3D(x - _resolution, y, z - _resolution);
-					auto p1 = QVector3D(x, y, z - _resolution);
-					auto p2 = QVector3D(x, y - _resolution, z - _resolution);
-					auto p3 = QVector3D(x - _resolution, y - _resolution, z - _resolution);
-					auto p4 = QVector3D(x - _resolution, y, z);
-					auto p5 = QVector3D(x, y, z);
-					auto p6 = QVector3D(x, y - _resolution, z);
-					auto p7 = QVector3D(x - _resolution, y - _resolution, z);
+				int indxex = std::floorf(((x + std::abs(_xMin)) / _resolution) +
+					(((y + std::abs(_yMin)) / _resolution) * _lengthX));/* +
+					((z + std::abs(_zMin)) / _resolution) * (_lengthX * _lengthY));*/
 
-					auto v0 = getSDFValue(p0);
-					auto v1 = getSDFValue(p1);
-					auto v2 = getSDFValue(p2);
-					auto v3 = getSDFValue(p3);
-					auto v4 = getSDFValue(p4);
-					auto v5 = getSDFValue(p5);
-					auto v6 = getSDFValue(p6);
-					auto v7 = getSDFValue(p7);
-
-					auto isolevel = -1.0;
-
-					if (v0 < isolevel) cubeindex |= 1;
-					if (v1 < isolevel) cubeindex |= 2;
-					if (v2 < isolevel) cubeindex |= 4;
-					if (v3 < isolevel) cubeindex |= 8;
-					if (v4 < isolevel) cubeindex |= 16;
-					if (v5 < isolevel) cubeindex |= 32;
-					if (v6 < isolevel) cubeindex |= 64;
-					if (v7 < isolevel) cubeindex |= 128;
-
-					QVector3D edgeList[12];
-
-
-					/* Find the vertices where the surface intersects the cube */
-					if (edgeTable[cubeindex] & 1)
-						edgeList[0] = VertexInterp(isolevel, p0, p1, v0, v1);
-					if (edgeTable[cubeindex] & 2)
-						edgeList[1] = VertexInterp(isolevel, p1, p2, v1, v2);
-					if (edgeTable[cubeindex] & 4)
-						edgeList[2] = VertexInterp(isolevel, p2, p3, v2, v3);
-					if (edgeTable[cubeindex] & 8)
-						edgeList[3] = VertexInterp(isolevel, p3, p0, v3, v0);
-					if (edgeTable[cubeindex] & 16)
-						edgeList[4] = VertexInterp(isolevel, p4, p5, v4, v5);
-					if (edgeTable[cubeindex] & 32)
-						edgeList[5] = VertexInterp(isolevel, p5, p6, v5, v6);
-					if (edgeTable[cubeindex] & 64)
-						edgeList[6] = VertexInterp(isolevel, p6, p7, v6, v7);
-					if (edgeTable[cubeindex] & 128)
-						edgeList[7] = VertexInterp(isolevel, p7, p4, v7, v4);
-					if (edgeTable[cubeindex] & 256)
-						edgeList[8] = VertexInterp(isolevel, p0, p4, v0, v4);
-					if (edgeTable[cubeindex] & 512)
-						edgeList[9] = VertexInterp(isolevel, p1, p5, v1, v5);
-					if (edgeTable[cubeindex] & 1024)
-						edgeList[10] = VertexInterp(isolevel, p2, p6, v2, v6);
-					if (edgeTable[cubeindex] & 2048)
-						edgeList[11] = VertexInterp(isolevel, p3, p7, v3, v7);
-
-
-					auto ntriang = 0;
-					for (auto i = 0; triTable[cubeindex][i] != -1; i += 3) {
-						newMesh->addFace(edgeList[triTable[cubeindex][i]],
-							edgeList[triTable[cubeindex][i + 1]],
-							edgeList[triTable[cubeindex][i + 2]]);
-					}
-
-				}
+				_SDF[indxex] = bvhdist;
+				//_SDF[indxex] = bvhdist;
 			}
 		}
-
-		newMesh->reverseFaces();
-		*originalMesh += *newMesh;
-		//return 0.0f;
+		//});
+		return _SDF;
 	}
 
 
-	std::vector<float> generateDFbyQueryAllFace(const Mesh& mesh, Bounds3D& bound)
+	std::vector<float> generateSDFbyQueryAllFace(const Mesh& mesh, Bounds3D& bound, float z)
 	{
 		std::vector<float> DF;
 
@@ -551,9 +510,9 @@ namespace BVHTest
 		int zMin = std::floorf(bound.zMin());
 		int zMax = std::ceilf(bound.zMax());
 
-		int cnt = 0;
-		for (float z = zMin; z < zMax; z += _resolution)
-		{
+		int closestDistance_sign;
+		//for (float z = zMin; z < zMax; z += _resolution)
+		//{
 			for (float y = yMin; y < yMax; y += _resolution)
 			{
 				for (float x = xMin; x < xMax; x += _resolution)
@@ -567,25 +526,79 @@ namespace BVHTest
 					{
 						auto tmpClosest = getClosestVertex(currPt, face);
 						auto tempDistance = (currPt - tmpClosest).lengthSquared();
-						if (tempDistance < closestDistance)
+
+						auto normalST = currPt - closestPoint;
+						normalST.normalize();
+						auto dot = QVector3D::dotProduct(normalST, closestFace.localFn());
+						auto sign = dot > 0.0f ? 1 : -1;
+
+						tempDistance *= sign;
+
+						float oldDist = closestDistance;
+
+						// for general case
+						if (std::abs(tempDistance) < std::abs(closestDistance))
 						{
 							closestDistance = tempDistance;
-							closestPoint = tmpClosest;
+							closestPoint = getClosestVertex(currPt, face);
 							closestFace = face;
+							
 						}
+
+						float delta = abs(abs(tempDistance) - abs(oldDist));
+
+						if (delta == 0.0f)
+						{
+							closestDistance = (tempDistance > 0) ? tempDistance : oldDist;
+						}
+						
 					}
 
-					auto normalST = currPt - closestPoint;
-					normalST.normalize();
-					auto dot = QVector3D::dotProduct(normalST, closestFace.localFn());
-					auto closestDistance_sign = dot > 0.0f ? 1.0f : -1.0f;
-
-					closestDistance *= closestDistance_sign;
+					closestDistance;
 
 					DF.push_back(closestDistance);
 				}
 			}
-		}
+		//}
+
+		return DF;
+	}
+
+
+	std::vector<float> generateDFbyQueryAllFace(const Mesh& mesh, Bounds3D& bound, float z)
+	{
+		std::vector<float> DF;
+
+		int xMin = std::floorf(bound.xMin());
+		int xMax = std::ceilf(bound.xMax());
+		int yMin = std::floorf(bound.yMin());
+		int yMax = std::ceilf(bound.yMax());
+		int zMin = std::floorf(bound.zMin());
+		int zMax = std::ceilf(bound.zMax());
+
+		int closestDistance_sign;
+		//for (float z = zMin; z < zMax; z += _resolution)
+		//{
+			for (float y = yMin; y < yMax; y += _resolution)
+			{
+				for (float x = xMin; x < xMax; x += _resolution)
+				{
+					auto closestDistance = std::numeric_limits<float>::max();
+					QVector3D closestPoint;
+					FaceConstItr closestFace;
+					QVector3D currPt = QVector3D(x, y, z);
+
+					for (auto face = mesh.getFaces().begin(); face != mesh.getFaces().end(); ++face)
+					{
+						auto tmpClosest = getClosestVertex(currPt, face);
+						auto tempDistance = (currPt - tmpClosest).lengthSquared();
+
+						closestDistance = (std::abs(tempDistance) < std::abs(closestDistance)) ? tempDistance : closestDistance;
+					}
+					DF.push_back(closestDistance);
+				}
+			}
+		//}
 
 		return DF;
 	}
