@@ -33,7 +33,14 @@ RayHits Hix::Engine3D::RayCaster::rayIntersectDirection(const QVector3D& rayFrom
 	auto candidates = _accelerator->getRayCandidatesDirection(rayFrom, rayDirection);
 	for (auto& each : candidates)
 	{
-		rayHits.push_back(rayIntersectTri(rayFrom, rayDirection, each));
+		auto result = rayIntersectTri(rayFrom, rayDirection, each);
+		if (result.type == HitType::Degenerate)
+		{
+			rayHits.clear();
+			rayHits.push_back(result);
+			return rayHits; 
+		}
+		rayHits.push_back(result);
 	}
 	return rayHits;
 }

@@ -1204,6 +1204,7 @@
     <ClInclude Include="unitTest\tests\BVHBench.h" />
     <ClInclude Include="unitTest\tests\BVHTest.h" />
     <ClInclude Include="unitTest\tests\marchingcubeTest.h" />
+    <ClInclude Include="unitTest\tests\RayCastTest.h" />
     <ClInclude Include="widget\GridBed.h" />
     <ClInclude Include="widget\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />

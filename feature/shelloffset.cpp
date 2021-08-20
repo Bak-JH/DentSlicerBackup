@@ -225,21 +225,24 @@ void Hix::Features::HollowMesh::runImpl()
 	_samplingBound.setMinPt(QVector3D(xMin, yMin, zMin));
 	_samplingBound.setMaxPt(QVector3D(xMax, yMax, zMax));
 
-	int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
-	int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
-	int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
+	int lengthX = std::ceilf((xMax - xMin + 1) / _resolution);
+	int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
+	int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
 
 	_SDF.resize(lengthX * lengthY * lengthZ);
 
 
 	std::vector<float> zVec;
-	for (float z = zMin; z < zMax; z += _resolution)
+	for (float z = zMin; z <= zMax; z += _resolution)
 		zVec.push_back(z);
 
+	_rayCaster.reset(new MTRayCaster());
 	_rayAccel.reset(new Hix::Engine3D::BVH(*_target, false));
+	_rayCaster->addAccelerator(_rayAccel.get());
 
 	std::vector<QVector3D> voxel;
 	std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
+		//for (float z = zMin; z <= zMax; z += _resolution)
 		{
 			for (float y = yMin; y <= yMax; y += _resolution)
 			{
@@ -247,14 +250,48 @@ void Hix::Features::HollowMesh::runImpl()
 				{
 					QVector3D currPt = QVector3D(x, y, z);
 					auto bvhdist = _rayAccel->getClosestDistance(currPt);
+					//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
 
-					_SDF[((x + std::abs(xMin)) / _resolution) +
+					int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
 						(((y + std::abs(yMin)) / _resolution) * lengthX) +
-						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY)] = bvhdist;
+						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
 
+
+					QVector3D rayDirection(_samplingBound.centre() - currPt);
+					rayDirection.normalize();
+
+					auto normal = _rayCaster->rayIntersectDirection(currPt, rayDirection);
+					auto eps = std::numeric_limits<float>::epsilon();
+
+					if (normal.size() == 0 || normal.at(0).type == HitType::Degenerate)
+					{
+						QVector3D positiveFixed(_samplingBound.centre() + QVector3D(eps, eps, eps) - currPt);
+						auto pFixedNormal = _rayCaster->rayIntersectDirection(currPt, positiveFixed);
+						if (normal.size() == 0 || normal.at(0).type == HitType::Degenerate)
+						{
+							QVector3D negativeFixed(_samplingBound.centre() + QVector3D(-eps, -eps, -eps) - currPt);
+							normal = _rayCaster->rayIntersectDirection(currPt, negativeFixed);
+						}
+					}
+
+					std::vector<QVector3D> hitPoints;
+					for (auto& r : normal)
+					{
+						if ((r.distance > 0.0f && r.type != HitType::Miss && r.type != HitType::Degenerate)
+							&& std::find(hitPoints.begin(), hitPoints.end(), r.intersection) == hitPoints.end())
+						{
+							hitPoints.push_back(r.intersection);
+						}
+						hitPoints.erase(std::unique(hitPoints.begin(), hitPoints.end()), hitPoints.end());
+					}
+
+					auto distSign = hitPoints.size() % 2 == 1 ? -1.0f : 1.0f;
+
+					_SDF[indxex] = bvhdist.first * distSign;
 				}
 			}
 		});
+
 
 	for (float z = zMin + _resolution; z <= zMax; z += _resolution) 
 	{
@@ -284,14 +321,14 @@ void Hix::Features::HollowMesh::runImpl()
 
 				auto isolevel = -_offset;
 
-				if (v0 < isolevel) cubeindex |= 1;
-				if (v1 < isolevel) cubeindex |= 2;
-				if (v2 < isolevel) cubeindex |= 4;
-				if (v3 < isolevel) cubeindex |= 8;
-				if (v4 < isolevel) cubeindex |= 16;
-				if (v5 < isolevel) cubeindex |= 32;
-				if (v6 < isolevel) cubeindex |= 64;
-				if (v7 < isolevel) cubeindex |= 128;
+				if (v0 < isolevel) { cubeindex |= 1;   /*voxel.push_back(p0);*/ }
+				if (v1 < isolevel) { cubeindex |= 2;   /*voxel.push_back(p1);*/ }
+				if (v2 < isolevel) { cubeindex |= 4;   /*voxel.push_back(p2);*/ }
+				if (v3 < isolevel) { cubeindex |= 8;   /*voxel.push_back(p3);*/ }
+				if (v4 < isolevel) { cubeindex |= 16;  /*voxel.push_back(p4);*/ }
+				if (v5 < isolevel) { cubeindex |= 32;  /*voxel.push_back(p5);*/ }
+				if (v6 < isolevel) { cubeindex |= 64;  /*voxel.push_back(p6);*/ }
+				if (v7 < isolevel) { cubeindex |= 128; /*voxel.push_back(p7);*/ }
 
 				QVector3D edgeList[12];
 
@@ -334,13 +371,18 @@ void Hix::Features::HollowMesh::runImpl()
 		}
 	}
 
-	newMesh->reverseFaces();
-	*hollowMesh += *newMesh;
+	//postUIthread([this, voxel]() {
+	//	Hix::Debug::DebugRenderObject::getInstance().addVertices(voxel);
+	//	//Hix::Debug::DebugRenderObject::getInstance().showAabb(_samplingBound);
+	//	});
 
-	_target->setMesh(hollowMesh);
+	newMesh->reverseFaces();
+	_target->setMesh(newMesh);
 
 	auto repair = new MeshRepair(_target);
 	tryRunFeature(*repair);
+	*hollowMesh += *_target->getMesh();
+
 }
 
 namespace MeshRepairPrivate
@@ -462,13 +504,15 @@ float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
 	int zMin = std::floorf(_samplingBound.zMin());
 	int zMax = std::ceilf(_samplingBound.zMax());
 
-	int lengthX = std::ceilf((xMax - xMin) / _resolution) + 1;
-	int lengthY = std::ceilf((yMax - yMin) / _resolution) + 1;
-	int lengthZ = std::ceilf((zMax - zMin) / _resolution) + 1;
+	int lengthX = std::ceilf((xMax - xMin + 1) / _resolution);
+	int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
+	int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
 
-	return _SDF[((point.x() + std::abs(xMin)) / _resolution) +
-				(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
-				((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY)];
+	int indxex = std::floorf(((point.x() + std::abs(xMin)) / _resolution) +
+		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
+		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+
+	return _SDF[indxex];
 }
 
 QVector3D Hix::Features::HollowMesh::VertexInterp(float isolevel, QVector3D p1, QVector3D p2, float valp1, float valp2)
