@@ -34,95 +34,119 @@ namespace RayTest
 		QVector3D v0 = _rayAccel->getCachedPos(mvs[0]);
 		QVector3D v1 = _rayAccel->getCachedPos(mvs[1]);
 		QVector3D v2 = _rayAccel->getCachedPos(mvs[2]);
-		QVector3D v0v1 = v1 - v0;
-		QVector3D v0v2 = v2 - v0;
-		QVector3D v1v2 = v2 - v1;
-		QVector3D pvec = QVector3D::crossProduct(rayDirection, v0v2);
-		float det = v0v1.dotProduct(v0v1, pvec);
 
+
+		QVector3D edge1 = v1 - v0;
+		QVector3D edge2 = v2 - v0;
+
+		QVector3D h = QVector3D::crossProduct(rayDirection, edge2);
+		float determinant = QVector3D::dotProduct(edge1, h);
 		bool isBackside = false;
-		// if the determinant is negative the triangle is backfacing
-		// if the determinant is close to 0, the ray misses the triangle
-		if (det < EPSILON)
+
+		// Negative determinant would indicate back facing triangle
+		if (determinant < 0.0f)
 			isBackside = true;
 
-		// ray and triangle are parallel if det is close to 0
-		if (fabs(det) < EPSILON)
+		// Very small determinant means the ray is almost parallel with the triangle plane.
+		if (determinant > -EPSILON && determinant < EPSILON)
 		{
-			auto distance = QVector3D::dotProduct(tri.localFn(), rayOrigin - v0) / tri.localFn().length();
-			auto distance1 = QVector3D::dotProduct(tri.localFn(), rayOrigin - v1) / tri.localFn().length();
-			auto distance2 = QVector3D::dotProduct(tri.localFn(), rayOrigin - v2) / tri.localFn().length();
-
-			if(std::abs(distance) < EPSILON)
-					hit.type = HitType::Degenerate;
-
+			hit.type = HitType::Degenerate;
 			return hit;
 		}
 
-		float invDet = 1 / det;
+		float inverse_determinant = 1.0 / determinant;
 
-		QVector3D tvec = rayOrigin - v0;
-		auto u = QVector3D::dotProduct(tvec, pvec) * invDet;
-		if (u < 0 || u > 1)
+		QVector3D origins_diff_vector = rayOrigin - v0;
+		float u = QVector3D::dotProduct(origins_diff_vector, h) * inverse_determinant;
+		qDebug()<< "u: " << u;
+		// Check the u-barycentric coordinate for validity to save further expensive calculations
+		if (u < 0.0 || u > 1.0)
+		{
 			return hit;
+		}
 
-		// vertex collision
-		QVector3D qvec = QVector3D::crossProduct(tvec, v0v1);
-		auto v = QVector3D::dotProduct(rayDirection, qvec) * invDet;
-		if (v < 0 || u + v > 1)
+		QVector3D q = QVector3D::crossProduct(origins_diff_vector, edge1);
+		float v = inverse_determinant * QVector3D::dotProduct(rayDirection, q);
+		qDebug() << "v: " << v;
+		// Check the v-barycentric coordinate for validity to save further expensive calculations
+		if (v < 0.0 || u + v > 1.0)
+		{
 			return hit;
+		}
 
-		auto t = QVector3D::dotProduct(v0v2, qvec) * invDet;
-		hit.distance = t;
-		hit.intersection = rayOrigin + rayDirection * t;
-		if (hit.type != HitType::Miss)
+		// At this stage we can compute t to find out where the intersection point is on the line
+		float t = inverse_determinant * QVector3D::dotProduct(edge2, q);
+		qDebug() << "t: " << t;
+		if (t > EPSILON)
+		{
+			hit.distance = t;
+			hit.intersection = rayOrigin + rayDirection * t;
+
+			if (isBackside)
+				hit.type = HitType::BackSide;
+			else
+				hit.type = HitType::FrontSide;
+
 			return hit;
-		else if (isBackside)
-			hit.type = HitType::BackSide;
+		}
 		else
-			hit.type = HitType::FrontSide;
-
-		return hit;
+		{
+			// This means that there is a line intersection but not a ray intersection
+			return hit;
+		}
 	}
 
 	void rayIntersect()
 	{
 		Mesh* testMesh = new Mesh();
-		testMesh->addFace(QVector3D(0.0f, 0.0f, 1.0f),
-						  QVector3D(1.0f, 0.0f, 0.0f),
-						  QVector3D(1.0f, 1.0f, 0.0f));
-		testMesh->addFace(QVector3D(1.0f, 1.0f, 0.0f),
-						  QVector3D(1.0f, 0.0f, 0.0f),
-						  QVector3D(2.0f, 0.0f, 1.0f));
+		testMesh->addFace(QVector3D(-25.4673, 12.6011, -2.04688),
+			QVector3D(-25.5571, 12.6157, -2.14258),
+			QVector3D(-25.4106, 12.7183, -2.08105));
+		testMesh->addFace(QVector3D(-25.4839f, 12.729f, -2.16016f),
+			QVector3D(-25.4106f, 12.7183f, -2.08105f),
+			QVector3D(-25.5571f, 12.6157f, -2.14258f));
+		testMesh->addFace(QVector3D(-25.4839, 12.729, -2.16016),
+			QVector3D(-25.3784, 12.8237, -2.13086),
+			QVector3D(-25.4106, 12.7183, -2.08105));
 
-		Mesh* ttMesh = new Mesh();
-		ttMesh->addFace(QVector3D(0.0f, 0.0f, 0.0f),
-						QVector3D(-4.0f, 0.0f, 0.0f),
-						QVector3D(0.0f, 4.0f, 0.0f));
+		Mesh* tttt = new Mesh();
+		tttt->addFace(QVector3D(0, 0, 0), QVector3D(0, 1, 0), QVector3D(1, 0, 0));
 
 		_rayCaster.reset(new MTRayCaster());
-		_rayAccel.reset(new Hix::Engine3D::BVH(*ttMesh, false));
+		_rayAccel.reset(new Hix::Engine3D::BVH(*tttt, false));
 		_rayCaster->addAccelerator(_rayAccel.get());
 
-		QVector3D vertTestOrigin = QVector3D(1.f, 0.f, -4.f);
-		QVector3D edgeTestOrigin = QVector3D(0.f, 0.f, -3.f);
-		QVector3D planeTestOrigin = QVector3D(0.3f, 0.2f, -0.2f);
-		QVector3D parallelTestOrigin = QVector3D(4.f, 2.f, 0.f);
-		QVector3D parallelTestOrigin2 = QVector3D(-4.f, -2.f, 0.f);
-
-		QVector3D normalToBottom = QVector3D(0.0f, 0.0f, -1.0f);
-		QVector3D normalToRight = QVector3D(-1.0f, 0.0f, 0.0f);
-		QVector3D parallelNormal = (QVector3D(-4.0f, 0.0f, 7.0f) - QVector3D(0.0f, 0.0f, 2.0f)).normalized();
-
-		for (auto face = ttMesh->getFaces().cbegin(); face != ttMesh->getFaces().cend(); ++face)
+		for (auto x = 0.0f; x <= 1.0f; x += 0.001f)
 		{
-			auto parallelTest = rayIntersectTri(parallelTestOrigin, normalToRight, face);
-			auto parallelTest2 = rayIntersectTri(parallelTestOrigin2, normalToRight, face);
-			//auto vertTest = rayIntersectTri(vertTestOrigin, normalToRight, face);
-			//auto edgeTest = rayIntersectTri(edgeTestOrigin, normalToRight, face);
-			//auto planeTest = rayIntersectTri(planeTestOrigin, normalToRight, face);
-			qDebug() << "";
+			for (auto y = 0.0f; y <= 1.0f; y += 0.001f)
+			{
+				auto testOrigin = QVector3D(x, y, 1);
+				auto testDir = QVector3D(0, 0, -1);
+
+				for (auto face = tttt->getFaces().cbegin(); face != tttt->getFaces().cend(); ++face)
+				{
+					qDebug() << testOrigin;
+
+					auto parallelTest = rayIntersectTri(testOrigin, testDir, face);
+					//auto parallelTest2 = rayIntersectTri(parallelTestOrigin2, normalToRight, face);
+					//auto vertTest = rayIntersectTri(vertTestOrigin, normalToRight, face);
+					//auto edgeTest = rayIntersectTri(edgeTestOrigin, normalToRight, face);
+					//auto planeTest = rayIntersectTri(planeTestOrigin, normalToRight, face);
+				}
+			}
 		}
+
+		//QVector3D vertTestOrigin = QVector3D(1.f, 0.f, -4.f);
+		//QVector3D edgeTestOrigin = QVector3D(0.f, 0.f, -3.f);
+		//QVector3D planeTestOrigin = QVector3D(0.3f, 0.2f, -0.2f);
+		//QVector3D parallelTestOrigin = QVector3D(4.f, 2.f, 0.f);
+		//QVector3D parallelTestOrigin2 = QVector3D(-4.f, -2.f, 0.f);
+
+		//QVector3D normalToBottom = QVector3D(0.0f, 0.0f, -1.0f);
+		//QVector3D normalToRight = QVector3D(-1.0f, 0.0f, 0.0f);
+		//QVector3D parallelNormal = (QVector3D(-4.0f, 0.0f, 7.0f) - QVector3D(0.0f, 0.0f, 2.0f)).normalized();
+
+		
 
 	}
 	TEST_CASE("BVH Distance Field Accuracy Test", "[BVH DF]")
