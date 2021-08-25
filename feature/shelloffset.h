@@ -55,6 +55,7 @@ namespace Hix
 			int _xMin, _yMin, _zMin, _xMax, _yMax, _zMax;
 			int _lengthX, _lengthY, _lengthZ;
 
+			Hix::Engine3D::RayHits getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection);
 			float getSDFValue(QVector3D point);
 			QVector3D VertexInterp(float isolevel, QVector3D p1, QVector3D p2, float valp1, float valp2);
 

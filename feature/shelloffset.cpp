@@ -248,6 +248,7 @@ void Hix::Features::HollowMesh::runImpl()
 			{
 				for (float x = xMin; x <= xMax; x += _resolution)
 				{
+	//auto x = -10, y = 12, z = -1;
 					QVector3D currPt = QVector3D(x, y, z);
 					auto bvhdist = _rayAccel->getClosestDistance(currPt);
 					//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
@@ -256,44 +257,26 @@ void Hix::Features::HollowMesh::runImpl()
 						(((y + std::abs(yMin)) / _resolution) * lengthX) +
 						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
 
-
-					QVector3D rayDirection(_samplingBound.centre() - currPt);
-					rayDirection.normalize();
-
-					auto normal = _rayCaster->rayIntersectDirection(currPt, rayDirection);
-					auto eps = std::numeric_limits<float>::epsilon();
-
-					if (normal.size() == 0 || normal.at(0).type == HitType::Degenerate)
+					RayHits hits;
+					for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
 					{
-						QVector3D positiveFixed(_samplingBound.centre() + QVector3D(eps, eps, eps) - currPt);
-						auto pFixedNormal = _rayCaster->rayIntersectDirection(currPt, positiveFixed);
-						if (normal.size() == 0 || normal.at(0).type == HitType::Degenerate)
+						QVector3D rayDirection(_samplingBound.centre() - (currPt + QVector3D(fixValue, fixValue, 0)));
+						rayDirection.normalize();
+						hits = getRayHitPoints(currPt, rayDirection);
+						if (hits.size() != 0 && hits.at(0).type != HitType::Degenerate)
 						{
-							QVector3D negativeFixed(_samplingBound.centre() + QVector3D(-eps, -eps, -eps) - currPt);
-							normal = _rayCaster->rayIntersectDirection(currPt, negativeFixed);
+							break;
 						}
 					}
 
-					std::vector<QVector3D> hitPoints;
-					for (auto& r : normal)
-					{
-						if ((r.distance > 0.0f && r.type != HitType::Miss && r.type != HitType::Degenerate)
-							&& std::find(hitPoints.begin(), hitPoints.end(), r.intersection) == hitPoints.end())
-						{
-							hitPoints.push_back(r.intersection);
-						}
-						hitPoints.erase(std::unique(hitPoints.begin(), hitPoints.end()), hitPoints.end());
-					}
-
-					auto distSign = hitPoints.size() % 2 == 1 ? -1.0f : 1.0f;
+					auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
 
 					_SDF[indxex] = bvhdist.first * distSign;
 				}
 			}
 		});
 
-
-	for (float z = zMin + _resolution; z <= zMax; z += _resolution) 
+	for (float z = zMin + _resolution; z <= zMax; z += _resolution)
 	{
 		for (float y = yMin + _resolution; y <= yMax; y += _resolution)
 		{
@@ -370,19 +353,81 @@ void Hix::Features::HollowMesh::runImpl()
 			}
 		}
 	}
-
-	//postUIthread([this, voxel]() {
-	//	Hix::Debug::DebugRenderObject::getInstance().addVertices(voxel);
-	//	//Hix::Debug::DebugRenderObject::getInstance().showAabb(_samplingBound);
-	//	});
-
-	newMesh->reverseFaces();
+	//newMesh->reverseFaces();
+	//*hollowMesh += *newMesh;
 	_target->setMesh(newMesh);
 
-	auto repair = new MeshRepair(_target);
-	tryRunFeature(*repair);
-	*hollowMesh += *_target->getMesh();
+	//auto repair = new MeshRepair(_target);
+	//tryRunFeature(*repair);
+}
 
+bool IsSimillar(float i) { return std::abs(i); }
+
+Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)
+{
+	auto normal = _rayCaster->rayIntersectDirection(rayOrigin, rayDirection);
+	RayHits result;
+
+	for (auto& r : normal)
+	{
+		if ((r.type != HitType::Miss && r.type != HitType::Degenerate))
+		{
+			bool pass = false;
+			for (auto p : result)
+			{
+				if (std::abs(std::abs(p.distance) - std::abs(r.distance)) < 0.0001)
+				{
+					pass = true;
+					break;
+				}
+			}
+			if(!pass)
+				result.push_back(r);
+		}
+	}
+
+	return result;
+}
+
+float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
+{
+	int xMin = std::floorf(_samplingBound.xMin());
+	int xMax = std::ceilf(_samplingBound.xMax());
+	int yMin = std::floorf(_samplingBound.yMin());
+	int yMax = std::ceilf(_samplingBound.yMax());
+	int zMin = std::floorf(_samplingBound.zMin());
+	int zMax = std::ceilf(_samplingBound.zMax());
+
+	int lengthX = std::ceilf((xMax - xMin + 1) / _resolution);
+	int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
+	int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
+
+	int indxex = std::floorf(((point.x() + std::abs(xMin)) / _resolution) +
+		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
+		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+
+	return _SDF[indxex];
+}
+
+QVector3D Hix::Features::HollowMesh::VertexInterp(float isolevel, QVector3D p1, QVector3D p2, float valp1, float valp2)
+{
+	double mu;
+	QVector3D p;
+
+	if (std::abs(isolevel - valp1) < 0.00001)
+		return(p1);
+	if (std::abs(isolevel - valp2) < 0.00001)
+		return(p2);
+	if (std::abs(valp1 - valp2) < 0.00001)
+		return(p1);
+
+	mu = (isolevel - valp1) / (valp2 - valp1);
+
+	p.setX(p1.x() + mu * (p2.x() - p1.x()));
+	p.setY(p1.y() + mu * (p2.y() - p1.y()));
+	p.setZ(p1.z() + mu * (p2.z() - p1.z()));
+
+	return(p);
 }
 
 namespace MeshRepairPrivate
@@ -493,45 +538,4 @@ QVector3D pclToQtPt(const PointClass& input)
 QVector3D getAbs(const QVector3D vec)
 {
 	return QVector3D(std::abs(vec.x()), std::abs(vec.y()), std::abs(vec.z()));
-}
-
-float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
-{
-	int xMin = std::floorf(_samplingBound.xMin());
-	int xMax = std::ceilf(_samplingBound.xMax());
-	int yMin = std::floorf(_samplingBound.yMin());
-	int yMax = std::ceilf(_samplingBound.yMax());
-	int zMin = std::floorf(_samplingBound.zMin());
-	int zMax = std::ceilf(_samplingBound.zMax());
-
-	int lengthX = std::ceilf((xMax - xMin + 1) / _resolution);
-	int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
-	int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
-
-	int indxex = std::floorf(((point.x() + std::abs(xMin)) / _resolution) +
-		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
-		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
-
-	return _SDF[indxex];
-}
-
-QVector3D Hix::Features::HollowMesh::VertexInterp(float isolevel, QVector3D p1, QVector3D p2, float valp1, float valp2)
-{
-	double mu;
-	QVector3D p;
-
-	if (std::abs(isolevel - valp1) < 0.00001)
-		return(p1);
-	if (std::abs(isolevel - valp2) < 0.00001)
-		return(p2);
-	if (std::abs(valp1 - valp2) < 0.00001)
-		return(p1);
-
-	mu = (isolevel - valp1) / (valp2 - valp1);
-
-	p.setX(p1.x() + mu * (p2.x() - p1.x()));
-	p.setY(p1.y() + mu * (p2.y() - p1.y()));
-	p.setZ(p1.z() + mu * (p2.z() - p1.z()));
-
-	return(p);
 }
