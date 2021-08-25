@@ -258,7 +258,7 @@ void Hix::Features::HollowMesh::runImpl()
 						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
 
 					RayHits hits;
-					for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
+					for (auto fixValue = -0.1f; fixValue <= 0.1f; fixValue += 0.1f)
 					{
 						QVector3D rayDirection(_samplingBound.centre() - (currPt + QVector3D(fixValue, fixValue, 0)));
 						rayDirection.normalize();
@@ -353,9 +353,9 @@ void Hix::Features::HollowMesh::runImpl()
 			}
 		}
 	}
-	//newMesh->reverseFaces();
-	//*hollowMesh += *newMesh;
-	_target->setMesh(newMesh);
+	newMesh->reverseFaces();
+	*hollowMesh += *newMesh;
+	_target->setMesh(hollowMesh);
 
 	//auto repair = new MeshRepair(_target);
 	//tryRunFeature(*repair);
