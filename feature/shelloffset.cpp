@@ -248,7 +248,6 @@ void Hix::Features::HollowMesh::runImpl()
 			{
 				for (float x = xMin; x <= xMax; x += _resolution)
 				{
-	//auto x = -10, y = 12, z = -1;
 					QVector3D currPt = QVector3D(x, y, z);
 					auto bvhdist = _rayAccel->getClosestDistance(currPt);
 					//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
@@ -258,9 +257,9 @@ void Hix::Features::HollowMesh::runImpl()
 						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
 
 					RayHits hits;
-					for (auto fixValue = -0.1f; fixValue <= 0.1f; fixValue += 0.1f)
+					for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
 					{
-						QVector3D rayDirection(_samplingBound.centre() - (currPt + QVector3D(fixValue, fixValue, 0)));
+						QVector3D rayDirection((_samplingBound.centre() + QVector3D(fixValue, fixValue, 0)) - currPt);
 						rayDirection.normalize();
 						hits = getRayHitPoints(currPt, rayDirection);
 						if (hits.size() != 0 && hits.at(0).type != HitType::Degenerate)
@@ -270,7 +269,6 @@ void Hix::Features::HollowMesh::runImpl()
 					}
 
 					auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
-
 					_SDF[indxex] = bvhdist.first * distSign;
 				}
 			}
@@ -353,9 +351,9 @@ void Hix::Features::HollowMesh::runImpl()
 			}
 		}
 	}
-	newMesh->reverseFaces();
-	*hollowMesh += *newMesh;
-	_target->setMesh(hollowMesh);
+	//newMesh->reverseFaces();
+	//*hollowMesh += *newMesh;
+	_target->setMesh(newMesh);
 
 	//auto repair = new MeshRepair(_target);
 	//tryRunFeature(*repair);
@@ -366,25 +364,18 @@ bool IsSimillar(float i) { return std::abs(i); }
 Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)
 {
 	auto normal = _rayCaster->rayIntersectDirection(rayOrigin, rayDirection);
+	std::vector<QVector3D> hitPoints;
 	RayHits result;
 
 	for (auto& r : normal)
 	{
-		if ((r.type != HitType::Miss && r.type != HitType::Degenerate))
+		if ((r.type != HitType::Miss && r.type != HitType::Degenerate)
+			&& std::find(hitPoints.begin(), hitPoints.end(), r.intersection) == hitPoints.end())
 		{
-			bool pass = false;
-			for (auto p : result)
-			{
-				if (std::abs(std::abs(p.distance) - std::abs(r.distance)) < 0.0001)
-				{
-					pass = true;
-					break;
-				}
-			}
-			if(!pass)
-				result.push_back(r);
+			hitPoints.push_back(r.intersection);
+			result.push_back(r);
 		}
-	}
+	}		
 
 	return result;
 }

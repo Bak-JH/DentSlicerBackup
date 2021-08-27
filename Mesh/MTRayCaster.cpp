@@ -17,18 +17,18 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	RayHit hit;
 	hit.type = HitType::Miss;
 	hit.face = tri;
-	constexpr float EPSILON = std::numeric_limits<float>::epsilon();
+	constexpr float approx = 0.0001f;
 	auto mvs = tri.meshVertices();
 
 	QVector3D v0 = _accelerator->getCachedPos(mvs[0]);
 	QVector3D v1 = _accelerator->getCachedPos(mvs[1]);
 	QVector3D v2 = _accelerator->getCachedPos(mvs[2]);
 
-	QVector3D edge1 = v1 - v0;
-	QVector3D edge2 = v2 - v0;
+	QVector3D v0v1 = v1 - v0;
+	QVector3D v0v2 = v2 - v0;
 
-	QVector3D h = QVector3D::crossProduct(rayDirection, edge2);
-	float determinant = QVector3D::dotProduct(edge1, h);
+	QVector3D h = QVector3D::crossProduct(rayDirection, v0v2);
+	float determinant = QVector3D::dotProduct(v0v1, h);
 	bool isBackside = false;
 
 	// Negative determinant would indicate back facing triangle
@@ -36,7 +36,7 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 		isBackside = true;
 
 	// Very small determinant means the ray is almost parallel with the triangle plane.
-	if (determinant > -EPSILON && determinant < EPSILON)
+	if (determinant > -approx && determinant < approx)
 	{
 		hit.type = HitType::Degenerate;
 		return hit;
@@ -47,7 +47,9 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	QVector3D origins_diff_vector = rayOrigin - v0;
 	float u = QVector3D::dotProduct(origins_diff_vector, h) * inverse_determinant;
 
-	if ((std::abs(u) <= EPSILON && std::abs(u) > 0.0f) || (std::abs(std::abs(u) - 1.0f) <= EPSILON && std::abs(u) > 1.0f))
+	// check float errors
+	if ((std::abs(u) <= approx && std::abs(u) > 0.0f) ||
+		(std::abs(u) - 1.0f <= approx && std::abs(u) > 1.0f))
 	{
 		hit.type = HitType::Degenerate;
 		return hit;
@@ -59,25 +61,29 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 		return hit;
 	}
 
-	QVector3D q = QVector3D::crossProduct(origins_diff_vector, edge1);
+	QVector3D q = QVector3D::crossProduct(origins_diff_vector, v0v1);
 	float v = inverse_determinant * QVector3D::dotProduct(rayDirection, q);
 
-	// Check the v-barycentric coordinate for validity to save further expensive calculations
-	if ((std::abs(v) <= EPSILON && std::abs(v) > 0.0f) || (std::abs(std::abs(v) - 1.0f) <= EPSILON && std::abs(v) > 1.0f))
+
+	// check float errors
+	if ((std::abs(v) <= approx && std::abs(v) > 0.0f) ||
+		(std::abs((u + v) - 1.0f) <= approx && (u + v) != 1.0f))
 	{
 		hit.type = HitType::Degenerate;
 		return hit;
 	}
 
+
+	// Check the v-barycentric coordinate for validity to save further expensive calculations
 	if (v < 0.0 || u + v > 1.0)
 	{
 		return hit;
 	}
 
 	// At this stage we can compute t to find out where the intersection point is on the line
-	float t = inverse_determinant * QVector3D::dotProduct(edge2, q);
+	float t = inverse_determinant * QVector3D::dotProduct(v0v2, q);
 
-	if (t > EPSILON)
+	if (t > approx)
 	{
 		hit.distance = t;
 		hit.intersection = rayOrigin + rayDirection * t;
