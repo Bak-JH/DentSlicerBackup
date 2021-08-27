@@ -481,7 +481,7 @@ namespace BVHTest
 			for (float x = _xMin; x <= _xMax; x += _resolution)
 			{
 				QVector3D currPt = QVector3D(x, y, z);
-				auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
+				//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
 				//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
 
 				int indxex = std::floorf(((x + std::abs(_xMin)) / _resolution) +

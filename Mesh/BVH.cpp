@@ -14,6 +14,7 @@ class BoundedObjectFactory
 public:
 	BoundedObjectFactory(const std::unordered_map<VertexConstItr, QVector3D>& wPosCache);
 	std::vector<BVHImpl::BoundedObject*> getBounds(const std::unordered_set<const GLModel*>& models);
+	std::vector<BVHImpl::BoundedObject*> getBounds(const Mesh& mesh);
 
 private:
 	BVHImpl::BoundedObject* toBoundedObjectHeap(const FaceConstItr& face);
@@ -76,6 +77,22 @@ std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const std::
 			bounds.push_back(toBoundedObjectHeap(faceItr));
 		}
 	}
+	return bounds;
+}
+
+std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const Mesh& mesh)
+{
+	std::vector<BVHImpl::BoundedObject*> bounds;
+	size_t faceCount = 0;
+		faceCount += mesh.getFaces().size();
+
+	bounds.reserve(faceCount);
+		auto faceEnd = mesh.getFaces().cend();
+		for (auto faceItr = mesh.getFaces().cbegin(); faceItr != faceEnd; ++faceItr)
+		{
+			bounds.push_back(toBoundedObjectHeap(faceItr));
+		}
+	
 	return bounds;
 }
 

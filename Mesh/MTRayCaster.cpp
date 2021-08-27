@@ -17,7 +17,6 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	RayHit hit;
 	hit.type = HitType::Miss;
 	hit.face = tri;
-	constexpr float approx = 0.0001f;
 	constexpr float EPS = std::numeric_limits<float>::epsilon() * 1000.0f;
 	auto mvs = tri.meshVertices();
 
@@ -84,7 +83,7 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	// At this stage we can compute t to find out where the intersection point is on the line
 	float t = inverse_determinant * QVector3D::dotProduct(v0v2, q);
 
-	if (t > approx)
+	if (t > EPS)
 	{
 		hit.distance = t;
 		hit.intersection = rayOrigin + rayDirection * t;
