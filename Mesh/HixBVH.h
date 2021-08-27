@@ -193,15 +193,6 @@ namespace Hix
 					}
 					return intersected_objects;
 				}
-				//inline bool
-				//	intersect(const float x, const float y, const float z) const
-				//{
-				//	if (x < bounds_[0] || y < bounds_[2] || z < bounds_[4] ||
-				//		x > bounds_[1] || y > bounds_[3] || z > bounds_[5])
-				//		return false;
-
-				//	return true;
-				//}
 
 				const float* getBound()const
 				{

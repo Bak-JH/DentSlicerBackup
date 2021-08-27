@@ -250,7 +250,6 @@ void Hix::Features::HollowMesh::runImpl()
 				{
 					QVector3D currPt = QVector3D(x, y, z);
 					auto bvhdist = _rayAccel->getClosestDistance(currPt);
-					//auto bvhdist = _rayAccel->getClosestDistanceOrigin(currPt);
 
 					int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
 						(((y + std::abs(yMin)) / _resolution) * lengthX) +
