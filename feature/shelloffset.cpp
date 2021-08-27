@@ -351,12 +351,9 @@ void Hix::Features::HollowMesh::runImpl()
 			}
 		}
 	}
-	//newMesh->reverseFaces();
-	//*hollowMesh += *newMesh;
-	_target->setMesh(newMesh);
-
-	//auto repair = new MeshRepair(_target);
-	//tryRunFeature(*repair);
+	newMesh->reverseFaces();
+	*hollowMesh += *newMesh;
+	_target->setMesh(hollowMesh);
 }
 
 bool IsSimillar(float i) { return std::abs(i); }

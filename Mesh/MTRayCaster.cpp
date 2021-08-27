@@ -18,6 +18,7 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	hit.type = HitType::Miss;
 	hit.face = tri;
 	constexpr float approx = 0.0001f;
+	constexpr float EPS = std::numeric_limits<float>::epsilon() * 1000.0f;
 	auto mvs = tri.meshVertices();
 
 	QVector3D v0 = _accelerator->getCachedPos(mvs[0]);
@@ -36,7 +37,7 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 		isBackside = true;
 
 	// Very small determinant means the ray is almost parallel with the triangle plane.
-	if (determinant > -approx && determinant < approx)
+	if (determinant > -EPS && determinant < EPS)
 	{
 		hit.type = HitType::Degenerate;
 		return hit;
@@ -48,8 +49,8 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 	float u = QVector3D::dotProduct(origins_diff_vector, h) * inverse_determinant;
 
 	// check float errors
-	if ((std::abs(u) <= approx && std::abs(u) > 0.0f) ||
-		(std::abs(u) - 1.0f <= approx && std::abs(u) > 1.0f))
+	if ((std::abs(u) <= EPS && std::abs(u) > 0.0f) ||
+		(std::abs(u) - 1.0f <= EPS && std::abs(u) > 1.0f))
 	{
 		hit.type = HitType::Degenerate;
 		return hit;
@@ -66,8 +67,8 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 
 
 	// check float errors
-	if ((std::abs(v) <= approx && std::abs(v) > 0.0f) ||
-		(std::abs((u + v) - 1.0f) <= approx && (u + v) != 1.0f))
+	if ((std::abs(v) <= EPS && std::abs(v) > 0.0f) ||
+		(std::abs((u + v) - 1.0f) <= EPS && (u + v) != 1.0f))
 	{
 		hit.type = HitType::Degenerate;
 		return hit;
