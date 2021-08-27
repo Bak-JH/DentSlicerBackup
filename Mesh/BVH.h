@@ -1,6 +1,5 @@
 #pragma once
 #include "RayAccelerator.h"
-#include "RayCaster.h"
 #include "HixBVH.h"
 #include <unordered_set>
 class GLModel;

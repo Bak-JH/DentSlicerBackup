@@ -14,7 +14,6 @@ class BoundedObjectFactory
 public:
 	BoundedObjectFactory(const std::unordered_map<VertexConstItr, QVector3D>& wPosCache);
 	std::vector<BVHImpl::BoundedObject*> getBounds(const std::unordered_set<const GLModel*>& models);
-	std::vector<BVHImpl::BoundedObject*> getBounds(const Mesh& mesh); // delete later
 
 private:
 	BVHImpl::BoundedObject* toBoundedObjectHeap(const FaceConstItr& face);
@@ -80,22 +79,6 @@ std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const std::
 	return bounds;
 }
 
-std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const Mesh& mesh) // delete later
-{
-	std::vector<BVHImpl::BoundedObject*> bounds;
-	size_t faceCount = 0;
-		faceCount += mesh.getFaces().size();
-
-	bounds.reserve(faceCount);
-		auto faceEnd = mesh.getFaces().cend();
-		for (auto faceItr = mesh.getFaces().cbegin(); faceItr != faceEnd; ++faceItr)
-		{
-			bounds.push_back(toBoundedObjectHeap(faceItr));
-		}
-	
-	return bounds;
-}
-
 Hix::Engine3D::BVH::~BVH()
 {
 	for (auto each : _boundedObjects)
@@ -139,7 +122,6 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 		working_list.pop_front();
 
 		// Is 'node' intersected by the box?
-		//if (node->intersect(pclOrderBound))
 		if (node->intersect(pclOrderBound) && rayIntersectsAABB(dirFrac, rayFrom, *node))
 		{
 			// We have to check the children of the intersected 'node'
@@ -217,76 +199,6 @@ std::pair<float, QVector3D> Hix::Engine3D::BVH::getClosestDistance(const QVector
 	}
 	return { closestLeaf.dist, closestLeaf.closestPt };
 }
-
-float Hix::Engine3D::BVH::getClosestDistanceOrigin(const QVector3D& point)
-{
-	struct LeafInfo
-	{
-		float dist;
-		Node* leafnode;
-		QVector3D closestPt;
-	};
-
-	std::priority_queue< std::pair<float, Node*>, std::vector<std::pair<float, Node*>>, std::greater<std::pair<float, Node*>> > frontier;
-	LeafInfo closestLeaf = { std::numeric_limits<float>::max(), nullptr, QVector3D() };
-
-	frontier.push({ root_->distanceSquared(point), root_ });
-
-	while (!frontier.empty())
-	{
-		//get current
-		auto currentItr = frontier.top();
-		Node* currentNode = currentItr.second;
-		// exit condition on here //
-
-		if (currentItr.second != nullptr && closestLeaf.dist < currentItr.first)
-		{
-			auto normalST = point - closestLeaf.closestPt;
-			normalST.normalize();
-			auto dot = QVector3D::dotProduct(normalST, closestLeaf.leafnode->getObject()->getData().localFn());
-
-			auto closestDistance_sign = dot > 0.0f ? 1 : -1;
-
-			return closestLeaf.dist * closestDistance_sign;
-		}
-
-		frontier.pop();
-
-		// expends children
-		auto nodeChildren = currentNode->getChildren();
-
-		for (auto idx = 0; idx < 2; ++idx)
-		{
-			if (nodeChildren[idx]->isLeaf())
-			{
-				auto closestPt = getClosestVertex(point, nodeChildren[idx]->getObject()->getData());
-				auto dist = (point - closestPt).lengthSquared();
-				if (dist < closestLeaf.dist)
-				{
-					closestLeaf.dist = dist;
-					closestLeaf.leafnode = nodeChildren[idx];
-					closestLeaf.closestPt = closestPt;
-				}
-			}
-			else
-			{
-				auto dist = nodeChildren[idx]->distanceSquared(point);
-				frontier.push({ nodeChildren[idx]->distanceSquared(point), nodeChildren[idx] });
-			}
-		}
-
-	}
-
-
-	auto normalST = point - closestLeaf.closestPt;
-	normalST.normalize();
-	auto dot = QVector3D::dotProduct(normalST, closestLeaf.leafnode->getObject()->getData().localFn());
-	auto closestDistance_sign = dot > 0.0f ? 1 : -1;
-
-	return closestLeaf.dist * closestDistance_sign;
-}
-
-
 
 std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidatesDirection(const QVector3D& rayFrom, const QVector3D& rayDirection)
 {
