@@ -10,6 +10,7 @@ namespace Hix
 		{
 			FrontSide,
 			BackSide,
+			Degenerate,
 			Miss
 		};
 

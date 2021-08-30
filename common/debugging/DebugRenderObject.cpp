@@ -3,6 +3,8 @@
 #include "DebugRenderObject.h"
 #include "../../glmodel.h"
 #include "../../render/SceneEntityWithMaterial.h"
+#include "render/Bounds3D.h"
+
 using namespace Qt3DCore;
 using namespace Hix::Render;
 using namespace Hix::Debug;
@@ -12,12 +14,22 @@ void Hix::Debug::DebugRenderObject::initialize(QEntity* root)
 	_root = root;
 }
 
-void Hix::Debug::DebugRenderObject::addPath(const std::vector<QVector3D>& vertices, const QColor& color)
+void Hix::Debug::DebugRenderObject::addVertex(const QVector3D vertex, const QColor& color)
+{
+	_points.emplace_back(vertex, _root, color);
+}
+
+void Hix::Debug::DebugRenderObject::addVertices(const std::vector<QVector3D>& vertices, const QColor& color)
+{
+	_points.emplace_back(vertices, _root, color);
+}
+
+void Hix::Debug::DebugRenderObject::addLinePath(const std::vector<QVector3D>& vertices, const QColor& color)
 {
 	_lines.emplace_back(vertices, _root, color);
 }
 
-void Hix::Debug::DebugRenderObject::addPaths(const std::vector<std::vector<QVector3D>>& paths, const QColor& color)
+void Hix::Debug::DebugRenderObject::addLinePaths(const std::vector<std::vector<QVector3D>>& paths, const QColor& color)
 {
 	_lines.emplace_back(paths, _root, color);
 
@@ -31,7 +43,7 @@ void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstIt
 	{
 		points.emplace_back(each.worldPosition());
 	}
-	addPath(points, color);
+	addLinePath(points, color);
 }
 
 void Hix::Debug::DebugRenderObject::registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<FaceConstItr>& faces, const QVector4D& color)
@@ -82,7 +94,38 @@ void Hix::Debug::DebugRenderObject::showGLModelAabb(SceneEntityWithMaterial* tar
 	paths.push_back({ QVector3D(maxX, minY, minZ), QVector3D(maxX, maxY, minZ) });
 	paths.push_back({ QVector3D(maxX, minY, minZ), QVector3D(maxX, minY, maxZ) });
 
-	addPaths(paths);
+	addLinePaths(paths);
+}
+
+void Hix::Debug::DebugRenderObject::showAabb(Bounds3D& aabb)
+{
+	auto minX = aabb.xMin();
+	auto minY = aabb.yMin();
+	auto minZ = aabb.zMin();
+	auto maxX = aabb.xMax();
+	auto maxY = aabb.yMax();
+	auto maxZ = aabb.zMax();
+
+	std::vector<std::vector<QVector3D>> paths;
+
+	paths.push_back({ QVector3D(minX, minY, minZ), QVector3D(maxX, minY, minZ) });
+	paths.push_back({ QVector3D(minX, minY, minZ), QVector3D(minX, maxY, minZ) });
+	paths.push_back({ QVector3D(minX, minY, minZ), QVector3D(minX, minY, maxZ) });
+
+	paths.push_back({ QVector3D(maxX, maxY, maxZ), QVector3D(maxX, minY, maxZ) });
+	paths.push_back({ QVector3D(maxX, maxY, maxZ), QVector3D(minX, maxY, maxZ) });
+	paths.push_back({ QVector3D(maxX, maxY, maxZ), QVector3D(maxX, maxY, minZ) });
+
+	paths.push_back({ QVector3D(minX, minY, maxZ), QVector3D(maxX, minY, maxZ) });
+	paths.push_back({ QVector3D(minX, minY, maxZ), QVector3D(minX, maxY, maxZ) });
+
+	paths.push_back({ QVector3D(minX, maxY, minZ), QVector3D(minX, maxY, maxZ) });
+	paths.push_back({ QVector3D(minX, maxY, minZ), QVector3D(maxX, maxY, minZ) });
+
+	paths.push_back({ QVector3D(maxX, minY, minZ), QVector3D(maxX, maxY, minZ) });
+	paths.push_back({ QVector3D(maxX, minY, minZ), QVector3D(maxX, minY, maxZ) });
+
+	addLinePaths(paths);
 }
 
 void Hix::Debug::DebugRenderObject::clear()

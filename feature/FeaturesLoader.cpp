@@ -124,7 +124,7 @@ void Hix::Features::FeaturesLoader::loadFeatureButtons()
 	if (Hix::Application::ApplicationManager::getInstance().settings().liscense == Hix::Settings::PRO)
 	{
 		addButton<Hix::Features::ModelCut>("cut", this);
-		//addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
+		addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
 		addButton<Hix::Features::ExtendMode>("extend", this);
 		addButton<Hix::Features::LabellingMode>("label", this);
 	}
