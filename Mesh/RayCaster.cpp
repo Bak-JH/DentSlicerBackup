@@ -20,6 +20,12 @@ RayHits Hix::Engine3D::RayCaster::rayIntersect(const QVector3D& rayOrigin, const
 	for (auto& each : candidates)
 	{
 		auto result = rayIntersectTri(rayOrigin, rayDirection, each);
+		if (result.type == HitType::Degenerate)
+		{
+			rayHits.clear();
+			rayHits.push_back(result);
+			return rayHits;
+		}
 		if(result.type != HitType::Miss)
 			rayHits.emplace_back(result);
 	}
@@ -40,7 +46,8 @@ RayHits Hix::Engine3D::RayCaster::rayIntersectDirection(const QVector3D& rayFrom
 			rayHits.push_back(result);
 			return rayHits; 
 		}
-		rayHits.push_back(result);
+		if (result.type != HitType::Miss)
+			rayHits.push_back(result);
 	}
 	return rayHits;
 }
