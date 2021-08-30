@@ -4,4 +4,7 @@
 #include "catch.hpp"
 
 // Simply by including test files here, they will be run
-#include"tests/SlicerTest.h"
+//#include"tests/SlicerTest.h"
+//#include "tests/BVHAccuracy.h"
+//#include "tests/BVHbench.h"
+#include "tests/RayCastTest.h"

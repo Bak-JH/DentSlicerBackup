@@ -2,6 +2,8 @@
 #include "../glmodel.h"
 #include "../../render/Bounds3D.h"
 #include "../common/Tree/BVHBuilder.h"
+#include "feature/sampling.h"
+
 using namespace Hix;
 using namespace Hix::Engine3D;
 typedef Hix::Temp::BVH<FaceConstItr> BVHImpl;
@@ -12,7 +14,7 @@ class BoundedObjectFactory
 public:
 	BoundedObjectFactory(const std::unordered_map<VertexConstItr, QVector3D>& wPosCache);
 	std::vector<BVHImpl::BoundedObject*> getBounds(const std::unordered_set<const GLModel*>& models);
-
+	std::vector<BVHImpl::BoundedObject*> getBounds(const Mesh& mesh);
 
 private:
 	BVHImpl::BoundedObject* toBoundedObjectHeap(const FaceConstItr& face);
@@ -77,6 +79,23 @@ std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const std::
 	}
 	return bounds;
 }
+
+std::vector<BVHImpl::BoundedObject*> BoundedObjectFactory::getBounds(const Mesh& mesh)
+{
+	std::vector<BVHImpl::BoundedObject*> bounds;
+	size_t faceCount = 0;
+		faceCount += mesh.getFaces().size();
+
+	bounds.reserve(faceCount);
+		auto faceEnd = mesh.getFaces().cend();
+		for (auto faceItr = mesh.getFaces().cbegin(); faceItr != faceEnd; ++faceItr)
+		{
+			bounds.push_back(toBoundedObjectHeap(faceItr));
+		}
+	
+	return bounds;
+}
+
 Hix::Engine3D::BVH::~BVH()
 {
 	for (auto each : _boundedObjects)
@@ -137,6 +156,65 @@ std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidates(const QVector3D& r
 	}
 
 	return intersected_objects;
+}
+
+std::pair<float, QVector3D> Hix::Engine3D::BVH::getClosestDistance(const QVector3D& point)
+{
+	struct LeafInfo
+	{
+		float dist;
+		Node* leafnode;
+		QVector3D closestPt;
+	};
+
+	std::priority_queue< std::pair<float, Node*>, std::vector<std::pair<float, Node*>>, std::greater<std::pair<float, Node*>> > frontier;
+	LeafInfo closestLeaf = {std::numeric_limits<float>::max(), nullptr, QVector3D()};
+
+	frontier.push({ root_->distanceSquared(point), root_ });
+
+	while (!frontier.empty())
+	{
+		//get current
+		auto currentItr = frontier.top();
+		Node* currentNode = currentItr.second;
+		// exit condition on here //
+
+		if (currentItr.second != nullptr && closestLeaf.dist < currentItr.first)
+		{
+			auto normalST = point - closestLeaf.closestPt;
+			normalST.normalize();
+			auto dot = QVector3D::dotProduct(normalST, closestLeaf.leafnode->getObject()->getData().localFn());
+			
+			return { closestLeaf.dist, closestLeaf.closestPt };
+		}
+
+		frontier.pop();
+
+		// expends children
+		auto nodeChildren = currentNode->getChildren();
+
+		for (auto idx = 0; idx < 2; ++idx)
+		{
+			if (nodeChildren[idx]->isLeaf())
+			{
+				auto closestPt = getClosestVertex(point, nodeChildren[idx]->getObject()->getData());
+				auto dist = (point - closestPt).lengthSquared();
+				if (dist < closestLeaf.dist)
+				{
+					closestLeaf.dist = dist;
+					closestLeaf.leafnode = nodeChildren[idx];
+					closestLeaf.closestPt = closestPt;
+				}
+			}
+			else
+			{
+				auto dist = nodeChildren[idx]->distanceSquared(point);
+				frontier.push({ nodeChildren[idx]->distanceSquared(point), nodeChildren[idx] });
+			}
+		}
+
+	}
+	return { closestLeaf.dist, closestLeaf.closestPt };
 }
 
 std::deque<FaceConstItr> Hix::Engine3D::BVH::getRayCandidatesDirection(const QVector3D& rayFrom, const QVector3D& rayDirection)
@@ -232,6 +310,16 @@ Hix::Engine3D::BVH::BVH(const GLModel& model, bool isWorld) : _isWorld(isWorld)
 
 }
 
+Hix::Engine3D::BVH::BVH(const Mesh& mesh, bool isWorld) : _isWorld(isWorld)
+{	
+	initModel(mesh);
+	BoundedObjectFactory boundFactory(_wPosCache);
+	_boundedObjects = boundFactory.getBounds(mesh);
+	//do not call parent::build, without Node factory patten, defaults to pcl::...Node class
+	build(_boundedObjects);
+
+}
+
 Hix::Engine3D::BVH::BVH(const std::unordered_set<const GLModel*>& model, bool isWorld) : _isWorld(isWorld)
 {
 	//cache world vertex positions and triangle bounding boxes
@@ -251,6 +339,23 @@ void Hix::Engine3D::BVH::initModel(const GLModel& model)
 {
 	auto vtxEnd = model.getMesh()->getVertices().cend();
 	for (auto vtxItr = model.getMesh()->getVertices().cbegin(); vtxItr != vtxEnd; ++vtxItr)
+	{
+		if (_isWorld)
+		{
+			_wPosCache[vtxItr] = vtxItr.worldPosition();
+
+		}
+		else
+		{
+			_wPosCache[vtxItr] = vtxItr.localPosition();
+		}
+	}
+}
+
+void Hix::Engine3D::BVH::initModel(const Mesh& mesh)
+{
+	auto vtxEnd = mesh.getVertices().cend();
+	for (auto vtxItr = mesh.getVertices().cbegin(); vtxItr != vtxEnd; ++vtxItr)
 	{
 		if (_isWorld)
 		{

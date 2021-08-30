@@ -117,6 +117,20 @@ void Hix::Engine3D::Bounds3D::setZMin(float val)
 	_bound[5] = val;
 }
 
+void Hix::Engine3D::Bounds3D::setMinPt(QVector3D pt)
+{
+	setXMin(pt.x());
+	setYMin(pt.y());
+	setZMin(pt.z());
+}
+
+void Hix::Engine3D::Bounds3D::setMaxPt(QVector3D pt)
+{
+	setXMax(pt.x());
+	setYMax(pt.y());
+	setZMax(pt.z());
+}
+
 void Hix::Engine3D::Bounds3D::setXLength(float length)
 {
 	auto half = length / 2.0f;
@@ -166,6 +180,16 @@ float Bounds3D::zMax() const
 float Bounds3D::zMin() const
 {
 	return _bound[5];
+}
+
+QVector3D Hix::Engine3D::Bounds3D::minPt() const
+{
+	return QVector3D(xMin(), yMin(), zMin());
+}
+
+QVector3D Hix::Engine3D::Bounds3D::maxPt() const
+{
+	return  QVector3D(xMax(), yMax(), zMax());
 }
 
 float Hix::Engine3D::Bounds3D::centreX() const

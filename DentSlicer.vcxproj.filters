@@ -311,6 +311,12 @@
     <ClCompile Include="Settings\BasicSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\PointMeshEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\sampling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -891,7 +897,7 @@
     <ClInclude Include="widget\Widget.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
-    <ClInclude Include="unitTest\tests\BVHTest.h" />
+    <ClInclude Include="unitTest\tests\BVHAccuracy.h" />
     <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
     <ClInclude Include="unitTest\tests\IndexedListTest.h" />
     <ClInclude Include="unitTest\RunTests.h" />
@@ -1168,6 +1174,21 @@
     <ClInclude Include="Settings\BasicSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\sampling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\BVHBench.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\BVHTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\marchingcubeTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\RayCastTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1283,6 +1304,7 @@
     <QtMoc Include="utils\httpreq.h" />
     <QtMoc Include="utils\linemeshgeometry.h" />
     <QtMoc Include="input\raycastcontroller.h" />
+    <QtMoc Include="render\PointMeshEntity.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
     <QtMoc Include="render\PlaneMeshEntity.h" />
     <QtMoc Include="Qml\components\Buttons.h" />

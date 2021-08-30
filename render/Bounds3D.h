@@ -38,6 +38,8 @@ namespace Hix
 			void setYMin(float val);
 			void setZMax(float val);
 			void setZMin(float val);
+			void setMinPt(QVector3D pt);
+			void setMaxPt(QVector3D pt);
 
 			float xMax()const;
 			float xMin()const;
@@ -45,6 +47,9 @@ namespace Hix
 			float yMin()const;
 			float zMax()const;
 			float zMin()const;
+			QVector3D minPt()const;
+			QVector3D maxPt()const;
+
 			float centreX()const;
 			float centreY()const;
 			float centreZ()const;

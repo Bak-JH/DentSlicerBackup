@@ -183,8 +183,6 @@ namespace Hix
 			VertexConstItr getVtxAtLocalPos(const QVector3D& pos)const;
 
 			
-
-
 			//templates
 
 			template <typename FaceCond>

@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <pcl/recognition/ransac_based/auxiliary.h>
+#include <QVector3D>
 
 namespace Hix
 {
@@ -77,6 +78,7 @@ namespace Hix
 				  * and with the same vector 'sorted_objects'.  */
 				Node(std::vector<BoundedObject*>& sorted_objects, int first_id, int last_id)
 				{
+					auto bounds = sorted_objects[first_id]->getBounds();
 					// Initialize the bounds of the node
 					memcpy(bounds_, sorted_objects[first_id]->getBounds(), 6 * sizeof(float));
 
@@ -127,6 +129,11 @@ namespace Hix
 					return children_[1];
 				}
 
+				Node** getChildren()
+				{
+					return children_;
+				}
+
 				BoundedObject*
 					getObject()
 				{
@@ -149,6 +156,44 @@ namespace Hix
 
 					return true;
 				}
+				inline float
+					distanceSquared(const QVector3D& pt) const
+				{
+					auto dx = std::max(std::min(pt.x(), bounds_[1]) , bounds_[0]);
+					auto dy = std::max(std::min(pt.y(), bounds_[3]) , bounds_[2]);
+					auto dz = std::max(std::min(pt.z(), bounds_[5]) , bounds_[4]);
+
+					//auto dist = (dx * dx) + (dy * dy) + (dz * dz);
+					auto dist = (pt.x() - dx) * (pt.x() - dx) + (pt.y() - dy) * (pt.y() - dy) + (pt.z() - dz) * (pt.z() - dz);
+
+					return dist;
+				}
+				inline std::list<BoundedObject*>
+					getAllObjects()
+				{
+					// Start the intersection process at the root
+					std::list<Node*> working_list;
+					working_list.push_back(this);
+					std::list<BoundedObject*> intersected_objects;
+
+					while (!working_list.empty())
+					{
+						Node* node = working_list.front();
+						working_list.pop_front();
+						// We have to check the children of the intersected 'node'
+						if (node->hasChildren())
+						{
+							working_list.push_back(node->getLeftChild());
+							working_list.push_back(node->getRightChild());
+						}
+						else // 'node' is a leaf -> save it's object in the output list
+						{
+							intersected_objects.push_back(node->getObject());
+						}
+					}
+					return intersected_objects;
+				}
+
 				const float* getBound()const
 				{
 					return bounds_;
@@ -166,7 +211,7 @@ namespace Hix
 			protected:
 				float bounds_[6];
 				Node* children_[2];
-				BoundedObject* object_;
+				BoundedObject* object_ = nullptr;
 			};
 
 		public:
