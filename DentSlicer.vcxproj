@@ -273,6 +273,7 @@
     <ClCompile Include="feature\polyclipping\poly2tri\sweep\sweep.cc" />
     <ClCompile Include="feature\polyclipping\poly2tri\sweep\sweep_context.cc" />
     <ClCompile Include="feature\polyclipping\polyclipping.cpp" />
+    <ClCompile Include="feature\sampling.cpp" />
     <ClCompile Include="render\Bounds3D.cpp" />
     <ClCompile Include="feature\slice\ContourBuilder.cpp" />
     <ClCompile Include="feature\slice\Planes.cpp" />

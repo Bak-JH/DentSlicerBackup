@@ -90,16 +90,30 @@ RayHits rayCastBottomPyramid(RayCaster& caster, const QVector3D& origin, float b
 	RayHits allRayHits;
 	QVector3D rayDest = origin;
 	rayDest.setZ(bottomZ);
-	float x = rayDest.x() - pyramidBaseRadius;
-	float y = rayDest.y() - pyramidBaseRadius;
+
 	constexpr size_t STEPS = 20;
 	misses.reserve(STEPS * STEPS);
 	float stepSize = pyramidBaseRadius * 2 / STEPS;
+
+	constexpr float EPS = std::numeric_limits<float>::epsilon();
+
 	for (size_t i = 0; i < STEPS; ++i)
 	{
 		for (size_t j = 0; j < STEPS; ++j)
 		{
-			auto rayCastResults = caster.rayIntersect(origin, rayDest);
+			RayHits rayCastResults;
+			for (auto fixValue = -EPS*10.0f; fixValue <= EPS*10.0f; fixValue += EPS)
+			{
+				QVector3D copyDest = rayDest;
+				copyDest.setX(rayDest.x() - pyramidBaseRadius + fixValue);
+				copyDest.setY(rayDest.y() - pyramidBaseRadius + fixValue);
+
+				rayCastResults = caster.rayIntersect(origin, copyDest);
+				if (rayCastResults.size() != 0 && rayCastResults.at(0).type != HitType::Degenerate)
+				{
+					break;
+				}
+			}
 			if (rayCastResults.empty())
 			{
 				//check if this ray can support min support radius
@@ -283,15 +297,28 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 	constexpr float coneLength = SUPPORT_CONE_LENGTH;
 	constexpr float doConeLength = coneLength * 2.0f;
 	constexpr float upDigLength = 0.300;
+	constexpr float EPS = std::numeric_limits<float>::epsilon();
 
 	float botNormalLength = 0.100f;
 	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 
 	auto zCloseMin = _overhang.coord().z() - layerHeight;
 	auto rayOrigin(_overhang.coord());
-	auto rayEnd(_overhang.coord());
-	rayEnd.setZ(0);
-	auto rayCastResults = _manager->supportRaycaster().rayIntersect(rayOrigin, rayEnd);
+
+
+	RayHits rayCastResults;
+	for (auto fixValue = -EPS*10.0f; fixValue <= EPS*10.0f; fixValue += EPS)
+	{
+		auto rayEnd = 
+			QVector3D(_overhang.coord().x() + fixValue, _overhang.coord().y() + fixValue, 0);
+
+		rayCastResults = _manager->supportRaycaster().rayIntersect(rayOrigin, rayEnd);
+		if (rayCastResults.size() != 0 && rayCastResults.at(0).type != HitType::Degenerate)
+		{
+			break;
+		}
+	}
+
 	_hasBasePt = false;
 	//get rid of hits that won't  be visible when sliced
 	for (auto hitItr = rayCastResults.begin(); hitItr != rayCastResults.end();)
