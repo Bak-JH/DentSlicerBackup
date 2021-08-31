@@ -116,6 +116,24 @@ void Hix::Features::HollowMesh::redoImpl()
 
 void Hix::Features::HollowMesh::runImpl()
 {
+	auto fixedOffset = _offset + 0.5f;
+
+	/// Extend Bottom Faces ///
+	std::unordered_set<FaceConstItr> bottomFaces;
+	for (auto face = _target->getMesh()->getFaces().cbegin(); face != _target->getMesh()->getFaces().end(); ++face)
+	{
+		auto meshVtcs = face.meshVertices();
+		if ((meshVtcs[0].localPosition().z() < 0.1f ||
+			meshVtcs[1].localPosition().z() < 0.1f ||
+			meshVtcs[2].localPosition().z() < 0.1f) && face.localFn().z() < 0.0f)
+		{
+			bottomFaces.insert(face);
+		}
+	}
+	auto extend = new Hix::Features::Extend(_target, QVector3D(0,0,-1), bottomFaces, _offset);
+	tryRunFeature(*extend);
+
+	/// Generate Hole ///
 	Hix::Engine3D::Mesh* originalMesh = _target->getMeshModd();
 	_prevMesh.reset(originalMesh);
 	auto hollowMesh = new Mesh(*originalMesh);
@@ -556,6 +574,10 @@ void Hix::Features::HollowMesh::runImpl()
 	newMesh->reverseFaces();
 	*hollowMesh += *newMesh;
 	_target->setMesh(hollowMesh);
+
+	/// Cut Extended Bottom ///
+	auto cut = new ZAxialCut(_target, _offset, Hix::Features::Cut::KeepBoth);
+	tryRunFeature(*cut);
 }
 
 Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)
