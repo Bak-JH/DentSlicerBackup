@@ -42,17 +42,6 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():DialogedMode(OFFSET_POPUP_URL)
 	}
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");
-
-	auto selectedModels = Hix::Application::ApplicationManager::getInstance().partManager().selectedModels();
-	if (selectedModels.size() == 1)
-	{
-		_subject = *selectedModels.begin();
-		_modelBound = _subject->recursiveAabb();
-	}
-	else
-	{
-		throw std::runtime_error("A single model must be selected");
-	}
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()
@@ -83,7 +72,33 @@ Hix::Features::ShellOffset::~ShellOffset()
 
 void Hix::Features::ShellOffset::runImpl()
 {
+	constexpr float EPS = std::numeric_limits<float>::epsilon();
+
+	/// Extend Bottom Faces ///
+	std::unordered_set<FaceConstItr> bottomFaces;
+	FaceConstItr bottomFace;
+	for (auto face = _target->getMesh()->getFaces().cbegin(); face != _target->getMesh()->getFaces().end(); ++face)
+	{
+		auto meshVtcs = face.meshVertices();
+		if ((meshVtcs[0].localPosition().z() < EPS * 10 ||
+			meshVtcs[1].localPosition().z() < EPS * 10 ||
+			meshVtcs[2].localPosition().z() < EPS * 10) && face.localFn().z() < -0.8)
+		{
+			bottomFace = face;
+			break;
+		}
+	}
+	auto targetFaces = _target->getMesh()->findNearSimilarFaces(bottomFace.localFn(), bottomFace);
+	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), targetFaces, _offset * 2);
+	addFeature(extend);
+
+	/// Hollow Mesh ///
 	addFeature(new HollowMesh(_target, _offset));
+
+	/// Cut Extended Bottom ///
+	auto cut = new ZAxialCut(_target, _offset * 2 + 0.001f, Hix::Features::Cut::KeepTop, true);
+	addFeature(cut);
+
 	FeatureContainer::runImpl();
 }
 
@@ -116,26 +131,6 @@ void Hix::Features::HollowMesh::redoImpl()
 
 void Hix::Features::HollowMesh::runImpl()
 {
-	constexpr float EPS = std::numeric_limits<float>::epsilon();
-
-	/// Extend Bottom Faces ///
-	std::unordered_set<FaceConstItr> bottomFaces;
-	FaceConstItr bottomFace;
-	for (auto face = _target->getMesh()->getFaces().cbegin(); face != _target->getMesh()->getFaces().end(); ++face)
-	{
-		auto meshVtcs = face.meshVertices();
-		if ((meshVtcs[0].localPosition().z() < EPS * 10 ||
-			 meshVtcs[1].localPosition().z() < EPS * 10 ||
-			 meshVtcs[2].localPosition().z() < EPS * 10) && face.localFn().z() < -0.8)
-		{
-			bottomFace = face;	
-			break;
-		}
-	}
-	auto targetFaces = _target->getMesh()->findNearSimilarFaces(bottomFace.localFn(), bottomFace);
-	auto extend = new Hix::Features::Extend(_target, QVector3D(0,0,-1), targetFaces, _offset*2);
-	tryRunFeature(*extend);
-
 	/// Generate Hole ///
 	Hix::Engine3D::Mesh* originalMesh = _target->getMeshModd();
 	_prevMesh.reset(originalMesh);
@@ -579,10 +574,6 @@ void Hix::Features::HollowMesh::runImpl()
 	newMesh->reverseFaces();
 	*hollowMesh += *newMesh;
 	_target->setMesh(hollowMesh);
-
-	/// Cut Extended Bottom ///
-	auto cut = new ZAxialCut(_target, _offset * 2 + 0.001f, Hix::Features::Cut::KeepTop);
-	tryRunFeature(*cut);
 }
 
 Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)

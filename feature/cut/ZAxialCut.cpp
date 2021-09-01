@@ -41,8 +41,8 @@ namespace Hix
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep) : FeatureContainerFlushSupport(subject),
-	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep)
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName) : FeatureContainerFlushSupport(subject),
+	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep), _keepName(keepName)
 {
 
 
@@ -70,13 +70,15 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	{
 		if (childTopMesh != nullptr && !childTopMesh->getFaces().empty())
 		{
-			auto addTopModel = new ListModel(childTopMesh, subject->modelName() + "_top", &subject->transform());
+			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_top";
+			auto addTopModel = new ListModel(childTopMesh, modelName, &subject->transform());
 			addFeature(addTopModel);
 
 		}
 		if (childBotMesh != nullptr && !childBotMesh->getFaces().empty())
 		{
-			auto addBotModel = new ListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform());
+			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_bot";
+			auto addBotModel = new ListModel(childBotMesh, modelName, &subject->transform());
 			addFeature(addBotModel);
 		}
 		

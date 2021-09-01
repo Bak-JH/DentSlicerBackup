@@ -27,7 +27,7 @@ Hix::Features::LayerView::LayerView():
 		return;
 	}
 
-	slider().setValue(slider().getMax());
+	slider().setValue(std::floor(slider().getMax() + 0.5f));
 	slider().setVisible(true);
 
 	//change shader, change support, raft to same color as model
