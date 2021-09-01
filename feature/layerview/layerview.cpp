@@ -27,7 +27,7 @@ Hix::Features::LayerView::LayerView():
 		return;
 	}
 
-	slider().setValue(std::floor(slider().getMax() + 0.5f));
+	slider().setValue(slider().getMax());
 	slider().setVisible(true);
 
 	//change shader, change support, raft to same color as model
@@ -63,7 +63,7 @@ Hix::Features::LayerView::LayerView():
 
 	QObject::connect(&slider(), &Hix::QML::SlideBarShell::valueChanged, [this]() {
 		_crossSectionPlane.showLayer(slider().getValue());
-		float h = slider().getValue();
+		float h = std::floor(slider().getValue() * 10) / 10;
 		for (auto& pair : _modelColorMap)
 		{
 			pair.first->setMaterialParamter("height", QVariant::fromValue(h));

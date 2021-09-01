@@ -75,14 +75,17 @@ void Hix::Features::ShellOffset::runImpl()
 	constexpr float EPS = std::numeric_limits<float>::epsilon();
 
 	/// Extend Bottom Faces ///
-	std::unordered_set<FaceConstItr> bottomFaces;
 	FaceConstItr bottomFace;
+	Bounds3D aabb = _target->aabb();
+	aabb.localBoundUpdate(*_target->getMesh());
+
 	for (auto face = _target->getMesh()->getFaces().cbegin(); face != _target->getMesh()->getFaces().end(); ++face)
 	{
 		auto meshVtcs = face.meshVertices();
-		if ((meshVtcs[0].localPosition().z() < EPS * 10 ||
-			meshVtcs[1].localPosition().z() < EPS * 10 ||
-			meshVtcs[2].localPosition().z() < EPS * 10) && face.localFn().z() < -0.8)
+
+		if ((meshVtcs[0].localPosition().z() < aabb.zMin() + EPS * 10 ||
+			 meshVtcs[1].localPosition().z() < aabb.zMin() + EPS * 10 ||
+			 meshVtcs[2].localPosition().z() < aabb.zMin() + EPS * 10) && face.localFn().z() < -0.8)
 		{
 			bottomFace = face;
 			break;
