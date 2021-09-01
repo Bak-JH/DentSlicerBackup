@@ -92,7 +92,7 @@ Hix.SlideBarShell {
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.left: parent.left
 						anchors.leftMargin: (parent.width - 10 - width) / 2
-						text: control.value.toFixed(2)
+						text: control.value.toFixed(1)
 						font.family: openSemiBold.name
 						font.pointSize: 10.5
 						color: "#ffffff"
