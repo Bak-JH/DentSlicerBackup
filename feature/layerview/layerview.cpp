@@ -63,7 +63,7 @@ Hix::Features::LayerView::LayerView():
 
 	QObject::connect(&slider(), &Hix::QML::SlideBarShell::valueChanged, [this]() {
 		_crossSectionPlane.showLayer(slider().getValue());
-		float h = std::floor(slider().getValue() * 10) / 10;
+		float h = slider().getValue();
 		for (auto& pair : _modelColorMap)
 		{
 			pair.first->setMaterialParamter("height", QVariant::fromValue(h));
