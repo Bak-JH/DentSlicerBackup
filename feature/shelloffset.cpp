@@ -92,14 +92,15 @@ void Hix::Features::ShellOffset::runImpl()
 		}
 	}
 	auto targetFaces = _target->getMesh()->findNearSimilarFaces(bottomFace.localFn(), bottomFace);
-	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), targetFaces, _offset * 2);
+	auto extendValue = std::fmod(_offset, 2.0f) > std::numeric_limits<float>::epsilon() * 10 ? _offset : _offset + 1;
+	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), targetFaces, extendValue);
 	addFeature(extend);
 
 	/// Hollow Mesh ///
 	addFeature(new HollowMesh(_target, _offset));
 
 	/// Cut Extended Bottom ///
-	auto cut = new ZAxialCut(_target, _offset * 2 + 0.001f, Hix::Features::Cut::KeepTop, true);
+	auto cut = new ZAxialCut(_target, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true);
 	addFeature(cut);
 
 	FeatureContainer::runImpl();
@@ -196,8 +197,6 @@ void Hix::Features::HollowMesh::runImpl()
 					}
 
 					auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
-					if (distSign > 0)
-						qDebug() << currPt;
 					_SDF[indxex] = bvhdist.first * distSign;
 				}
 			}
