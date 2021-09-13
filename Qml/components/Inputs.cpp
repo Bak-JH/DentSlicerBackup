@@ -36,6 +36,12 @@ void Hix::QML::Controls::InputSpinBox::setIncrement(double inc)
 	emit incrementChanged();
 }
 
+void Hix::QML::Controls::InputSpinBox::updateValue()
+{
+	setValue(_value > _max ? _max : _value);
+	setValue(_value < _min ? _min : _value);
+}
+
 Hix::QML::Controls::TextInputBox::TextInputBox(QQuickItem* parent) : QQuickItem(parent)
 {
 }

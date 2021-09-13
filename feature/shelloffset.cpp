@@ -42,6 +42,8 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():DialogedMode(OFFSET_POPUP_URL)
 	}
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");
+
+	_offsetValue->setRange(1, 100);
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()
@@ -50,6 +52,8 @@ Hix::Features::ShellOffsetMode::~ShellOffsetMode()
 
 void Hix::Features::ShellOffsetMode::applyButtonClicked()
 {
+	_offsetValue->updateValue();
+
 	auto container = new Hix::Features::FeatureContainer();
 	for (auto each : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
 	{
