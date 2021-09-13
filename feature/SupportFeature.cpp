@@ -295,6 +295,15 @@ Hix::Features::SupportMode::SupportMode()
 	_maxConnectDistanceSpin->setValue(settings.maxConnectDistance);
 	_thickenFeetBttn->setChecked(settings.thickenFeet);
 
+	_suppDensitySpin->setRange(5, 100);
+	_maxRadSpin->setRange(0.1, 5);
+	_minRadSpin->setRange(0.1, 5);
+	_raftRadiusMultSpin->setRange(0.5, 100);
+	_raftMinMaxRatioSpin->setRange(1, 10);
+	_raftThickness->setRange(0.05, 10);
+	_supportBaseHeightSpin->setRange(1, 20);
+	_maxConnectDistanceSpin->setRange(0, 10000);
+
 	// bind buttons
 	QObject::connect(_generateSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		generateAutoSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());

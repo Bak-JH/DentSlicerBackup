@@ -19,16 +19,7 @@ Hix.InputSpinBox {
 		anchors.verticalCenter: control.verticalCenter
 	}
 	onValueChanged:{ 
-		if(root.value < fromNum)
-			root.value = fromNum
-		if(root.value > toNum)
-			root.value = toNum
-		
-		if(!isNaN(root.value)) {
-			var diff = Math.abs(parseFloat(controlInput.text) - root.value);
-			if(diff >= 0.001)
-				controlInput.text = root.value.toFixed(3);
-		}
+
 	}
 
 	SpinBox {
@@ -66,6 +57,17 @@ Hix.InputSpinBox {
 			{
 				if(activeFocus)
 					selectAll();
+
+				if(root.value < fromNum)
+					root.value = fromNum
+				if(root.value > toNum)
+					root.value = toNum
+		
+				if(!isNaN(root.value)) {
+					var diff = Math.abs(parseFloat(controlInput.text) - root.value);
+					if(diff >= 0.001)
+						controlInput.text = root.value.toFixed(3);
+				}
 			}
 			Component.onCompleted:
 			{
