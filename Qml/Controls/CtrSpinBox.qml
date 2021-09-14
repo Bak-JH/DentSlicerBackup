@@ -18,8 +18,13 @@ Hix.InputSpinBox {
 		color: "#666666"
 		anchors.verticalCenter: control.verticalCenter
 	}
-	onValueChanged:{ 
 
+	onValueChanged:{ 
+		if(!isNaN(root.value)) {
+			var diff = Math.abs(parseFloat(controlInput.text) - root.value);
+			if(diff >= 0.001)
+				controlInput.text = root.value.toFixed(3);
+		}
 	}
 
 	SpinBox {

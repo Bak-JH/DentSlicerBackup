@@ -54,6 +54,10 @@ void Hix::Features::ShellOffsetMode::applyButtonClicked()
 {
 	_offsetValue->updateValue();
 
+#ifdef _DEBUG
+	qDebug() << _offsetValue->getValue();
+#endif
+
 	auto container = new Hix::Features::FeatureContainer();
 	for (auto each : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
 	{
