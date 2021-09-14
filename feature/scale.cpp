@@ -32,6 +32,12 @@ void Hix::Features::ScaleMode::applyButtonClicked()
 	_yValue->updateValue();
 	_zValue->updateValue();
 
+#ifdef _DEBUG
+	qDebug() << _xValue->getValue();
+	qDebug() << _yValue->getValue();
+	qDebug() << _zValue->getValue();
+#endif
+
 	auto scale = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	scale /= 100; //percent
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);

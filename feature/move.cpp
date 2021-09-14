@@ -69,6 +69,12 @@ void Hix::Features::MoveMode::applyButtonClicked()
 	_yValue->updateValue();
 	_zValue->updateValue();
 
+#ifdef _DEBUG
+	qDebug() << _xValue->getValue();
+	qDebug() << _yValue->getValue();
+	qDebug() << _zValue->getValue();
+#endif
+
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	if (to == QVector3D(0, 0, 0))
 		return;

@@ -75,6 +75,12 @@ void Hix::Features::RotateMode::applyButtonClicked()
 	_yValue->updateValue();
 	_zValue->updateValue();
 
+#ifdef _DEBUG
+	qDebug() << _xValue->getValue();
+	qDebug() << _yValue->getValue();
+	qDebug() << _zValue->getValue();
+#endif
+
 	auto rotation = QQuaternion::fromEulerAngles(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
