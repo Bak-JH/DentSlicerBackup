@@ -30,7 +30,7 @@ namespace Hix
 			void logout();
 
 		private:
-			void setWebview();
+			void setWebview(int width = 720, int height = 720);
 			void acquireAuth(Hix::Settings::Liscense license);
 			void blockApp();
 			void unblockApp();

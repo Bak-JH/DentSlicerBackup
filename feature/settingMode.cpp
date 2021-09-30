@@ -44,7 +44,7 @@ Hix::Features::SettingMode::SettingMode()
 	QObject::connect(_logoutBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
 		auth.logout();
-		auth.login();
+		//auth.login();
 		});
 	QObject::connect(_updateBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		Hix::Application::ApplicationManager::getInstance().updater().forceCheckForUpdates();
