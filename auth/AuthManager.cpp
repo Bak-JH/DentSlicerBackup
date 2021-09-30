@@ -36,6 +36,7 @@ constexpr auto PROTOCOL = IS_TLS ? "https://"_fstr : "http://"_fstr;
 
 
 constexpr auto LOGIN_URL = PROTOCOL + ADDRESS + "/product/login/"_fstr;
+constexpr auto PROFILE_URL = LOGIN_URL + "?next=/product/profile/"_fstr;
 constexpr auto LOGIN_REDIRECT_URL = PROTOCOL + ADDRESS + "/product/login_redirect/"_fstr;
 constexpr auto REGISTER_SERIAL_URL = PROTOCOL + ADDRESS + "/product/register/"_fstr;
 constexpr auto REGISTER_SERIAL_DONE_URL = PROTOCOL + ADDRESS + "/product/registration_done/"_fstr;
@@ -114,13 +115,13 @@ inline QNetworkCookie fromStdCk(const std::string& name, const std::string& val)
     return ck;
 }
 
-void Hix::Auth::AuthManager::setWebview()
+void Hix::Auth::AuthManager::setWebview(int width, int height)
 {
     if (!_webView)
     {
         _webView.reset(new QWebEngineView(nullptr));
-        _webView->setMinimumWidth(720);
-        _webView->setMinimumHeight(720);
+        _webView->setMinimumWidth(width);
+        _webView->setMinimumHeight(height);
     }
 }
 
@@ -204,7 +205,7 @@ void Hix::Auth::AuthManager::login()
         _cks[cookie.name().toStdString()] = cookie.value().toStdString();
         });
     QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
-        //qDebug() << url;
+        qDebug() << url;
         if (_webView)
         {
             if (url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
@@ -275,6 +276,11 @@ void Hix::Auth::AuthManager::login()
                     loader.loadFeatureButtons();
                 }
             }
+
+            if (url.toString().toStdString().find(PROFILE_URL.to_std_string()) != std::string::npos)
+            {
+                _webView->load(QUrl(PROFILE_URL.data()));
+            }
             
         }
         });
@@ -286,16 +292,19 @@ void Hix::Auth::AuthManager::login()
 void Hix::Auth::AuthManager::logout()
 {
     //delete login cookies so user is promted to login again
-    setWebview();
-    auto cookieStore = _webView->page()->profile()->cookieStore();
-    cookieStore->deleteAllCookies();
-    //close websocket conenction
-    if(_ws)
-    {
-        _ws->close();
-    }
+    setWebview(1280, 720);
+    _webView->load(QUrl(PROFILE_URL.data()));
+    _webView->show();
+
+    //auto cookieStore = _webView->page()->profile()->cookieStore();
+    //cookieStore->deleteAllCookies();
+    ////close websocket conenction
+    //if(_ws)
+    //{
+    //    _ws->close();
+    //}
     //block usage until authorized
-	blockApp();
+	//blockApp();
 }  
 
 
@@ -359,6 +368,7 @@ void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
             qDebug() << "none";
             moddableSetting.liscense = Hix::Settings::NONE;
             _webView->load(QUrl(REGISTER_SERIAL_URL.data()));
+            unblockApp();
         }
     }
 }   
