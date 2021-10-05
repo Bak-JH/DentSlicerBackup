@@ -30,25 +30,13 @@ FeaturePopup {
 		buttonText: "View Profile"
 	}
 	CtrTextButton {
-		id: logoutButton
-		width: 224
-		height: 32
-		radius: 16
-		// color: "transparent"
-		// border.color: "#b2c4c6"
-		anchors.top: profileButton.bottom
-		anchors.topMargin: 10
-		anchors.horizontalCenter: parent.horizontalCenter
-		buttonText: "Logout"
-	}
-	CtrTextButton {
 		id: updateButton
 		width: 224
 		height: 32
 		radius: 16
 		// color: "transparent"
 		// border.color: "#b2c4c6"
-		anchors.top: logoutButton.bottom
+		anchors.top: profileButton.bottom
 		anchors.topMargin: 10
 		anchors.horizontalCenter: parent.horizontalCenter
 		buttonText: "Check for update"

@@ -205,7 +205,7 @@ void Hix::Auth::AuthManager::login()
         _cks[cookie.name().toStdString()] = cookie.value().toStdString();
         });
     QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
-        qDebug() << url;
+        //qDebug() << url;
         if (_webView)
         {
             if (url.toString().toStdString().find(LOGIN_REDIRECT_URL.to_std_string()) != std::string::npos)
@@ -289,22 +289,29 @@ void Hix::Auth::AuthManager::login()
     
 }
 
-void Hix::Auth::AuthManager::logout()
+void Hix::Auth::AuthManager::profile()
 {
     //delete login cookies so user is promted to login again
     setWebview(1280, 720);
     _webView->load(QUrl(PROFILE_URL.data()));
     _webView->show();
-
-    //auto cookieStore = _webView->page()->profile()->cookieStore();
-    //cookieStore->deleteAllCookies();
-    ////close websocket conenction
-    //if(_ws)
-    //{
-    //    _ws->close();
-    //}
-    //block usage until authorized
-	//blockApp();
+    QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
+        if (url.toString().toStdString().find(LOGIN_URL.to_std_string()) != std::string::npos)
+        {
+            auto cookieStore = _webView->page()->profile()->cookieStore();
+            cookieStore->deleteAllCookies();
+            //close websocket conenction
+            if(_ws)
+            {
+                _ws->close();
+            }
+            //block usage until authorized
+            blockApp();
+            _webView->close();
+            _webView.reset();
+            login();
+        }
+    });
 }  
 
 
