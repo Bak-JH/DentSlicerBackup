@@ -27,7 +27,7 @@ namespace Hix
 			void setResumeWindow(QObject* resume);
 
 			void login();
-			void logout();
+			void profile();
 
 		private:
 			void setWebview(int width = 720, int height = 720);
