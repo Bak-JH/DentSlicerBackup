@@ -25,6 +25,7 @@ namespace Hix
 			AuthManager();
 			void setMainWindow(QQuickWindow* window);
 			void setResumeWindow(QObject* resume);
+			void setWebViewWindow(QWidget* webWindow);
 
 			void login();
 			void profile();
@@ -45,6 +46,7 @@ namespace Hix
 			QMetaObject::Connection _ckAddedConnToken;
 			QQuickWindow* _mainWindow;
 			QObject* _resumeWindow;
+			QWidget* _webViewWindow;
 			std::unordered_map<std::string, std::string> _cks;
 		public slots:
 			void replyFinished(QNetworkReply* reply); 
