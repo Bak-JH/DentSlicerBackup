@@ -295,6 +295,5 @@ Item{
 		id : resumeWindow
 		objectName: "resumeWindow"
 	}
-
 }
 
