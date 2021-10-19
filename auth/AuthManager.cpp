@@ -9,7 +9,7 @@
 #include <QQuickWindow>
 #include <QWebEngineHistory>
 
-#include <QDockWidget>
+#include <QWidget>
 #include <QToolBar>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -58,6 +58,22 @@ constexpr auto WS_BASIC_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/
 //constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
 
 
+Hix::Auth::WebViewWindow::WebViewWindow()
+{
+    _toolbar.reset(new QToolBar(this));
+    _toolbar->addAction("Back", [this]() { _webView->back(); });
+
+    _layout.reset(new QVBoxLayout(this));
+    _layout->addStretch();
+    _layout->addWidget(_toolbar.get());
+}
+
+void Hix::Auth::WebViewWindow::setWebView(QWebEngineView* webView)
+{
+    _webView.reset(webView);
+    _layout->addWidget(_webView.get());
+
+}
 
 //TODO: fix this
 void qDeleteLater(QWebEngineView* obj)
@@ -73,6 +89,7 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
 {
     //_webView->setPage(new HixWebviewPage());
     _ws.reset(new QWebSocket());
+
     QObject::connect(_ws.get(), &QWebSocket::connected,
         [this]() {
             unblockApp();
@@ -108,10 +125,7 @@ void Hix::Auth::AuthManager::setResumeWindow(QObject* resume)
     QObject::connect(_resumeWindow, SIGNAL(resume()), this, SLOT(resume()));
 
 }
-void Hix::Auth::AuthManager::setWebViewWindow(QWidget* webWindow)
-{
-    _webViewWindow = webWindow;
-}
+
 void Hix::Auth::AuthManager::setMainWindow(QQuickWindow* window)
 {
     _mainWindow = window;
@@ -127,27 +141,16 @@ inline QNetworkCookie fromStdCk(const std::string& name, const std::string& val)
 
 void Hix::Auth::AuthManager::setWebview(int width, int height)
 {
-    if (!_webView)
+    if (!_webViewWindow)
     {
-        _webView.reset(new QWebEngineView(_webViewWindow));
-        _webViewWindow->setMinimumWidth(width);
-        _webViewWindow->setMinimumHeight(height);
+        _webView.reset(new QWebEngineView());
         _webView->setMinimumWidth(width);
         _webView->setMinimumHeight(height);
 
-        if(_webViewWindow->children().size() == 0)
-        {
-            QToolBar* toolBar = new QToolBar();
-            toolBar->addAction("Back", [this]() { _webView->back(); });
-
-            QVBoxLayout* layout = new QVBoxLayout(_webViewWindow);
-            layout->addStretch();
-            layout->addWidget(toolBar);
-            layout->addWidget(_webView.get());
-        }
-
-        _webViewWindow->show();
-        _webView->show();
+        _webViewWindow.reset(new WebViewWindow());
+        _webViewWindow->setWebView(_webView.get());
+        _webViewWindow->setMinimumHeight(height + 50);
+        _webViewWindow->setMinimumWidth(width + 25);
     }
 }
 
@@ -311,20 +314,21 @@ void Hix::Auth::AuthManager::login()
         }
         });
     _webView->load(QUrl(LOGIN_URL.data()));
-	_webView->show();
+	_webViewWindow->show();
     
 }
 
 void Hix::Auth::AuthManager::profile()
 {
     //delete login cookies so user is promted to login again
-    if (_webView) {
-        _webView->close();
+    if (_webViewWindow) {
         _webView.reset();
+        _webViewWindow->close();
+        _webViewWindow.reset();
     }
     setWebview(1280, 720);
     _webView->load(QUrl(PROFILE_URL.data()));
-    _webView->show();
+    _webViewWindow->show();
     if (!_webView){
         QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
             if (url.toString().toStdString().compare(LOGIN_URL.to_std_string()) == 0 ||
@@ -334,9 +338,9 @@ void Hix::Auth::AuthManager::profile()
                 cookieStore->deleteAllCookies();
 
                 //block usage until authorized
-                _webViewWindow->close();
-                _webView->close();
                 _webView.reset();
+                _webViewWindow->close();
+                _webViewWindow.reset();
                 blockApp();
                 login();
             }
@@ -357,11 +361,11 @@ void Hix::Auth::AuthManager::blockApp()
 void Hix::Auth::AuthManager::unblockApp()
 {
     _mainWindow->setProperty("visible", true);
-    if (_webView)
+    if (_webViewWindow)
     {
-        _webViewWindow->close();
-        _webView->close();
         _webView.reset();
+        _webViewWindow->close();
+        _webViewWindow.reset();
     }
 
 }
@@ -410,4 +414,3 @@ void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
         }
     }
 }   
-

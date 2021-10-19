@@ -6,9 +6,12 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QWidget>
 class QWebEngineView;
 class QWebSocket;
 class QQuickWindow;
+class QToolBar;
+class QVBoxLayout;
 namespace Hix
 {
 	namespace Settings
@@ -17,7 +20,17 @@ namespace Hix
 	}
 	namespace Auth
 	{
-
+		class WebViewWindow : public QWidget
+		{
+		public:
+			WebViewWindow();
+			void setWebView(QWebEngineView* webView);
+		private:
+			std::unique_ptr<QToolBar> _toolbar;
+			std::unique_ptr<QVBoxLayout> _layout;
+			std::unique_ptr<QWebEngineView> _webView;
+		};
+		
 		class AuthManager: public QObject
 		{
 			Q_OBJECT
@@ -25,7 +38,6 @@ namespace Hix
 			AuthManager();
 			void setMainWindow(QQuickWindow* window);
 			void setResumeWindow(QObject* resume);
-			void setWebViewWindow(QWidget* webWindow);
 
 			void login();
 			void profile();
@@ -46,7 +58,7 @@ namespace Hix
 			QMetaObject::Connection _ckAddedConnToken;
 			QQuickWindow* _mainWindow;
 			QObject* _resumeWindow;
-			QWidget* _webViewWindow;
+			std::unique_ptr<WebViewWindow> _webViewWindow;
 			std::unordered_map<std::string, std::string> _cks;
 		public slots:
 			void replyFinished(QNetworkReply* reply); 
