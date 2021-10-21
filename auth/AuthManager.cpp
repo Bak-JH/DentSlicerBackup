@@ -65,6 +65,8 @@ Hix::Auth::WebViewWindow::WebViewWindow()
 
     _layout.reset(new QVBoxLayout(this));
     _layout->addStretch();
+    _layout->setSpacing(0);
+    _layout->setContentsMargins(0, 0, 0, 0);
     _layout->addWidget(_toolbar.get());
 }
 
@@ -149,8 +151,8 @@ void Hix::Auth::AuthManager::setWebview(int width, int height)
 
         _webViewWindow.reset(new WebViewWindow());
         _webViewWindow->setWebView(_webView.get());
-        _webViewWindow->setMinimumHeight(height + 50);
-        _webViewWindow->setMinimumWidth(width + 25);
+        _webViewWindow->setMinimumHeight(height);
+        _webViewWindow->setMinimumWidth(width);
     }
 }
 
@@ -326,7 +328,7 @@ void Hix::Auth::AuthManager::profile()
         _webViewWindow->close();
         _webViewWindow.reset();
     }
-    setWebview(1280, 720);
+    setWebview(995, 560);
     _webView->load(QUrl(PROFILE_URL.data()));
     _webViewWindow->show();
     if (!_webView){
@@ -337,10 +339,12 @@ void Hix::Auth::AuthManager::profile()
                 auto cookieStore = _webView->page()->profile()->cookieStore();
                 cookieStore->deleteAllCookies();
 
-                //block usage until authorized
+                //close webView window
                 _webView.reset();
                 _webViewWindow->close();
                 _webViewWindow.reset();
+
+                //block app and reopen login page
                 blockApp();
                 login();
             }
