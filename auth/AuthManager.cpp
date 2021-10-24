@@ -61,7 +61,7 @@ constexpr auto WS_BASIC_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/
 Hix::Auth::WebViewWindow::WebViewWindow()
 {
     _toolbar.reset(new QToolBar(this));
-    _toolbar->addAction("Back", [this]() { _webView->back(); });
+    _toolbar->addAction(QIcon(":/Resource/arrow_left.png"), "Back", [this]() { _webView->back(); });
 
     _layout.reset(new QVBoxLayout(this));
     _layout->addStretch();
