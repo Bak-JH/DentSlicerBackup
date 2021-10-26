@@ -62,6 +62,7 @@ Hix::Auth::WebViewWindow::WebViewWindow()
 {
     _toolbar.reset(new QToolBar(this));
     _toolbar->addAction(QIcon(":/Resource/arrow_left.png"), "Back", [this]() { _webView->back(); });
+    _toolbar->setStyleSheet("QToolBar {background: rgb(255, 255, 255)}");
 
     _layout.reset(new QVBoxLayout(this));
     _layout->addStretch();
