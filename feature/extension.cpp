@@ -22,6 +22,8 @@ Hix::Features::ExtendMode::ExtendMode()
 	}
 	auto& co = controlOwner();
 	co.getControl(_extendValue, "extendvalue");
+
+	_extendValue->setRange(-100, 100);
 }
 
 
@@ -42,6 +44,12 @@ void Hix::Features::ExtendMode::applyButtonClicked()
 {
 	if (_args.empty())
 		return;
+
+	_extendValue->updateValue();
+
+#ifdef _DEBUG
+	qDebug() << _extendValue->getValue();
+#endif
 
 	auto distance = _extendValue->getValue();
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());

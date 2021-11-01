@@ -25,6 +25,7 @@ namespace Hix
 				void setValue(double value);
 				void setRange(double min, double max);
 				void setIncrement(double inc);
+				void updateValue();
 				//Q_INVOKABLE QVariantMap parseStringSigFig(QString str)const;
 				///// <summary>
 				///// Pretty damn accurate sig fig guessing from given double
@@ -42,7 +43,7 @@ namespace Hix
 
 			private:
 				double _value = 0;
-				double _min, _max;
+				double _min = std::numeric_limits<double>::min(), _max = std::numeric_limits<double>::max();
 				double _increment = 1.0;
 			};
 

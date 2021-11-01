@@ -19,7 +19,7 @@ Hix::Features::SettingMode::SettingMode()
 {
 	auto& co = controlOwner();
 	co.getControl(_printerPresets, "printerPreset");
-	co.getControl(_logoutBttn, "logoutButton");
+	co.getControl(_profileBttn, "profileButton");
 	co.getControl(_updateBttn, "updateButton");
 	co.getControl(_resetBttn, "resetSettings");
 
@@ -41,10 +41,9 @@ Hix::Features::SettingMode::SettingMode()
 	_printerPresets->setList(presets);
 	_printerPresets->setIndex(_oldIndex);
 
-	QObject::connect(_logoutBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+	QObject::connect(_profileBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
-		auth.logout();
-		auth.login();
+		auth.profile();
 		});
 	QObject::connect(_updateBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		Hix::Application::ApplicationManager::getInstance().updater().forceCheckForUpdates();

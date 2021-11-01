@@ -17,6 +17,10 @@ Hix::Features::ScaleMode::ScaleMode(): _targetModels(Hix::Application::Applicati
 	co.getControl(_xValue, "scaleX");
 	co.getControl(_yValue, "scaleY");
 	co.getControl(_zValue, "scaleZ");
+
+	_xValue->setRange(0, 20000);
+	_yValue->setRange(0, 20000);
+	_zValue->setRange(0, 20000);
 }
 Hix::Features::ScaleMode::~ScaleMode()
 {
@@ -24,6 +28,16 @@ Hix::Features::ScaleMode::~ScaleMode()
 
 void Hix::Features::ScaleMode::applyButtonClicked()
 {
+	_xValue->updateValue();
+	_yValue->updateValue();
+	_zValue->updateValue();
+
+#ifdef _DEBUG
+	qDebug() << _xValue->getValue();
+	qDebug() << _yValue->getValue();
+	qDebug() << _zValue->getValue();
+#endif
+
 	auto scale = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	scale /= 100; //percent
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);

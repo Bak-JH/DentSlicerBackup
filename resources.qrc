@@ -226,5 +226,6 @@
         <file>Resource/menu_printer.png</file>
         <file>Resource/menu_printer_select_1.png</file>
         <file>Resource/pem/service_pub.pem</file>
+        <file>Resource/arrow_left.png</file>
     </qresource>
 </RCC>

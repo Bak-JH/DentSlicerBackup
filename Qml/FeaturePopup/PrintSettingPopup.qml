@@ -18,7 +18,7 @@ FeaturePopup {
 		anchors.topMargin: 55
 	}
 	CtrTextButton {
-		id: logoutButton
+		id: profileButton
 		width: 224
 		height: 32
 		radius: 16
@@ -27,7 +27,7 @@ FeaturePopup {
 		anchors.top: printerPreset.bottom
 		anchors.topMargin: 30
 		anchors.horizontalCenter: parent.horizontalCenter
-		buttonText: "Logout"
+		buttonText: "View Profile"
 	}
 	CtrTextButton {
 		id: updateButton
@@ -36,7 +36,7 @@ FeaturePopup {
 		radius: 16
 		// color: "transparent"
 		// border.color: "#b2c4c6"
-		anchors.top: logoutButton.bottom
+		anchors.top: profileButton.bottom
 		anchors.topMargin: 10
 		anchors.horizontalCenter: parent.horizontalCenter
 		buttonText: "Check for update"

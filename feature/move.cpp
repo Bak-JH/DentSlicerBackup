@@ -27,6 +27,10 @@ Hix::Features::MoveMode::MoveMode() : WidgetMode()
 	co.getControl(_zValue, "moveZ");
 	co.getControl(_snapButton, "snapButton");
 
+	_xValue->setRange(-1000, 1000);
+	_yValue->setRange(-1000, 1000);
+	_zValue->setRange(-1000, 1000);
+
 	QObject::connect(_snapButton, &Hix::QML::Controls::Button::clicked, [this]() {
 			Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 			for (auto& target : _targetModels)
@@ -61,6 +65,16 @@ void Hix::Features::MoveMode::featureEnded()
 
 void Hix::Features::MoveMode::applyButtonClicked()
 {
+	_xValue->updateValue();
+	_yValue->updateValue();
+	_zValue->updateValue();
+
+#ifdef _DEBUG
+	qDebug() << _xValue->getValue();
+	qDebug() << _yValue->getValue();
+	qDebug() << _zValue->getValue();
+#endif
+
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	if (to == QVector3D(0, 0, 0))
 		return;

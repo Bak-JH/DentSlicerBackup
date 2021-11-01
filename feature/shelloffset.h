@@ -26,8 +26,6 @@ namespace Hix
 			virtual ~ShellOffsetMode();
 			void applyButtonClicked()override;
 		private:
-			GLModel* _subject = nullptr;
-			Hix::Engine3D::Bounds3D _modelBound;
 			Hix::QML::Controls::InputSpinBox* _offsetValue;
 		};
 
@@ -46,7 +44,7 @@ namespace Hix
 		};
 
 
-		class HollowMesh : public Hix::Features::Feature
+		class HollowMesh : public Hix::Features::FeatureContainer
 		{
 		public:
 			HollowMesh(GLModel* target, float offset);

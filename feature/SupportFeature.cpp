@@ -295,6 +295,15 @@ Hix::Features::SupportMode::SupportMode()
 	_maxConnectDistanceSpin->setValue(settings.maxConnectDistance);
 	_thickenFeetBttn->setChecked(settings.thickenFeet);
 
+	_suppDensitySpin->setRange(5, 100);
+	_maxRadSpin->setRange(0.1, 5);
+	_minRadSpin->setRange(0.1, 5);
+	_raftRadiusMultSpin->setRange(0.5, 100);
+	_raftMinMaxRatioSpin->setRange(1, 10);
+	_raftThickness->setRange(0.05, 10);
+	_supportBaseHeightSpin->setRange(1, 20);
+	_maxConnectDistanceSpin->setRange(0, 10000);
+
 	// bind buttons
 	QObject::connect(_generateSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		generateAutoSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
@@ -329,34 +338,12 @@ Hix::Features::SupportMode::SupportMode()
 	QObject::connect(_raftTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
 		_raftTypeDrop->getSelected(modSettings.raftType);
 		});
-	QObject::connect(_suppDensitySpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.supportDensity = _suppDensitySpin->getValue();
-		});
-	QObject::connect(_maxRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.supportRadiusMax = _maxRadSpin->getValue();
-		});
-	QObject::connect(_minRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.supportRadiusMin = _minRadSpin->getValue();
-		});
-	QObject::connect(_raftRadiusMultSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.raftRadiusMult = _raftRadiusMultSpin->getValue();
-		});
-	QObject::connect(_raftMinMaxRatioSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.raftMinMaxRatio = _raftMinMaxRatioSpin->getValue();
-		});
-	QObject::connect(_raftThickness, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.raftThickness = _raftThickness->getValue();
-		});
 	QObject::connect(_interconnectTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
 		_interconnectTypeDrop->getSelected(modSettings.interconnectType);
 		});
 	QObject::connect(_supportBaseHeightSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.supportBaseHeight = _supportBaseHeightSpin->getValue();
 		});
-	QObject::connect(_maxConnectDistanceSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.maxConnectDistance = _maxConnectDistanceSpin->getValue();
-		});
-
 
 	QObject::connect(_thickenFeetBttn, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this, &modSettings]() {
 		modSettings.thickenFeet = _thickenFeetBttn->isChecked();
@@ -374,7 +361,35 @@ Hix::Features::SupportMode::~SupportMode()
 
 void Hix::Features::SupportMode::applySupportSettings()
 {
+	_suppDensitySpin->updateValue();
+	_maxRadSpin->updateValue();
+	_minRadSpin->updateValue();
+	_raftRadiusMultSpin->updateValue();
+	_raftMinMaxRatioSpin->updateValue();
+	_raftThickness->updateValue();
+	_supportBaseHeightSpin->updateValue();
+	_maxConnectDistanceSpin->updateValue();
+
+#ifdef _DEBUG
+	qDebug() << _suppDensitySpin->getValue();
+	qDebug() << _maxRadSpin->getValue();
+	qDebug() << _minRadSpin->getValue();
+	qDebug() << _raftRadiusMultSpin->getValue();
+	qDebug() << _raftMinMaxRatioSpin->getValue();
+	qDebug() << _raftThickness->getValue();
+	qDebug() << _supportBaseHeightSpin->getValue();
+	qDebug() << _maxConnectDistanceSpin->getValue();
+#endif
+
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
+	modSettings.supportDensity = _suppDensitySpin->getValue();
+	modSettings.supportRadiusMax = _maxRadSpin->getValue();
+	modSettings.supportRadiusMin = _minRadSpin->getValue();
+	modSettings.raftRadiusMult = _raftRadiusMultSpin->getValue();
+	modSettings.raftMinMaxRatio = _raftMinMaxRatioSpin->getValue();
+	modSettings.raftThickness = _raftThickness->getValue();
+	modSettings.supportBaseHeight = _supportBaseHeightSpin->getValue();
+	modSettings.maxConnectDistance = _maxConnectDistanceSpin->getValue();
 	modSettings.writeJSON();
 }
 
@@ -417,7 +432,6 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 
 void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)
 {
-	applySupportSettings();
 	auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
 	if (srMan.supportsEmpty())
 		return;
@@ -492,7 +506,6 @@ void Hix::Features::SupportMode::regenerateRaft()
 
 void Hix::Features::SupportMode::applyButtonClicked()
 {
-	//do nothing
 }
 
 
