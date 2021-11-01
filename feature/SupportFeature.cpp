@@ -354,7 +354,6 @@ Hix::Features::SupportMode::SupportMode()
 
 Hix::Features::SupportMode::~SupportMode()
 {
-	applySupportSettings();
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 }
 
