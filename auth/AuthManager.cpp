@@ -8,6 +8,12 @@
 #include <QNetworkRequest>
 #include <QQuickWindow>
 #include <QWebEngineHistory>
+
+#include <QWidget>
+#include <QToolBar>
+#include <QPushButton>
+#include <QVBoxLayout>
+
 #include "../application/ApplicationManager.h"
 #include "../common/frozen/string.hpp"
 #include "../../feature/FeaturesLoader.h"
@@ -36,6 +42,7 @@ constexpr auto PROTOCOL = IS_TLS ? "https://"_fstr : "http://"_fstr;
 
 
 constexpr auto LOGIN_URL = PROTOCOL + ADDRESS + "/product/login/"_fstr;
+constexpr auto PROFILE_URL = LOGIN_URL + "?next=/product/profile/"_fstr;
 constexpr auto LOGIN_REDIRECT_URL = PROTOCOL + ADDRESS + "/product/login_redirect/"_fstr;
 constexpr auto REGISTER_SERIAL_URL = PROTOCOL + ADDRESS + "/product/register/"_fstr;
 constexpr auto REGISTER_SERIAL_DONE_URL = PROTOCOL + ADDRESS + "/product/registration_done/"_fstr;
@@ -51,6 +58,25 @@ constexpr auto WS_BASIC_URL = "wss://"_fstr + ADDRESS + "/ws/product/dentslicer/
 //constexpr auto TEST_URL = "http://"_fstr + ADDRESS + "/product/check_login/"_fstr;
 
 
+Hix::Auth::WebViewWindow::WebViewWindow()
+{
+    _toolbar.reset(new QToolBar(this));
+    _toolbar->addAction(QIcon(":/Resource/arrow_left.png"), "Back", [this]() { _webView->back(); });
+    _toolbar->setStyleSheet("QToolBar {background: rgb(255, 255, 255)}");
+
+    _layout.reset(new QVBoxLayout(this));
+    _layout->addStretch();
+    _layout->setSpacing(0);
+    _layout->setContentsMargins(0, 0, 0, 0);
+    _layout->addWidget(_toolbar.get());
+}
+
+void Hix::Auth::WebViewWindow::setWebView(QWebEngineView* webView)
+{
+    _webView.reset(webView);
+    _layout->addWidget(_webView.get());
+
+}
 
 //TODO: fix this
 void qDeleteLater(QWebEngineView* obj)
@@ -66,6 +92,7 @@ Hix::Auth::AuthManager::AuthManager() : _webView(nullptr, qDeleteLater), _ws(nul
 {
     //_webView->setPage(new HixWebviewPage());
     _ws.reset(new QWebSocket());
+
     QObject::connect(_ws.get(), &QWebSocket::connected,
         [this]() {
             unblockApp();
@@ -101,6 +128,7 @@ void Hix::Auth::AuthManager::setResumeWindow(QObject* resume)
     QObject::connect(_resumeWindow, SIGNAL(resume()), this, SLOT(resume()));
 
 }
+
 void Hix::Auth::AuthManager::setMainWindow(QQuickWindow* window)
 {
     _mainWindow = window;
@@ -114,13 +142,18 @@ inline QNetworkCookie fromStdCk(const std::string& name, const std::string& val)
     return ck;
 }
 
-void Hix::Auth::AuthManager::setWebview()
+void Hix::Auth::AuthManager::setWebview(int width, int height)
 {
-    if (!_webView)
+    if (!_webViewWindow)
     {
-        _webView.reset(new QWebEngineView(nullptr));
-        _webView->setMinimumWidth(720);
-        _webView->setMinimumHeight(720);
+        _webView.reset(new QWebEngineView());
+        _webView->setMinimumWidth(width);
+        _webView->setMinimumHeight(height);
+
+        _webViewWindow.reset(new WebViewWindow());
+        _webViewWindow->setWebView(_webView.get());
+        _webViewWindow->setMinimumHeight(height);
+        _webViewWindow->setMinimumWidth(width);
     }
 }
 
@@ -275,27 +308,50 @@ void Hix::Auth::AuthManager::login()
                     loader.loadFeatureButtons();
                 }
             }
+
+            if (url.toString().toStdString().find(PROFILE_URL.to_std_string()) != std::string::npos)
+            {
+                _webView->load(QUrl(PROFILE_URL.data()));
+            }
             
         }
         });
     _webView->load(QUrl(LOGIN_URL.data()));
-	_webView->show();
+	_webViewWindow->show();
     
 }
 
-void Hix::Auth::AuthManager::logout()
+void Hix::Auth::AuthManager::profile()
 {
     //delete login cookies so user is promted to login again
-    setWebview();
-    auto cookieStore = _webView->page()->profile()->cookieStore();
-    cookieStore->deleteAllCookies();
-    //close websocket conenction
-    if(_ws)
-    {
-        _ws->close();
+    if (_webViewWindow) {
+        _webView.reset();
+        _webViewWindow->close();
+        _webViewWindow.reset();
     }
-    //block usage until authorized
-	blockApp();
+    setWebview(995, 560);
+    _webView->load(QUrl(PROFILE_URL.data()));
+    _webViewWindow->show();
+    if (!_webView){
+        QObject::connect(_webView.get(), &QWebEngineView::urlChanged, [this](const QUrl& url) {
+            if (url.toString().toStdString().compare(LOGIN_URL.to_std_string()) == 0 ||
+                url.toString().toStdString().compare(LOGIN_REDIRECT_URL.to_std_string()) == 0)
+            {
+                auto cookieStore = _webView->page()->profile()->cookieStore();
+                cookieStore->deleteAllCookies();
+
+                //close webView window
+                _webView.reset();
+                _webViewWindow->close();
+                _webViewWindow.reset();
+
+                //block app and reopen login page
+                blockApp();
+                login();
+            }
+        });
+    }
+    _webView->page()->setBackgroundColor(Qt::transparent);
 }  
 
 
@@ -310,10 +366,11 @@ void Hix::Auth::AuthManager::blockApp()
 void Hix::Auth::AuthManager::unblockApp()
 {
     _mainWindow->setProperty("visible", true);
-    if (_webView)
+    if (_webViewWindow)
     {
-        _webView->close();
         _webView.reset();
+        _webViewWindow->close();
+        _webViewWindow.reset();
     }
 
 }
@@ -362,4 +419,3 @@ void Hix::Auth::AuthManager::replyFinished(QNetworkReply* reply)
         }
     }
 }   
-

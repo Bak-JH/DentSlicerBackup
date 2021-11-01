@@ -97,6 +97,7 @@ int main(int argc, char** argv)
 	//login or make main window visible
 	QQuickWindow *mainWindow;
 	QObject* resumeWindow;
+
 	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
 	Hix::QML::getItemByID(appManager.getWindowRoot(), resumeWindow, "resumeWindow");
 

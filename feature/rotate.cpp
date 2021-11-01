@@ -11,10 +11,16 @@ Hix::Features::RotateMode::RotateMode(const std::unordered_set<GLModel*>& models
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget, models));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget, models));
 	_widget.setVisible(true);
+
 	auto& co = controlOwner();
 	co.getControl(_xValue, "rotateX");
 	co.getControl(_yValue, "rotateY");
 	co.getControl(_zValue, "rotateZ");
+
+	_xValue->setRange(-360, 360);
+	_yValue->setRange(-360, 360);
+	_zValue->setRange(-360, 360);
+
 	updatePosition();
 }
 Hix::Features::RotateMode::RotateMode(): RotateMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
@@ -65,6 +71,16 @@ std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
 
 void Hix::Features::RotateMode::applyButtonClicked()
 {
+	_xValue->updateValue();
+	_yValue->updateValue();
+	_zValue->updateValue();
+
+#ifdef _DEBUG
+	qDebug() << _xValue->getValue();
+	qDebug() << _yValue->getValue();
+	qDebug() << _zValue->getValue();
+#endif
+
 	auto rotation = QQuaternion::fromEulerAngles(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)

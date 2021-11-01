@@ -28,6 +28,9 @@ const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
 constexpr float LABEL_SCALE = 0.05f;
 GLModel* Hix::Features::LabellingMode::generatePreviewModel(const QMatrix4x4& transformMat)
 {
+	_fontSize->updateValue();
+	_labelDepth->updateValue();
+
 	auto labelMesh = new Hix::Engine3D::Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
@@ -225,6 +228,9 @@ Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 	co.getControl(_fontSize, "labelfontsize");
 	co.getControl(_labelDepth, "labelDepth");
 	co.getControl(_isEmboss, "labeltype");
+
+	_fontSize->setRange(0, 256);
+	_labelDepth->setRange(0.05, 10);
 }
 
 Hix::Features::LabellingMode::~LabellingMode()

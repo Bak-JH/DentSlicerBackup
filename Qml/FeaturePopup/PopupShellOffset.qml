@@ -23,7 +23,7 @@ FeaturePopup {
 		id: offsetValue
 		fromNum: 1
 		toNum: 100
-		value: 1
+		value: 3
 		label.text: "Tickness(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left

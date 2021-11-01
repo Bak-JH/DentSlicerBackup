@@ -27,7 +27,7 @@ namespace Hix
 		private:
 			bool isDirty()const;
 			Hix::QML::Controls::DropdownBox* _printerPresets;
-			Hix::QML::Controls::Button* _logoutBttn;
+			Hix::QML::Controls::Button* _profileBttn;
 			Hix::QML::Controls::Button* _updateBttn;
 			Hix::QML::Controls::Button* _resetBttn;
 
