@@ -333,6 +333,10 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 
 	if (!rayCastResults.empty())
 	{
+		// Degenerate case
+		if (rayCastResults.front().type == HitType::Degenerate)
+			return;
+
 
 		//setMaterialColor(Hix::Render::Colors::OutOfBound);
 		std::sort(rayCastResults.begin(), rayCastResults.end(), RayHitZSort());
