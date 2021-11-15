@@ -32,7 +32,8 @@ namespace Hix
 		class SettingMode;
 		class SupportMode;
 		class SliceExportMode;
-
+		class STLExportMode;
+		class ImportModelMode;
 	}
 	namespace QML
 	{
@@ -107,6 +108,8 @@ namespace Hix
 			friend class Hix::Features::SupportMode;
 			friend class Hix::Settings::BasicSetting;
 			friend class Hix::Features::SliceExportMode;
+			friend class Hix::Features::STLExportMode;
+			friend class Hix::Features::ImportModelMode;
 			friend class Hix::Auth::AuthManager;
 			friend class Hix::Utils::UpdateChecker;
 
