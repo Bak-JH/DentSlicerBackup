@@ -15,6 +15,7 @@ namespace Hix
 			~BasicSetting();
 			bool enableErrorReport;
 			std::string printerPresetPath;
+			std::string latestFilePath;
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
