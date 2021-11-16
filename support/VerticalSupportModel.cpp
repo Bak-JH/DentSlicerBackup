@@ -290,7 +290,7 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 	constexpr float EPS = std::numeric_limits<float>::epsilon();
 
 	float botNormalLength = 0.100f;
-	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
+	float layerHeight = (int)Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight/1000.0f;
 
 	auto zCloseMin = _overhang.coord().z() - layerHeight;
 	auto rayOrigin(_overhang.coord());
