@@ -24,7 +24,7 @@ FeaturePopup {
 		fromNum: 1
 		toNum: 100
 		value: 3
-		label.text: "Tickness(mm)"
+		label.text: "Thickness(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
