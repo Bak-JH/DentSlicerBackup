@@ -1579,6 +1579,7 @@
     <None Include="Qml\FeatureDivider.qml" />
     <None Include="Qml\Controls\CtrRectButton.qml" />
     <None Include="Qml\FeaturePopup\PopupPrinter.qml" />
+    <None Include="Qml\Controls\CtrSpinBoxInteger.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
