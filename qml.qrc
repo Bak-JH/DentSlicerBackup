@@ -91,5 +91,6 @@
         <file>Qml/FeatureDivider.qml</file>
         <file>Qml/Controls/CtrButtonBase.qml</file>
         <file>Qml/Controls/CtrRectButton.qml</file>
+        <file>Qml/Controls/CtrSpinBoxInteger.qml</file>
     </qresource>
 </RCC>

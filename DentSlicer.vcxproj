@@ -1281,6 +1281,7 @@
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrButtonBase.qml" />
     <None Include="Qml\Controls\CtrRectButton.qml" />
+    <None Include="Qml\Controls\CtrSpinBoxInteger.qml" />
     <None Include="Qml\Controls\CtrTextButton.qml" />
     <None Include="Qml\Controls\CtrToggleButton.qml" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />

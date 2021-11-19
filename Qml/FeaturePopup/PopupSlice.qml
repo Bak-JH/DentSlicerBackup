@@ -18,7 +18,7 @@ FeaturePopup {
 		anchors.topMargin: 44
 		anchors.leftMargin: 16
 	}
-	CtrSpinBox {
+	CtrSpinBoxInteger {
 		id: layerHeight
 		label.text: "Layer Height(µm)"
 		width: parent.width - 13 * 2	// 16 = triangle height
