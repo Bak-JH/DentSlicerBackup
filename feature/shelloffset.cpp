@@ -80,28 +80,26 @@ Hix::Features::ShellOffset::~ShellOffset()
 
 void Hix::Features::ShellOffset::runImpl()
 {
-	constexpr float EPS = std::numeric_limits<float>::epsilon();
-
 	/// Extend Bottom Faces ///
-	FaceConstItr bottomFace;
+	std::unordered_set<FaceConstItr> bottomFace;
 	Bounds3D aabb = _target->aabb();
 	aabb.localBoundUpdate(*_target->getMesh());
+
+	auto layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f;
 
 	for (auto face = _target->getMesh()->getFaces().cbegin(); face != _target->getMesh()->getFaces().end(); ++face)
 	{
 		auto meshVtcs = face.meshVertices();
 
-		if ((meshVtcs[0].localPosition().z() < aabb.zMin() + EPS * 10 ||
-			 meshVtcs[1].localPosition().z() < aabb.zMin() + EPS * 10 ||
-			 meshVtcs[2].localPosition().z() < aabb.zMin() + EPS * 10) && face.localFn().z() < -0.8)
+		if ((meshVtcs[0].localPosition().z() < aabb.zMin() + layerHeight ||
+			 meshVtcs[1].localPosition().z() < aabb.zMin() + layerHeight ||
+			 meshVtcs[2].localPosition().z() < aabb.zMin() + layerHeight) && face.localFn().z() < -0.8)
 		{
-			bottomFace = face;
-			break;
+			bottomFace.insert(face);
 		}
 	}
-	auto targetFaces = _target->getMesh()->findNearSimilarFaces(bottomFace.localFn(), bottomFace);
 	auto extendValue = std::fmod(_offset, 2.0f) > std::numeric_limits<float>::epsilon() * 10 ? _offset : _offset + 1;
-	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), targetFaces, extendValue);
+	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), bottomFace, extendValue);
 	addFeature(extend);
 
 	/// Hollow Mesh ///
