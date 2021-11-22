@@ -23,8 +23,8 @@ FeaturePopup {
 		label.text: "Layer Height(µm)"
 		width: parent.width - 13 * 2	// 16 = triangle height
 		height: 26
-		value: 100.0
-		fromNum: 100
+		value: 100
+		fromNum: 10
 		toNum: 200
 		increment: 10.0
 		anchors.left: parent.left

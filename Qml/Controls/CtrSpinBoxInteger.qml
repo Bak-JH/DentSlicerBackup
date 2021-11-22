@@ -21,9 +21,7 @@ Hix.InputSpinBox {
 
 	onValueChanged:{ 
 		if(!isNaN(root.value)) {
-			var diff = Math.abs(parseFloat(controlInput.text) - root.value);
-			if(diff >= 0.001)
-				controlInput.text = root.value.toFixed(3);
+			controlInput.text = root.value.toFixed(0);
 		}
 	}
 
@@ -69,18 +67,23 @@ Hix.InputSpinBox {
 					root.value = toNum
 		
 				if(!isNaN(root.value)) {
-					var diff = Math.abs(parseFloat(controlInput.text) - root.value);
-					if(diff >= 0.1)
-						controlInput.text = root.value.toFixed(0);
+					controlInput.text = root.value.toFixed(0);
 				}
 			}
 			Component.onCompleted:
 			{
+				if(root.value < fromNum)
+					root.value = fromNum
+				if(root.value > toNum)
+					root.value = toNum
 				text = root.value.toFixed(0);
 			}
 			onTextEdited:{
-				root.value = parseFloat(text);
-				text = root.value.toFixed(0);
+				if (!isNaN(parseFloat(text)))
+				{
+					root.value = parseFloat(text);
+					text = root.value.toFixed(0);
+				}
 			}
 		}
 		
