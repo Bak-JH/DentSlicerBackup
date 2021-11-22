@@ -93,6 +93,25 @@ void Hix::Features::SliceExportMode::applyAndClose()
 void Hix::Features::SliceExportMode::applySettings()
 {
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).sliceSetting;
+	auto layerHeight = modSettings.layerHeight;
+	auto aaxy = modSettings.AAXY;
+	auto aaz = modSettings.AAZ;
+
+	if (10.0f > layerHeight)
+		modSettings.layerHeight = 10.0f;
+	if (200.0f < layerHeight)
+		modSettings.layerHeight = 200.0f;
+
+	if (1.0f > aaxy)
+		modSettings.AAXY = 1.0f;
+	if (8.0f < aaxy)
+		modSettings.AAXY = 8.0f;
+
+	if (1.0f > aaz)
+		modSettings.AAZ = 1.0f;
+	if (8.0f < aaz)
+		modSettings.AAZ = 8.0f;
+	
 	modSettings.writeJSON();
 } 
 
