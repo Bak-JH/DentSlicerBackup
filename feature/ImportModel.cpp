@@ -21,7 +21,7 @@ Hix::Features::ImportModelMode::ImportModelMode()
 	
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
 	modSettings.parseJSON();
-	QUrl latestUrl(QString(modSettings.latestFilePath.c_str()));
+	QUrl latestUrl(QString(modSettings.importFilePath.c_str()));
 
 	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or zipped export", latestUrl, "3D files(*.stl *.obj, *.zip)");
 
@@ -30,7 +30,7 @@ Hix::Features::ImportModelMode::ImportModelMode()
 		if (!u.isEmpty())
 		{
 			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ImportModel(u));
-			modSettings.latestFilePath = u.adjusted(QUrl::RemoveFilename).toString().toStdString();
+			modSettings.importFilePath = u.adjusted(QUrl::RemoveFilename).toString().toStdString();
 			modSettings.writeJSON();
 		}
 	}

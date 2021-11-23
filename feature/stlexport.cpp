@@ -24,7 +24,7 @@ Hix::Features::STLExportMode::STLExportMode()
 
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
 	modSettings.parseJSON();
-	QString latestUrl(modSettings.latestFilePath.c_str());
+	QString latestUrl(modSettings.exportFilePath.c_str());
 
 	QString fileName;
 	if (models.size() == 1)
@@ -44,7 +44,7 @@ Hix::Features::STLExportMode::STLExportMode()
     auto se = new STLExport(models, fileName);
     Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<STLExport>(se));
 
-	modSettings.latestFilePath = QUrl(fileName).adjusted(QUrl::RemoveFilename).toString().toStdString();
+	modSettings.exportFilePath = QUrl(fileName).adjusted(QUrl::RemoveFilename).toString().toStdString();
 	modSettings.writeJSON();
 }
 
