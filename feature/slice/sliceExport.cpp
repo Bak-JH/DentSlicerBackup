@@ -67,7 +67,7 @@ void Hix::Features::SliceExportMode::applyButtonClicked()
 
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
 	modSettings.parseJSON();
-	QString latestUrl(modSettings.latestFilePath.c_str());
+	QString latestUrl(modSettings.exportFilePath.c_str());
 
 	auto fileName = QFileDialog::getSaveFileName(nullptr, "Export sliced file", latestUrl, "Zip (*.zip)", new QString("Zip (*.zip)"));
 	if (fileName.isEmpty())
@@ -79,7 +79,7 @@ void Hix::Features::SliceExportMode::applyButtonClicked()
 
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<SliceExportGPU>(se));
 
-	modSettings.latestFilePath = QUrl(fileName).adjusted(QUrl::RemoveFilename).toString().toStdString();
+	modSettings.exportFilePath = QUrl(fileName).adjusted(QUrl::RemoveFilename).toString().toStdString();
 	modSettings.writeJSON();
 }
 

@@ -1,4 +1,6 @@
 {
     "printerPresetPath": "HixC10.json",
-    "enableErrorReport": true
+    "enableErrorReport": true,
+    "importFilePath": "",
+    "exportFilePath": ""
 }
