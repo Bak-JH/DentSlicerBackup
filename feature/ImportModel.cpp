@@ -14,16 +14,24 @@
 #include <boost/algorithm/string.hpp>
 
 namespace fs = std::filesystem;
+using namespace Hix::Settings;
 
 Hix::Features::ImportModelMode::ImportModelMode()
 {
+	
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
+	modSettings.parseJSON();
+	QUrl latestUrl(QString(modSettings.importFilePath.c_str()));
 
-	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or zipped export", QUrl(), "3D files(*.stl *.obj, *.zip)");
+	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or zipped export", latestUrl, "3D files(*.stl *.obj, *.zip)");
+
 	for (auto& u : fileUrls)
 	{
 		if (!u.isEmpty())
 		{
 			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ImportModel(u));
+			modSettings.importFilePath = u.adjusted(QUrl::RemoveFilename).toString().toStdString();
+			modSettings.writeJSON();
 		}
 	}
 }

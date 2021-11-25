@@ -53,14 +53,14 @@ void Hix::Features::SliceExportGPU::run()
 	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
 	// Export to SVG
-	Hix::Slicer::SlicerGL slicer(setting.layerHeight, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
+	Hix::Slicer::SlicerGL slicer(setting.layerHeight/1000.0f, tmpPath, setting.AAXY, setting.AAZ, setting.minHeight);
 	slicer.setScreen(printerSetting.pixelSizeX(), printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY);
     Hix::Engine3D::Bounds3D bounds;
     auto vtcs = toVtxBuffer(bounds);
     slicer.setBounds(bounds);
 	auto layerCnt = slicer.run(vtcs);
 	//write info files
-	Hix::Slicer::InfoWriter iw(tmpPath, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight);
+	Hix::Slicer::InfoWriter iw(tmpPath, printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, setting.layerHeight/1000.0f);
 	iw.createInfoFile();
 	iw.writeBasicInfo(layerCnt, printerSetting.printerConstants);
 	

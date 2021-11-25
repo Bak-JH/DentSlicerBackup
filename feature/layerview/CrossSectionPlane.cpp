@@ -74,7 +74,7 @@ Hix::Features::CrossSectionPlane::~CrossSectionPlane()
 
 void Hix::Features::CrossSectionPlane::showLayer(double zHeight)
 {
-	size_t layer = zHeight / Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
+	size_t layer = zHeight / (Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f);
 	layer = std::min(_layerMeshes.size() - 1, layer);
 	setMesh(&_layerMeshes[layer]);
 	//set z

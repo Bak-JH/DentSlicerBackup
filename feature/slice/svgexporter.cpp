@@ -40,7 +40,7 @@ void SVGexporter::exportSVG(std::vector<LayerGroup>& layerGroup){
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
         //if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)
-        writeGroupHeader(currentSlice_idx, _layerHeight *(currentSlice_idx+1), contentStream);
+        writeGroupHeader(currentSlice_idx, (int)_layerHeight/1000.0f *(currentSlice_idx+1), contentStream);
         for (auto& s : layerGroup[i].slices)
         {
             PolyTree& shellSlice_polytree = *s.polytree;

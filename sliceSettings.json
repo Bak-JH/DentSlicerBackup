@@ -1,5 +1,5 @@
 {
-    "layerHeight": 0.1,
+    "layerHeight": 100.0,
     "slicingMode": "Uniform",
     "useGPU": true,
     "AAXY": 1,

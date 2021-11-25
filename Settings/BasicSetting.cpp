@@ -26,6 +26,8 @@ void Hix::Settings::BasicSetting::parseJSONImpl(const rapidjson::Document& doc)
 	auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
 	moddableSetting.printerSetting.setPrinterPreset(printerPresetPath);
 	tryParse(doc, "enableErrorReport", enableErrorReport);
+	tryParse(doc, "importFIlePath", importFilePath);
+	tryParse(doc, "exportFIlePath", exportFilePath);
 }
 
 
@@ -43,6 +45,8 @@ rapidjson::Document Hix::Settings::BasicSetting::doc()
 	doc.SetObject();
 	doc.AddMember("printerPresetPath", printerPresetPath, doc.GetAllocator());
 	doc.AddMember("enableErrorReport", enableErrorReport, doc.GetAllocator());
+	doc.AddMember("importFilePath", importFilePath, doc.GetAllocator());
+	doc.AddMember("exportFilePath", exportFilePath, doc.GetAllocator());
 	auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
 	moddableSetting.printerSetting.setPrinterPreset(printerPresetPath);
 	return doc;

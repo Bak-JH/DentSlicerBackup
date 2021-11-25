@@ -13,6 +13,7 @@ namespace Hix
 			virtual ~MTRayCaster();
 		protected:
 			RayHit rayIntersectTri(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri)override;
+			RayHit rayIntersectTriWithoutDegen(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri)override;
 		};
 
 

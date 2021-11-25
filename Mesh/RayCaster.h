@@ -28,6 +28,7 @@ namespace Hix
 			virtual ~RayCaster();
 			void addAccelerator(RayAccelerator* accelerator);
 			RayHits rayIntersect(const QVector3D& rayOrigin, const QVector3D& rayEnd);
+			RayHits rayIntersectWithoutDegen(const QVector3D& rayOrigin, const QVector3D& rayEnd);
 			RayHits rayIntersectDirection(const QVector3D& rayFrom, const QVector3D& rayDirection);
 			std::optional<RayHit> getFirstFront(RayHits& hits);
 			/// <summary>
@@ -37,6 +38,7 @@ namespace Hix
 
 		protected:
 			virtual RayHit rayIntersectTri(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;
+			virtual RayHit rayIntersectTriWithoutDegen(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;
 			RayAccelerator* _accelerator;
 		};
 
