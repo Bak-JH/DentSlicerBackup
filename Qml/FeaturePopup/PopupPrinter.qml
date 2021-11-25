@@ -10,14 +10,14 @@ FeaturePopup {
 
 	CtrDropdownBox {
 		id: printerDrop
-		label.text: "Printers"
-		width: parent.width - 10	// 16 = triangle height
-		comboBox.width: parent.width - label.width - 14
+		label.text: ""
+		width: 230	// 16 = triangle height
+		comboBox.width: 210
 		height: 26
 		anchors.top: parent.top
+		anchors.topMargin: 55
 		anchors.left: parent.left
-		anchors.topMargin: 44
-		anchors.leftMargin: 4
+		anchors.leftMargin: 3
 	}
 
 		CtrRectButton {

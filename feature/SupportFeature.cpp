@@ -354,7 +354,6 @@ Hix::Features::SupportMode::SupportMode()
 
 Hix::Features::SupportMode::~SupportMode()
 {
-	applySupportSettings();
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 }
 
@@ -398,7 +397,7 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 {
 	auto editMode = Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportEditMode();
 	auto suppType = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType;
-	if (editMode == Hix::Support::EditMode::Manual && suppType != Hix::Settings::SupportSetting::SupportType::None) {
+	if (editMode == Hix::Support::EditMode::Manual) {
 		applySupportSettings();
 		Hix::OverhangDetect::Overhang newOverhang(selectedFace, selected->ptToRoot(hit.localIntersection()));
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ManualSupport(newOverhang));
@@ -409,25 +408,22 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 { 
 	applySupportSettings();
 
-	if (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType != Hix::Settings::SupportSetting::SupportType::None)
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+		
+	if (ApplicationManager::getInstance().supportRaftManager().supportActive())
 	{
-		Hix::Features::FeatureContainer* container = new FeatureContainer();
-		
-		if (ApplicationManager::getInstance().supportRaftManager().supportActive())
-		{
-			for (auto each : Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models))
-				container->addFeature(new RemoveSupport(each));
+		for (auto each : Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models))
+			container->addFeature(new RemoveSupport(each));
 
-			for (auto model : models)
-				container->addFeature(new Move::ZToBed(model));
-		}
-		
-		for (auto selectedModel : models)
-		{
-			container->addFeature(new AutoSupport(selectedModel));
-		}
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+		for (auto model : models)
+			container->addFeature(new Move::ZToBed(model));
 	}
+		
+	for (auto selectedModel : models)
+	{
+		container->addFeature(new AutoSupport(selectedModel));
+	}
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)

@@ -11,7 +11,6 @@ namespace Hix
 
 			enum class SupportType : uint8_t
 			{
-				None,
 				Vertical
 			};
 			enum class RaftType : uint8_t

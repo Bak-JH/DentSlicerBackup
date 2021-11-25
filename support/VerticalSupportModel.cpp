@@ -102,18 +102,8 @@ RayHits rayCastBottomPyramid(RayCaster& caster, const QVector3D& origin, float b
 		for (size_t j = 0; j < STEPS; ++j)
 		{
 			RayHits rayCastResults;
-			for (auto fixValue = -EPS*10.0f; fixValue <= EPS*10.0f; fixValue += EPS)
-			{
-				QVector3D copyDest = rayDest;
-				copyDest.setX(rayDest.x() - pyramidBaseRadius + fixValue);
-				copyDest.setY(rayDest.y() - pyramidBaseRadius + fixValue);
+			rayCastResults = caster.rayIntersectWithoutDegen(origin, rayDest);
 
-				rayCastResults = caster.rayIntersect(origin, copyDest);
-				if (rayCastResults.size() != 0 && rayCastResults.at(0).type != HitType::Degenerate)
-				{
-					break;
-				}
-			}
 			if (rayCastResults.empty())
 			{
 				//check if this ray can support min support radius
@@ -300,24 +290,16 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 	constexpr float EPS = std::numeric_limits<float>::epsilon();
 
 	float botNormalLength = 0.100f;
-	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
+	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight/1000.0f;
 
 	auto zCloseMin = _overhang.coord().z() - layerHeight;
 	auto rayOrigin(_overhang.coord());
 
 
 	RayHits rayCastResults;
-	for (auto fixValue = -EPS*10.0f; fixValue <= EPS*10.0f; fixValue += EPS)
-	{
-		auto rayEnd = 
-			QVector3D(_overhang.coord().x() + fixValue, _overhang.coord().y() + fixValue, 0);
+	auto rayEnd = QVector3D(_overhang.coord().x(), _overhang.coord().y(), 0);
+	rayCastResults = _manager->supportRaycaster().rayIntersectWithoutDegen(rayOrigin, rayEnd);
 
-		rayCastResults = _manager->supportRaycaster().rayIntersect(rayOrigin, rayEnd);
-		if (rayCastResults.size() != 0 && rayCastResults.at(0).type != HitType::Degenerate)
-		{
-			break;
-		}
-	}
 
 	_hasBasePt = false;
 	//get rid of hits that won't  be visible when sliced
@@ -333,7 +315,6 @@ void Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::
 
 	if (!rayCastResults.empty())
 	{
-
 		//setMaterialColor(Hix::Render::Colors::OutOfBound);
 		std::sort(rayCastResults.begin(), rayCastResults.end(), RayHitZSort());
 		//if the raycasted side is on the backside of a triangle, this is not overhang

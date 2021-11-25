@@ -21,15 +21,20 @@ const constexpr auto STL_TEMP_PATH = "hix_temp_stl";
 Hix::Features::STLExportMode::STLExportMode()
 {
 	auto models = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
+
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
+	modSettings.parseJSON();
+	QString latestUrl(modSettings.exportFilePath.c_str());
+
 	QString fileName;
 	if (models.size() == 1)
 	{
-		fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL file", "", "3D Model file (*.stl)");
+		fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL file", latestUrl, "3D Model file (*.stl)");
 
 	}
 	else if (models.size() > 1)
 	{
-		fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL Zip file", "", "3D Model Collection(*.zip)");
+		fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL Zip file", latestUrl, "3D Model Collection(*.zip)");
 
 	}
     if (fileName.isEmpty())
@@ -38,6 +43,9 @@ Hix::Features::STLExportMode::STLExportMode()
     }
     auto se = new STLExport(models, fileName);
     Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<STLExport>(se));
+
+	modSettings.exportFilePath = QUrl(fileName).adjusted(QUrl::RemoveFilename).toString().toStdString();
+	modSettings.writeJSON();
 }
 
 Hix::Features::STLExportMode::~STLExportMode()

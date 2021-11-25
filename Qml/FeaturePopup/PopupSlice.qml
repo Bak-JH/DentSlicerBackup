@@ -18,45 +18,45 @@ FeaturePopup {
 		anchors.topMargin: 44
 		anchors.leftMargin: 16
 	}
-	CtrSpinBox {
+	CtrSpinBoxInteger {
 		id: layerHeight
-		label.text: "Layer Height"
-		width: parent.width - 16 * 2 - 16	// 16 = triangle height
+		label.text: "Layer Height(µm)"
+		width: parent.width - 13 * 2	// 16 = triangle height
 		height: 26
-		value: 0.1
-		fromNum: -10
-		toNum: 10
-		increment: 0.01
+		value: 100
+		fromNum: 10
+		toNum: 200
+		increment: 10.0
 		anchors.left: parent.left
-		anchors.leftMargin: 32	// 16 = triangle height
+		anchors.leftMargin: 16	// 16 = triangle height
 		anchors.top: sliceType.bottom
 		anchors.topMargin: 16
 	}
 	CtrSpinBox {
 		id: aaxy
 		label.text: "Antialiasing XY"
-		width: parent.width - 16 * 2 - 16	// 16 = triangle height
+		width: parent.width - 13 * 2	// 16 = triangle height
 		height: 26
 		value: 1
 		fromNum: 1
 		toNum: 8
 		increment: 1
 		anchors.left: parent.left
-		anchors.leftMargin: 32	// 16 = triangle height
+		anchors.leftMargin: 16	// 16 = triangle height
 		anchors.top: layerHeight.bottom
 		anchors.topMargin: 16
 	}
 	CtrSpinBox {
 		id: aaz
 		label.text: "Antialiasing Z"
-		width: parent.width - 16 * 2 - 16	// 16 = triangle height
+		width: parent.width - 13 * 2	// 16 = triangle height
 		height: 26
 		value: 1
 		fromNum: 1
 		toNum: 4
 		increment: 1
 		anchors.left: parent.left
-		anchors.leftMargin: 32	// 16 = triangle height
+		anchors.leftMargin: 16	// 16 = triangle height
 		anchors.top: aaxy.bottom
 		anchors.topMargin: 16
 	}
