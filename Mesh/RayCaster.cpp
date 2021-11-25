@@ -40,7 +40,7 @@ RayHits Hix::Engine3D::RayCaster::rayIntersectWithoutDegen(const QVector3D& rayO
 	auto candidates = _accelerator->getRayCandidates(rayOrigin, rayEnd);
 	for (auto& each : candidates)
 	{
-		auto result = rayIntersectTriWIthoutDegen(rayOrigin, rayDirection, each);
+		auto result = rayIntersectTriWithoutDegen(rayOrigin, rayDirection, each);
 
 		if (result.type != HitType::Miss)
 			rayHits.emplace_back(result);

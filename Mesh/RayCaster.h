@@ -38,7 +38,7 @@ namespace Hix
 
 		protected:
 			virtual RayHit rayIntersectTri(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;
-			virtual RayHit rayIntersectTriWIthoutDegen(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;
+			virtual RayHit rayIntersectTriWithoutDegen(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri) = 0;
 			RayAccelerator* _accelerator;
 		};
 
