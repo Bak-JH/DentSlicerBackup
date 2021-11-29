@@ -776,8 +776,11 @@ void zCylinder(Hix::Engine3D::Mesh& model, std::deque<HalfEdgeConstItr>& boundar
 		auto pos = each.from().localPosition();
 		bottomPath.emplace_back(QVector3D(pos.x(), pos.y(), zVal));
 	}
-	auto last = boundary.front().from().localPosition();
-	bottomPath.emplace_back(QVector3D(last.x(), last.y(), zVal));
+	if (boundary.size() > 0)
+	{
+		auto last = boundary.front().from().localPosition();
+		bottomPath.emplace_back(QVector3D(last.x(), last.y(), zVal));
+	}
 
 	//create actual cylinder
 	auto dItr = bottomPath.cbegin();

@@ -429,6 +429,7 @@ void Hix::Features::MBPrep::run()
 		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_mode->_widget, models));
 		_mode->updatePosition();
 		_mode->setMode(Hix::Features::MBEditMode::Rotation);
+		_mode->_widget.setVisible(true);
 		});
 }
 

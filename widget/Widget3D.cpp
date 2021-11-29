@@ -22,15 +22,12 @@ void Hix::UI::Widget3D::addWidget(std::unique_ptr<Widget> widget)
 
 void Hix::UI::Widget3D::setVisible(bool show)
 {
-	if (_visible != show)
+	_visible = show;
+	setEnabled(_visible);
+	for (auto& each : _widgets)
 	{
-		_visible = show;
-		setEnabled(_visible);
-		for (auto& each : _widgets)
-		{
-			each->setHitTestable(_visible);
-			each->setHoverable(_visible);
-		}
+		each->setHitTestable(_visible);
+		each->setHoverable(_visible);
 	}
 }
 
