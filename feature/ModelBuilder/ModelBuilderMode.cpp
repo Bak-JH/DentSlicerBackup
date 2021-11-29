@@ -337,7 +337,11 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 
 	setMode(magic_enum::enum_value<MBEditMode>(0));
 
-	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", QUrl(), "3D Model file (*.stl)");
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
+	modSettings.parseJSON();
+	QUrl latestUrl(QString(modSettings.importFilePath.c_str()));
+
+	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", latestUrl, "3D Model file (*.stl)");
 	auto fileName = fileUrl.fileName();
 	if (fileName.isEmpty())
 	{
