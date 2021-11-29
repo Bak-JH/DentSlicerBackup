@@ -103,7 +103,7 @@ RayHit Hix::Engine3D::MTRayCaster::rayIntersectTri(const QVector3D& rayOrigin, c
 }
 
 
-RayHit Hix::Engine3D::MTRayCaster::rayIntersectTriWIthoutDegen(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri)
+RayHit Hix::Engine3D::MTRayCaster::rayIntersectTriWithoutDegen(const QVector3D& rayOrigin, const QVector3D& rayDirection, const FaceConstItr& tri)
 {
 	RayHit hit;
 	hit.type = HitType::Miss;
