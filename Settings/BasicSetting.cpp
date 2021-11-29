@@ -26,8 +26,8 @@ void Hix::Settings::BasicSetting::parseJSONImpl(const rapidjson::Document& doc)
 	auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
 	moddableSetting.printerSetting.setPrinterPreset(printerPresetPath);
 	tryParse(doc, "enableErrorReport", enableErrorReport);
-	tryParse(doc, "importFIlePath", importFilePath);
-	tryParse(doc, "exportFIlePath", exportFilePath);
+	tryParse(doc, "importFilePath", importFilePath);
+	tryParse(doc, "exportFilePath", exportFilePath);
 }
 
 
