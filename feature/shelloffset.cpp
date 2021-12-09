@@ -83,7 +83,6 @@ void Hix::Features::ShellOffset::runImpl()
 	/// Extend Bottom Faces ///
 	std::unordered_set<FaceConstItr> bottomFace;
 	Bounds3D aabb = _target->aabb();
-	aabb.localBoundUpdate(*_target->getMesh());
 
 	auto layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f;
 
@@ -91,15 +90,21 @@ void Hix::Features::ShellOffset::runImpl()
 	{
 		auto meshVtcs = face.meshVertices();
 
-		if ((meshVtcs[0].localPosition().z() < aabb.zMin() + layerHeight ||
-			 meshVtcs[1].localPosition().z() < aabb.zMin() + layerHeight ||
-			 meshVtcs[2].localPosition().z() < aabb.zMin() + layerHeight) && face.localFn().z() < -0.8)
+		if ((meshVtcs[0].worldPosition().z() < aabb.zMin() + layerHeight ||
+			 meshVtcs[1].worldPosition().z() < aabb.zMin() + layerHeight ||
+			 meshVtcs[2].worldPosition().z() < aabb.zMin() + layerHeight) && face.worldFn().z() < -0.8)
 		{
 			bottomFace.insert(face);
 		}
 	}
-	auto extendValue = std::fmod(_offset, 2.0f) > std::numeric_limits<float>::epsilon() * 10 ? _offset : _offset + 1;
-	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), bottomFace, extendValue);
+
+
+	auto extendValue = std::fmod(_offset, 2.0f) > 0.0001 ? _offset : _offset + 1;
+
+	aabb.localBoundUpdate(*_target->getMesh());
+	qDebug() << bottomFace.begin()->localFn() << bottomFace.begin()->worldFn();
+
+	auto extend = new Hix::Features::Extend(_target, bottomFace.begin()->localFn(), bottomFace, extendValue);
 	addFeature(extend);
 
 	/// Hollow Mesh ///
@@ -177,36 +182,37 @@ void Hix::Features::HollowMesh::runImpl()
 
 	std::vector<QVector3D> voxel;
 	std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
-		//for (float z = zMin; z <= zMax; z += _resolution)
+	//for (float z = zMin; z <= zMax; z += _resolution)
+	{
+		for (float y = yMin; y <= yMax; y += _resolution)
 		{
-			for (float y = yMin; y <= yMax; y += _resolution)
+			for (float x = xMin; x <= xMax; x += _resolution)
 			{
-				for (float x = xMin; x <= xMax; x += _resolution)
+				QVector3D currPt = QVector3D(x, y, z);
+				//QVector3D currPt = QVector3D(-9, 1, 9);
+				auto bvhdist = _rayAccel->getClosestDistance(currPt);
+
+				int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
+					(((y + std::abs(yMin)) / _resolution) * lengthX) +
+					((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+
+				RayHits hits;
+				for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
 				{
-					QVector3D currPt = QVector3D(x, y, z);
-					auto bvhdist = _rayAccel->getClosestDistance(currPt);
-
-					int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
-						(((y + std::abs(yMin)) / _resolution) * lengthX) +
-						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
-
-					RayHits hits;
-					for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
+					QVector3D rayDirection((_samplingBound.centre() + QVector3D(fixValue, fixValue, 0)) - currPt);
+					rayDirection.normalize();
+					hits = getRayHitPoints(currPt, rayDirection);
+					if (hits.size() != 0 && hits.at(0).type != HitType::Degenerate)
 					{
-						QVector3D rayDirection((_samplingBound.centre() + QVector3D(fixValue, fixValue, 0)) - currPt);
-						rayDirection.normalize();
-						hits = getRayHitPoints(currPt, rayDirection);
-						if (hits.size() != 0 && hits.at(0).type != HitType::Degenerate)
-						{
-							break;
-						}
+						break;
 					}
-
-					auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
-					_SDF[indxex] = bvhdist.first * distSign;
 				}
+
+				auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
+				_SDF[indxex] = bvhdist.first * distSign;
 			}
-		});
+		}
+	});
 
 	const int edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -595,6 +601,20 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 		if ((r.type != HitType::Miss && r.type != HitType::Degenerate)
 			&& std::find(hitPoints.begin(), hitPoints.end(), r.intersection) == hitPoints.end())
 		{
+			if (hitPoints.empty())
+			{
+				hitPoints.push_back(r.intersection);
+				result.push_back(r);
+			}
+			for (auto hitPoint : hitPoints)
+			{
+				if (std::numeric_limits<float>::epsilon()*100 > hitPoint.distanceToPoint(r.intersection))
+				{
+					hitPoints.push_back(r.intersection);
+					result.push_back(r);
+				}
+			}
+
 			hitPoints.push_back(r.intersection);
 			result.push_back(r);
 		}

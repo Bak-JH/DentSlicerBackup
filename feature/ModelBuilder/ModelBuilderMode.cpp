@@ -349,7 +349,8 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 		return;
 	}
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<MBPrep>(this, fileUrl));
-
+	modSettings.importFilePath = fileUrl.adjusted(QUrl::RemoveFilename).toString().toStdString();
+	modSettings.writeJSON();
 
 	QObject::connect(&slider(), &Hix::QML::RangeSlideBarShell::lowerValueChanged, [this]() {
 		_bottPlane.transform().setMatrix(QMatrix4x4());
