@@ -119,20 +119,15 @@ void Hix::Features::ShellOffset::runImpl()
 		auto extendValue = std::fmod(aabb.lengthZ() + _offset, 2.0f) > 0.0001 ? odd_offset : _offset;
 
 		auto extend = new Hix::Features::Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
-		tryRunFeature(*extend);
+		addFeature(extend);
 
 		/// Hollow Mesh ///
-		tryRunFeature(*new HollowMesh(child, _offset));
+		addFeature(new HollowMesh(child, _offset));
 
 		/// Cut Extended Bottom ///
 		auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true);
-		tryRunFeature(*cut);
+		addFeature(cut);
 	}
-
-	qDebug() << _target->modelName();
-
-	auto combine = new CombineModels(children, _target->modelName().toStdString());
-	addFeature(combine);
 
 	FeatureContainer::runImpl();
 }
