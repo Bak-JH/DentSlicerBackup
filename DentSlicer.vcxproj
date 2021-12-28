@@ -265,6 +265,7 @@
     <ClCompile Include="common\mathUtil.cpp" />
     <ClCompile Include="common\platform\Process.cpp" />
     <ClCompile Include="common\Semaphore.cpp" />
+    <ClCompile Include="feature\CombineModel.cpp" />
     <ClCompile Include="feature\ModelBuilder\SelectionPlane.cpp" />
     <ClCompile Include="feature\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="feature\polyclipping\poly2tri\common\shapes.cc" />
@@ -932,6 +933,7 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="feature\CombineModel.h" />
     <ClInclude Include="feature\ModelBuilder\SelectionPlane.h" />
     <ClInclude Include="feature\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="feature\polyclipping\poly2tri\common\shapes.h" />

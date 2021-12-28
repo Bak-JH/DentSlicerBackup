@@ -45,7 +45,8 @@ namespace Hix
 			void registerDebugColorFaces(SceneEntityWithMaterial* owner, const std::unordered_set<Hix::Engine3D::FaceConstItr>& faces, const QVector4D& color);
 			void colorDebugFaces();
 			void showGLModelAabb(SceneEntityWithMaterial* target);
-			void showAabb(Hix::Engine3D::Bounds3D& aabb);
+			void showGLModelFaces(SceneEntityWithMaterial* target);
+			void showAabb(const Hix::Engine3D::Bounds3D& aabb);
 			void clear();
 			std::optional<std::reference_wrapper<const FaceColorSet>>getOverrideColors(SceneEntityWithMaterial* owner)const;
 			Hix::Render::PlaneMeshEntity& displayPlane(const Hix::Plane3D::PDPlane& pdplane);

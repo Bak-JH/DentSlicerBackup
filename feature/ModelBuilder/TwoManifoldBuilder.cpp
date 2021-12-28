@@ -325,7 +325,7 @@ void contourSmoothing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 
 		//now reset
 		std::swap(cylinder, newCylinder);
-		newCylinder.clear();
+		//newCylinder.clear();
 	}
 
 	//create new cylinder to smoothed edges
