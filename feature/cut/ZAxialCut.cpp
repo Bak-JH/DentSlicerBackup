@@ -70,16 +70,34 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	{
 		if (childTopMesh != nullptr && !childTopMesh->getFaces().empty())
 		{
-			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_top";
-			auto addTopModel = new ListModel(childTopMesh, modelName, &subject->transform());
-			addFeature(addTopModel);
+			if (_keepName)
+			{
+				auto modelName = subject->modelName();
+				auto addTopModel = new AddModel(subject->parentEntity(), childTopMesh, modelName, &subject->transform());
+				addFeature(addTopModel);
+			}
+			else
+			{
+				auto modelName = subject->modelName() + "_top";
+				auto addTopModel = new ListModel(childTopMesh, modelName, &subject->transform());
+				addFeature(addTopModel);
+			}
 
 		}
 		if (childBotMesh != nullptr && !childBotMesh->getFaces().empty())
 		{
-			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_bot";
-			auto addBotModel = new ListModel(childBotMesh, modelName, &subject->transform());
-			addFeature(addBotModel);
+			if (_keepName)
+			{
+				auto modelName = subject->modelName();
+				auto addBotModel = new AddModel(subject->parentEntity(), childBotMesh, modelName, &subject->transform());
+				addFeature(addBotModel);
+			}
+			else
+			{
+				auto modelName = subject->modelName() + "_bot";
+				auto addBotModel = new ListModel(childBotMesh, modelName, &subject->transform());
+				addFeature(addBotModel);
+			}
 		}
 		
 	}
