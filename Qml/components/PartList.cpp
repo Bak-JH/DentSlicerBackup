@@ -64,10 +64,16 @@ void Hix::QML::PartList::listModel(GLModel* model)
 
 }
 
-void Hix::QML::PartList::unlistModel(GLModel* model)
+bool Hix::QML::PartList::unlistModel(GLModel* model)
 {
 	_selectedModels.erase(model);
-	_items.erase(model);
+	if (isListed(model))
+	{
+		_items.erase(model);
+		return true;
+	}
+	else
+		return false;
 }
 
 bool Hix::QML::PartList::isListed(GLModel* model) const

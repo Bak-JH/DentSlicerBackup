@@ -62,7 +62,8 @@ namespace Hix
 			const std::array<float, 6>& bound()const;
 			QVector3D displaceWithin(const Bounds3D& child, QVector3D displacement =  QVector3D())const;
 			std::array<float, 6> calculateMaxDisplacement(const Bounds3D & child)const;
-			bool contains(const Hix::Engine3D::Bounds3D& other)const;
+			bool containsAabb(const Hix::Engine3D::Bounds3D& other)const;
+			bool containsPoint(const QVector3D point)const;
 			bool intersects(const Hix::Engine3D::Bounds3D& other)const;
 			bool intersects2D(const Hix::Engine3D::Bounds3D& other)const;
 			Bounds3D centred()const;
