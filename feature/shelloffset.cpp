@@ -5,9 +5,9 @@
 #include "feature/CombineModel.h"
 #include "Mesh/mesh.h"
 #include "cut/ZAxialCut.h"
+#include "move.h"
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"
-#include "common/debugging/DebugRenderObject.h"
 
 
 #include <QString>
@@ -30,15 +30,16 @@
 // offset shell with mm
 
 using namespace Hix::Engine3D;
+using namespace Hix::Application;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
 const QUrl OFFSET_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupShellOffset.qml");
 
 Hix::Features::ShellOffsetMode::ShellOffsetMode():DialogedMode(OFFSET_POPUP_URL)
 {
-	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	if (ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
-		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
 		return;
 	}
 	auto& co = controlOwner();
@@ -60,11 +61,11 @@ void Hix::Features::ShellOffsetMode::applyButtonClicked()
 #endif
 
 	auto container = new Hix::Features::FeatureContainer();
-	for (auto each : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	for (auto each : ApplicationManager::getInstance().partManager().selectedModels())
 	{
 		container->addFeature(new ShellOffset(each, _offsetValue->getValue()));
 	}
-	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+	ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
@@ -86,6 +87,8 @@ void Hix::Features::ShellOffset::runImpl()
 	_target->getChildrenModelsModd(children);
 	children.insert(_target);
 
+	float cutValue = std::numeric_limits<float>::max();
+
 	for (auto child : children)
 	{
 		if (child->getMesh()->getFaces().empty())
@@ -97,7 +100,7 @@ void Hix::Features::ShellOffset::runImpl()
 		std::unordered_set<FaceConstItr> bottomFace;
 		Bounds3D aabb = child->aabb();
 
-		auto layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f;
+		auto layerHeight = ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f;
 
 		for (auto face = child->getMesh()->getFaces().cbegin(); face != child->getMesh()->getFaces().end(); ++face)
 		{
@@ -117,17 +120,21 @@ void Hix::Features::ShellOffset::runImpl()
 		auto odd_offset = _offset - (aabb.lengthZ() - std::floorf(aabb.lengthZ()));
 
 		auto extendValue = std::fmod(aabb.lengthZ() + _offset, 2.0f) > 0.0001 ? odd_offset : _offset;
+		cutValue = cutValue > extendValue ? extendValue : cutValue;
 
-		auto extend = new Hix::Features::Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
+		auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
 		addFeature(extend);
 
 		/// Hollow Mesh ///
 		addFeature(new HollowMesh(child, _offset));
 
 		/// Cut Extended Bottom ///
-		auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true);
+		auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true, child == _target);
 		addFeature(cut);
+
 	}
+	auto move = new Move(_target, QVector3D(0, 0, -cutValue));
+	addFeature(move);
 
 	FeatureContainer::runImpl();
 }
