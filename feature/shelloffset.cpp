@@ -8,7 +8,7 @@
 #include "move.h"
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"
-
+#include "common/debugging/DebugRenderObject.h"
 
 #include <QString>
 
@@ -117,9 +117,12 @@ void Hix::Features::ShellOffset::runImpl()
 		if (bottomFace.empty())
 			continue;
 
-		auto odd_offset = _offset - (aabb.lengthZ() - std::floorf(aabb.lengthZ()));
+		auto calibrateValue = 1 - (aabb.lengthZ() - std::floorf(aabb.lengthZ()));
 
-		auto extendValue = std::fmod(aabb.lengthZ() + _offset, 2.0f) > 0.0001 ? odd_offset : _offset;
+		auto extendValue = std::fmod(aabb.lengthZ() + calibrateValue + _offset, 2.0f) > 0.0001 ? _offset + calibrateValue + 1.0f : _offset + calibrateValue;
+
+		qDebug() << extendValue;
+
 		cutValue = cutValue > extendValue ? extendValue : cutValue;
 
 		auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
@@ -129,12 +132,12 @@ void Hix::Features::ShellOffset::runImpl()
 		addFeature(new HollowMesh(child, _offset));
 
 		/// Cut Extended Bottom ///
-		auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true, child == _target);
-		addFeature(cut);
+		//auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true, child == _target);
+		//addFeature(cut);
 
 	}
-	auto move = new Move(_target, QVector3D(0, 0, -cutValue));
-	addFeature(move);
+	//auto move = new Move(_target, QVector3D(0, 0, -cutValue));
+	//addFeature(move);
 
 	FeatureContainer::runImpl();
 }
@@ -193,9 +196,6 @@ void Hix::Features::HollowMesh::runImpl()
 
 	_SDF.resize(lengthX * lengthY * lengthZ);
 
-
-	qDebug() << QVector3D(xMin, yMin, zMin) << QVector3D(xMax, yMax, zMax);
-
 	std::vector<float> zVec;
 	for (float z = zMin; z <= zMax; z += _resolution)
 		zVec.push_back(z);
@@ -217,8 +217,8 @@ void Hix::Features::HollowMesh::runImpl()
 				auto bvhdist = _rayAccel->getClosestDistance(currPt);
 
 				int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
-					(((y + std::abs(yMin)) / _resolution) * lengthX) +
-					((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+					(((y + std::abs(yMin)) / _resolution) * lengthX)
+					+ ((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
 
 				RayHits hits;
 				for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
@@ -241,19 +241,6 @@ void Hix::Features::HollowMesh::runImpl()
 	//}
 	});
 
-	//	std::vector<uint8_t> data;
-	//	for (auto p : _SDF)
-	//	{
-	//		auto t = 0;
-	//		if (p < 0)
-	//			t = 255;
-	//		data.push_back(t);
-	//	}
-
-	//std::filesystem::path file = "1.png";
-	//stbi_write_png(file.c_str(), lengthX, lengthY, 1, data.data(), lengthX);
-
-	//return;
 
 	const int edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -626,9 +613,9 @@ void Hix::Features::HollowMesh::runImpl()
 		}
 	}
 
-	newMesh->reverseFaces();
+	//newMesh->reverseFaces();
 	*hollowMesh += *newMesh;
-	_target->setMesh(hollowMesh);
+	_target->setMesh(newMesh);
 }
 
 Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)
@@ -648,12 +635,22 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 				if (r.type == HitType::Degenerate)
 				{
 					result.push_back(r);
+					hitPoints.push_back(r.intersection);
 					return result;
 				}
 
 				if (result.empty() && r.distance > 0.0001f)
 				{
 					result.push_back(r);
+					hitPoints.push_back(r.intersection);
+				}
+				else
+				{
+					if (result.back().type != r.type)
+					{
+						result.push_back(r);
+						hitPoints.push_back(r.intersection);
+					}
 				}
 
 				bool duplicate = false;
@@ -666,12 +663,13 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 				}
 
 				if (!duplicate)
+				{
 					result.push_back(r);
-				//hitPoints.push_back(r.intersection);
+					hitPoints.push_back(r.intersection);
+				}
 			}
 		}
 	}
-	
 
 	return result;
 }
