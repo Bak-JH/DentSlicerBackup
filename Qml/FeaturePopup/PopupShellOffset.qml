@@ -19,9 +19,9 @@ FeaturePopup {
 		anchors.leftMargin: 16
 	}
 
-	CtrSpinBox {
+	CtrSpinBoxInteger {
 		id: offsetValue
-		fromNum: 1
+		fromNum: 2
 		toNum: 100
 		value: 3
 		label.text: "Thickness(mm)"

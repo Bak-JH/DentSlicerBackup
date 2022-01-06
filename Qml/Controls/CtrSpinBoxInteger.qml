@@ -107,7 +107,11 @@ Hix.InputSpinBox {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
-				onReleased: { root.value += root.increment; controlInput.text = root.value.toFixed(0); }
+				onReleased: { 
+					root.value = root.value < root.fromNum ? root.fromNum : root.value;
+					root.value = root.value + root.increment <= root.toNum ? root.value + root.increment : root.toNum; 
+					controlInput.text = root.value.toFixed(0); 
+				}
 				onEntered: { upindicator.source = "qrc:/Resource/triangle_up_hover.png" }
 				onExited: { upindicator.source = "qrc:/Resource/triangle_up.png" }
 			}
@@ -132,7 +136,11 @@ Hix.InputSpinBox {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
-				onReleased: { root.value -= root.increment; controlInput.text = root.value.toFixed(0);}
+				onReleased: {
+					root.value = root.value > root.toNum ? root.toNum : root.value;
+					root.value = root.value - root.increment >= root.fromNum ? root.value - root.increment : root.fromNum; 
+					controlInput.text = root.value.toFixed(0);
+				}
 				onEntered: { downindicator.source = "qrc:/Resource/triangle_down_hover.png" }
 				onExited: { downindicator.source = "qrc:/Resource/triangle_down.png" }
 			}
