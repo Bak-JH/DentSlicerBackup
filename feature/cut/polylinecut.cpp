@@ -110,8 +110,9 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(result);
 	for (size_t i = 0; i < seperateParts.size(); ++i)
 	{
-		if (seperateParts[i]->getFaces().empty())
+		if (seperateParts[i]->getFaces().size() < 3)
 			continue;
+
 		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
 		tryRunFeature(*addModel);
 		addModel->get()->setZToBed();
