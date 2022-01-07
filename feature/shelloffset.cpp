@@ -125,13 +125,13 @@ void Hix::Features::ShellOffset::runImpl()
 
 		cutValue = cutValue > extendValue ? extendValue : cutValue;
 
-		auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
-		addFeature(extend);
+		//auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
+		//addFeature(extend);
 
 		/// Hollow Mesh ///
-		addFeature(new HollowMesh(child, _offset));
+		addFeature(new HollowMesh(_target, _offset));
 
-		/// Cut Extended Bottom ///
+		///// Cut Extended Bottom ///
 		//auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true, child == _target);
 		//addFeature(cut);
 
@@ -613,16 +613,16 @@ void Hix::Features::HollowMesh::runImpl()
 		}
 	}
 
-	//newMesh->reverseFaces();
+	newMesh->reverseFaces();
 	*hollowMesh += *newMesh;
-	_target->setMesh(newMesh);
+	_target->setMesh(hollowMesh);
 }
 
 Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)
 {
 	auto normal = _rayCaster->rayIntersectDirection(rayOrigin, rayDirection);
 	RayHits result;
-	std::vector<QVector3D> hitPoints;
+	//std::vector<QVector3D> hitPoints;
 
 	for (auto& r : normal)
 	{
@@ -635,21 +635,21 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 				if (r.type == HitType::Degenerate)
 				{
 					result.push_back(r);
-					hitPoints.push_back(r.intersection);
+					//hitPoints.push_back(r.intersection);
 					return result;
 				}
 
 				if (result.empty() && r.distance > 0.0001f)
 				{
 					result.push_back(r);
-					hitPoints.push_back(r.intersection);
+					//hitPoints.push_back(r.intersection);
 				}
 				else
 				{
 					if (result.back().type != r.type)
 					{
 						result.push_back(r);
-						hitPoints.push_back(r.intersection);
+						//hitPoints.push_back(r.intersection);
 					}
 				}
 
@@ -665,7 +665,7 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 				if (!duplicate)
 				{
 					result.push_back(r);
-					hitPoints.push_back(r.intersection);
+					//hitPoints.push_back(r.intersection);
 				}
 			}
 		}
