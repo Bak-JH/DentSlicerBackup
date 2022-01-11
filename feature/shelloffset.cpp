@@ -22,10 +22,10 @@
 
 
 
-
-#define STBI_WINDOWS_UTF16
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "slice/include/stb_image_write.h"
+//
+//#define STBI_WINDOWS_UTF16
+//#define STB_IMAGE_WRITE_IMPLEMENTATION
+//#include "slice/include/stb_image_write.h"
 
 // offset shell with mm
 
@@ -125,17 +125,18 @@ void Hix::Features::ShellOffset::runImpl()
 
 		cutValue = cutValue > extendValue ? extendValue : cutValue;
 
-		//auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
-		//addFeature(extend);
+		auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
+		addFeature(extend);
 
 		/// Hollow Mesh ///
-		addFeature(new HollowMesh(_target, _offset));
+		addFeature(new HollowMesh(child, _offset));
 
-		///// Cut Extended Bottom ///
-		//auto cut = new ZAxialCut(child, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true, child == _target);
-		//addFeature(cut);
-
+		/// Cut Extended Bottom ///
+		auto cut = new ZAxialCut(child, extendValue, Hix::Features::Cut::KeepTop, true);
+		addFeature(cut);
 	}
+
+
 	//auto move = new Move(_target, QVector3D(0, 0, -cutValue));
 	//addFeature(move);
 
@@ -217,8 +218,8 @@ void Hix::Features::HollowMesh::runImpl()
 				auto bvhdist = _rayAccel->getClosestDistance(currPt);
 
 				int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
-					(((y + std::abs(yMin)) / _resolution) * lengthX)
-					+ ((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+					(((y + std::abs(yMin)) / _resolution) * lengthX) +
+					((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
 
 				RayHits hits;
 				for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
@@ -644,15 +645,6 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 					result.push_back(r);
 					//hitPoints.push_back(r.intersection);
 				}
-				else
-				{
-					if (result.back().type != r.type)
-					{
-						result.push_back(r);
-						//hitPoints.push_back(r.intersection);
-					}
-				}
-
 				bool duplicate = false;
 				for (auto res : result)
 				{
@@ -664,7 +656,11 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 
 				if (!duplicate)
 				{
-					result.push_back(r);
+					if (result.back().type != r.type)
+					{
+						result.push_back(r);
+						//hitPoints.push_back(r.intersection);
+					}
 					//hitPoints.push_back(r.intersection);
 				}
 			}
