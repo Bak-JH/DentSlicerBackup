@@ -132,13 +132,12 @@ void Hix::Features::ShellOffset::runImpl()
 		addFeature(new HollowMesh(child, _offset));
 
 		/// Cut Extended Bottom ///
-		auto cut = new ZAxialCut(child, extendValue, Hix::Features::Cut::KeepTop, true);
+		auto cut = new ZAxialCut(child, extendValue + 0.0001f, Hix::Features::Cut::KeepTop, true, _target == child);
 		addFeature(cut);
 	}
 
-
-	//auto move = new Move(_target, QVector3D(0, 0, -cutValue));
-	//addFeature(move);
+	auto move = new Move(_target, QVector3D(0, 0, -cutValue));
+	addFeature(move);
 
 	FeatureContainer::runImpl();
 }
