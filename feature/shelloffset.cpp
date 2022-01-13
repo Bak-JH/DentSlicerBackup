@@ -613,8 +613,8 @@ void Hix::Features::HollowMesh::runImpl()
 		}
 	}
 
-	newMesh->reverseFaces();
-	*hollowMesh += *newMesh;
+	//newMesh->reverseFaces();
+	//*hollowMesh += *newMesh;
 	_target->setMesh(hollowMesh);
 }
 
@@ -644,6 +644,11 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 					result.push_back(r);
 					//hitPoints.push_back(r.intersection);
 				}
+				else if (result.back().type != r.type)
+				{
+					result.push_back(r);
+				}
+
 				bool duplicate = false;
 				for (auto res : result)
 				{
@@ -655,11 +660,12 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 
 				if (!duplicate)
 				{
-					if (result.back().type != r.type)
-					{
-						result.push_back(r);
-						//hitPoints.push_back(r.intersection);
-					}
+					result.push_back(r);
+					//if (result.back().type != r.type)
+					//{
+					//	
+					//	//hitPoints.push_back(r.intersection);
+					//}
 					//hitPoints.push_back(r.intersection);
 				}
 			}
