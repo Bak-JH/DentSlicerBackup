@@ -140,6 +140,9 @@ void Hix::Features::ShellOffset::runImpl()
 	addFeature(move);
 
 	FeatureContainer::runImpl();
+
+	if (isRepairNeeded(_target->getMesh()))
+		tryRunFeature(*new MeshRepair(_target));
 }
 
 Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)
@@ -613,8 +616,8 @@ void Hix::Features::HollowMesh::runImpl()
 		}
 	}
 
-	//newMesh->reverseFaces();
-	//*hollowMesh += *newMesh;
+	newMesh->reverseFaces();
+	*hollowMesh += *newMesh;
 	_target->setMesh(hollowMesh);
 }
 
