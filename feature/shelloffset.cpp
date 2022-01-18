@@ -132,7 +132,7 @@ void Hix::Features::ShellOffset::runImpl()
 		addFeature(new HollowMesh(child, _offset));
 
 		/// Cut Extended Bottom ///
-		auto cut = new ZAxialCut(child, extendValue + 0.0001f, Hix::Features::Cut::KeepTop, true, _target == child);
+		auto cut = new ZAxialCut(child, extendValue - 0.0001f, Hix::Features::Cut::KeepTop, true, _target == child);
 		addFeature(cut);
 	}
 
@@ -219,9 +219,9 @@ void Hix::Features::HollowMesh::runImpl()
 				//QVector3D currPt = QVector3D(0, yMax - 8, 0);
 				auto bvhdist = _rayAccel->getClosestDistance(currPt);
 
-				int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
-					(((y + std::abs(yMin)) / _resolution) * lengthX) +
-					((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+				int indxex = std::floorf(((x -xMin) / _resolution) +
+					(((y - yMin) / _resolution) * lengthX) +
+					((z - zMin) / _resolution) * (lengthX * lengthY));
 
 				RayHits hits;
 				for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
@@ -691,9 +691,9 @@ float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
 	int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
 	int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
 
-	int indxex = std::floorf(((point.x() + std::abs(xMin)) / _resolution) +
-		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
-		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+	int indxex = std::floorf(((point.x() - xMin) / _resolution) +
+		(((point.y() - yMin) / _resolution) * lengthX) +
+		((point.z() - zMin) / _resolution) * (lengthX * lengthY));
 
 	return _SDF[indxex];
 }
