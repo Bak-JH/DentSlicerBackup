@@ -5,6 +5,7 @@
 #include "feature/CombineModel.h"
 #include "Mesh/mesh.h"
 #include "cut/ZAxialCut.h"
+#include "addModel.h"
 #include "move.h"
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"
@@ -140,9 +141,6 @@ void Hix::Features::ShellOffset::runImpl()
 	addFeature(move);
 
 	FeatureContainer::runImpl();
-
-	if (isRepairNeeded(_target->getMesh()))
-		tryRunFeature(*new MeshRepair(_target));
 }
 
 Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)
@@ -617,7 +615,18 @@ void Hix::Features::HollowMesh::runImpl()
 	}
 
 	newMesh->reverseFaces();
-	*hollowMesh += *newMesh;
+
+	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(newMesh);
+	for (auto part : seperateParts)
+	{
+		float filter = float(part->getFaces().size()) / float(newMesh->getFaces().size());
+		if (filter > 0.01f)
+		{
+			*hollowMesh += *part;
+			break;
+		}
+
+	}
 	_target->setMesh(hollowMesh);
 }
 
@@ -625,32 +634,24 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 {
 	auto normal = _rayCaster->rayIntersectDirection(rayOrigin, rayDirection);
 	RayHits result;
-	//std::vector<QVector3D> hitPoints;
 
 	for (auto& r : normal)
 	{
 		if (_samplingBound.containsPoint(r.intersection))
 		{
-			//if ((r.type != HitType::Miss && r.type != HitType::Degenerate)
-			//	&& std::find(hitPoints.begin(), hitPoints.end(), r.intersection) == hitPoints.end())
 			if (r.type != HitType::Miss)
 			{
 				if (r.type == HitType::Degenerate)
 				{
 					result.push_back(r);
-					//hitPoints.push_back(r.intersection);
 					return result;
 				}
 
 				if (result.empty() && r.distance > 0.0001f)
-				{
 					result.push_back(r);
-					//hitPoints.push_back(r.intersection);
-				}
+
 				else if (result.back().type != r.type)
-				{
 					result.push_back(r);
-				}
 
 				bool duplicate = false;
 				for (auto res : result)
@@ -662,15 +663,7 @@ Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayO
 				}
 
 				if (!duplicate)
-				{
 					result.push_back(r);
-					//if (result.back().type != r.type)
-					//{
-					//	
-					//	//hitPoints.push_back(r.intersection);
-					//}
-					//hitPoints.push_back(r.intersection);
-				}
 			}
 		}
 	}

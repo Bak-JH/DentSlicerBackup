@@ -105,7 +105,6 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	freeCorkTriMesh(&subjectCork);
 	freeCorkTriMesh(&output);
 
-
 	//seperate disconnected meshes
 	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(result);
 	for (size_t i = 0; i < seperateParts.size(); ++i)
@@ -113,17 +112,16 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		if (seperateParts[i]->getFaces().size() < 3)
 			continue;
 
+		float filter = float(seperateParts[i]->getFaces().size()) / float(subject->getMesh()->getFaces().size());
+		if (filter < 0.0001f)
+		{
+			continue;
+		}
+
 		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
 		tryRunFeature(*addModel);
 		addModel->get()->setZToBed();
 		addFeature(addModel);
-		if (Hix::Features::isRepairNeeded(seperateParts[i]))
-		{
-			//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
-			auto repair = new MeshRepair(addModel->get());
-			tryRunFeature(*repair);
-			addFeature(repair);
-		}
 	}
 	auto model = dynamic_cast<GLModel*>(subject);
 	if (model)
