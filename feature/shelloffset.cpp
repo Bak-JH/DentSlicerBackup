@@ -122,8 +122,6 @@ void Hix::Features::ShellOffset::runImpl()
 
 		auto extendValue = std::fmod(aabb.lengthZ() + calibrateValue + _offset, 2.0f) > 0.0001 ? _offset + calibrateValue + 1.0f : _offset + calibrateValue;
 
-		qDebug() << extendValue;
-
 		cutValue = cutValue > extendValue ? extendValue : cutValue;
 
 		auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
@@ -174,6 +172,10 @@ void Hix::Features::HollowMesh::runImpl()
 {
 	/// Generate Hole ///
 	Hix::Engine3D::Mesh* originalMesh = _target->getMeshModd();
+
+	if (isRepairNeeded(originalMesh))
+		tryRunFeature(*new MeshRepair(_target));
+
 	_prevMesh.reset(originalMesh);
 	auto hollowMesh = new Mesh(*originalMesh);
 
@@ -615,18 +617,22 @@ void Hix::Features::HollowMesh::runImpl()
 	}
 
 	newMesh->reverseFaces();
-
+	auto filteredMesh = new Mesh();
 	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(newMesh);
-	for (auto part : seperateParts)
+	if (newMesh->getFaces().size() < 1500)
 	{
-		float filter = float(part->getFaces().size()) / float(newMesh->getFaces().size());
-		if (filter > 0.01f)
-		{
-			*hollowMesh += *part;
-			break;
-		}
-
+		*filteredMesh += *newMesh;
 	}
+	else
+	{
+		for (auto part : seperateParts)
+		{
+			float filter = float(part->getFaces().size()) / float(newMesh->getFaces().size());
+			if (filter > 0.005f)
+				*filteredMesh += *part;
+		}
+	}
+	*hollowMesh += *filteredMesh;
 	_target->setMesh(hollowMesh);
 }
 
