@@ -2,12 +2,14 @@
 #include "../qml/components/Inputs.h"
 #include "../qml/components/ControlOwner.h"
 #include "feature/repair/meshrepair.h"
+#include "feature/CombineModel.h"
 #include "Mesh/mesh.h"
 #include "cut/ZAxialCut.h"
+#include "addModel.h"
+#include "move.h"
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"
 #include "common/debugging/DebugRenderObject.h"
-
 
 #include <QString>
 
@@ -29,15 +31,16 @@
 // offset shell with mm
 
 using namespace Hix::Engine3D;
+using namespace Hix::Application;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
 const QUrl OFFSET_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupShellOffset.qml");
 
 Hix::Features::ShellOffsetMode::ShellOffsetMode():DialogedMode(OFFSET_POPUP_URL)
 {
-	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	if (ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
-		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
 		return;
 	}
 	auto& co = controlOwner();
@@ -59,11 +62,11 @@ void Hix::Features::ShellOffsetMode::applyButtonClicked()
 #endif
 
 	auto container = new Hix::Features::FeatureContainer();
-	for (auto each : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	for (auto each : ApplicationManager::getInstance().partManager().selectedModels())
 	{
 		container->addFeature(new ShellOffset(each, _offsetValue->getValue()));
 	}
-	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+	ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
@@ -80,34 +83,60 @@ Hix::Features::ShellOffset::~ShellOffset()
 
 void Hix::Features::ShellOffset::runImpl()
 {
-	/// Extend Bottom Faces ///
-	std::unordered_set<FaceConstItr> bottomFace;
-	Bounds3D aabb = _target->aabb();
-	aabb.localBoundUpdate(*_target->getMesh());
 
-	auto layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f;
+	std::unordered_set<GLModel*> children;
+	_target->getChildrenModelsModd(children);
+	children.insert(_target);
 
-	for (auto face = _target->getMesh()->getFaces().cbegin(); face != _target->getMesh()->getFaces().end(); ++face)
+	float cutValue = std::numeric_limits<float>::max();
+
+	for (auto child : children)
 	{
-		auto meshVtcs = face.meshVertices();
-
-		if ((meshVtcs[0].localPosition().z() < aabb.zMin() + layerHeight ||
-			 meshVtcs[1].localPosition().z() < aabb.zMin() + layerHeight ||
-			 meshVtcs[2].localPosition().z() < aabb.zMin() + layerHeight) && face.localFn().z() < -0.8)
+		if (child->getMesh()->getFaces().empty())
 		{
-			bottomFace.insert(face);
+			continue;
 		}
+
+		/// Extend Bottom Faces ///
+		std::unordered_set<FaceConstItr> bottomFace;
+		Bounds3D aabb = child->aabb();
+
+		auto layerHeight = ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f;
+
+		for (auto face = child->getMesh()->getFaces().cbegin(); face != child->getMesh()->getFaces().end(); ++face)
+		{
+			auto meshVtcs = face.meshVertices();
+
+			if ((meshVtcs[0].worldPosition().z() < aabb.zMin() + layerHeight ||
+				meshVtcs[1].worldPosition().z() < aabb.zMin() + layerHeight ||
+				meshVtcs[2].worldPosition().z() < aabb.zMin() + layerHeight) && face.worldFn().z() < -0.8)
+			{
+				bottomFace.insert(face);
+			}
+		}
+
+		if (bottomFace.empty())
+			continue;
+
+		auto calibrateValue = 1 - (aabb.lengthZ() - std::floorf(aabb.lengthZ()));
+
+		auto extendValue = std::fmod(aabb.lengthZ() + calibrateValue + _offset, 2.0f) > 0.0001 ? _offset + calibrateValue + 1.0f : _offset + calibrateValue;
+
+		cutValue = cutValue > extendValue ? extendValue : cutValue;
+
+		auto extend = new Extend(child, QVector3D(bottomFace.begin()->localFn()), bottomFace, extendValue);
+		addFeature(extend);
+
+		/// Hollow Mesh ///
+		addFeature(new HollowMesh(child, _offset));
+
+		/// Cut Extended Bottom ///
+		auto cut = new ZAxialCut(child, extendValue - 0.0001f, Hix::Features::Cut::KeepTop, true, _target == child);
+		addFeature(cut);
 	}
-	auto extendValue = std::fmod(_offset, 2.0f) > std::numeric_limits<float>::epsilon() * 10 ? _offset : _offset + 1;
-	auto extend = new Hix::Features::Extend(_target, QVector3D(0, 0, -1), bottomFace, extendValue);
-	addFeature(extend);
 
-	/// Hollow Mesh ///
-	addFeature(new HollowMesh(_target, _offset));
-
-	/// Cut Extended Bottom ///
-	auto cut = new ZAxialCut(_target, extendValue + 0.001f, Hix::Features::Cut::KeepTop, true);
-	addFeature(cut);
+	auto move = new Move(_target, QVector3D(0, 0, -cutValue));
+	addFeature(move);
 
 	FeatureContainer::runImpl();
 }
@@ -143,12 +172,16 @@ void Hix::Features::HollowMesh::runImpl()
 {
 	/// Generate Hole ///
 	Hix::Engine3D::Mesh* originalMesh = _target->getMeshModd();
+
+	if (isRepairNeeded(originalMesh))
+		tryRunFeature(*new MeshRepair(_target));
+
 	_prevMesh.reset(originalMesh);
 	auto hollowMesh = new Mesh(*originalMesh);
 
 	Mesh* newMesh = new Mesh();
 	_samplingBound.localBoundUpdate(*hollowMesh);
-	_samplingBound = _samplingBound.centred();
+	//_samplingBound = _samplingBound.centred();
 
 	int xMin = std::floorf(_samplingBound.xMin());
 	int xMax = std::ceilf(_samplingBound.xMax());
@@ -166,7 +199,6 @@ void Hix::Features::HollowMesh::runImpl()
 
 	_SDF.resize(lengthX * lengthY * lengthZ);
 
-
 	std::vector<float> zVec;
 	for (float z = zMin; z <= zMax; z += _resolution)
 		zVec.push_back(z);
@@ -177,36 +209,41 @@ void Hix::Features::HollowMesh::runImpl()
 
 	std::vector<QVector3D> voxel;
 	std::for_each(std::execution::par_unseq, std::begin(zVec), std::end(zVec), [&](int z)
-		//for (float z = zMin; z <= zMax; z += _resolution)
+	//for (float z = zMin; z <= zMax; z += _resolution)
+	{
+		for (float y = yMin; y <= yMax; y += _resolution)
 		{
-			for (float y = yMin; y <= yMax; y += _resolution)
+			for (float x = xMin; x <= xMax; x += _resolution)
 			{
-				for (float x = xMin; x <= xMax; x += _resolution)
+				QVector3D currPt = QVector3D(x, y, z);
+				//QVector3D currPt = QVector3D(0, yMax - 8, 0);
+				auto bvhdist = _rayAccel->getClosestDistance(currPt);
+
+				int indxex = std::floorf(((x -xMin) / _resolution) +
+					(((y - yMin) / _resolution) * lengthX) +
+					((z - zMin) / _resolution) * (lengthX * lengthY));
+
+				RayHits hits;
+				for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
 				{
-					QVector3D currPt = QVector3D(x, y, z);
-					auto bvhdist = _rayAccel->getClosestDistance(currPt);
-
-					int indxex = std::floorf(((x + std::abs(xMin)) / _resolution) +
-						(((y + std::abs(yMin)) / _resolution) * lengthX) +
-						((z + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
-
-					RayHits hits;
-					for (auto fixValue = -1.0f; fixValue < 1.0f; fixValue += 0.1f)
+					QVector3D rayDirection((_samplingBound.centre() + QVector3D(fixValue, fixValue, 0)) - currPt);
+					rayDirection.normalize();
+					hits = getRayHitPoints(currPt, rayDirection);
+					if (hits.size() != 0 && hits.at(0).type != HitType::Degenerate)
 					{
-						QVector3D rayDirection((_samplingBound.centre() + QVector3D(fixValue, fixValue, 0)) - currPt);
-						rayDirection.normalize();
-						hits = getRayHitPoints(currPt, rayDirection);
-						if (hits.size() != 0 && hits.at(0).type != HitType::Degenerate)
-						{
-							break;
-						}
+						break;
 					}
-
-					auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
-					_SDF[indxex] = bvhdist.first * distSign;
 				}
+
+				auto distSign = hits.size() % 2 == 1 ? -1.0f : 1.0f;
+
+				_SDF[indxex] = bvhdist.first * distSign;
+				//_SDF.push_back( distSign);
 			}
-		});
+		}
+	//}
+	});
+
 
 	const int edgeTable[256] = {
 	0x0  , 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -580,25 +617,62 @@ void Hix::Features::HollowMesh::runImpl()
 	}
 
 	newMesh->reverseFaces();
-	*hollowMesh += *newMesh;
+	auto filteredMesh = new Mesh();
+	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(newMesh);
+	if (newMesh->getFaces().size() < 1500)
+	{
+		*filteredMesh += *newMesh;
+	}
+	else
+	{
+		for (auto part : seperateParts)
+		{
+			float filter = float(part->getFaces().size()) / float(newMesh->getFaces().size());
+			if (filter > 0.005f)
+				*filteredMesh += *part;
+		}
+	}
+	*hollowMesh += *filteredMesh;
 	_target->setMesh(hollowMesh);
 }
 
 Hix::Engine3D::RayHits Hix::Features::HollowMesh::getRayHitPoints(QVector3D rayOrigin, QVector3D rayDirection)
 {
 	auto normal = _rayCaster->rayIntersectDirection(rayOrigin, rayDirection);
-	std::vector<QVector3D> hitPoints;
 	RayHits result;
 
 	for (auto& r : normal)
 	{
-		if ((r.type != HitType::Miss && r.type != HitType::Degenerate)
-			&& std::find(hitPoints.begin(), hitPoints.end(), r.intersection) == hitPoints.end())
+		if (_samplingBound.containsPoint(r.intersection))
 		{
-			hitPoints.push_back(r.intersection);
-			result.push_back(r);
+			if (r.type != HitType::Miss)
+			{
+				if (r.type == HitType::Degenerate)
+				{
+					result.push_back(r);
+					return result;
+				}
+
+				if (result.empty() && r.distance > 0.0001f)
+					result.push_back(r);
+
+				else if (result.back().type != r.type)
+					result.push_back(r);
+
+				bool duplicate = false;
+				for (auto res : result)
+				{
+					if (std::abs(res.distance - r.distance) < 0.0001f)
+					{
+						duplicate = true;
+					}
+				}
+
+				if (!duplicate)
+					result.push_back(r);
+			}
 		}
-	}		
+	}
 
 	return result;
 }
@@ -616,9 +690,9 @@ float Hix::Features::HollowMesh::getSDFValue(QVector3D point)
 	int lengthY = std::ceilf((yMax - yMin + 1) / _resolution);
 	int lengthZ = std::ceilf((zMax - zMin + 1) / _resolution);
 
-	int indxex = std::floorf(((point.x() + std::abs(xMin)) / _resolution) +
-		(((point.y() + std::abs(yMin)) / _resolution) * lengthX) +
-		((point.z() + std::abs(zMin)) / _resolution) * (lengthX * lengthY));
+	int indxex = std::floorf(((point.x() - xMin) / _resolution) +
+		(((point.y() - yMin) / _resolution) * lengthX) +
+		((point.z() - zMin) / _resolution) * (lengthX * lengthY));
 
 	return _SDF[indxex];
 }

@@ -317,6 +317,9 @@
     <ClCompile Include="feature\sampling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\CombineModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1187,6 +1190,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="unitTest\tests\RayCastTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\CombineModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

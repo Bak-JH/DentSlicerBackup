@@ -337,7 +337,11 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 
 	setMode(magic_enum::enum_value<MBEditMode>(0));
 
-	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", QUrl(), "3D Model file (*.stl)");
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).basicSetting;
+	modSettings.parseJSON();
+	QUrl latestUrl(QString(modSettings.importFilePath.c_str()));
+
+	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", latestUrl, "3D Model file (*.stl)");
 	auto fileName = fileUrl.fileName();
 	if (fileName.isEmpty())
 	{
@@ -345,7 +349,8 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 		return;
 	}
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<MBPrep>(this, fileUrl));
-
+	modSettings.importFilePath = fileUrl.adjusted(QUrl::RemoveFilename).toString().toStdString();
+	modSettings.writeJSON();
 
 	QObject::connect(&slider(), &Hix::QML::RangeSlideBarShell::lowerValueChanged, [this]() {
 		_bottPlane.transform().setMatrix(QMatrix4x4());
@@ -429,6 +434,7 @@ void Hix::Features::MBPrep::run()
 		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_mode->_widget, models));
 		_mode->updatePosition();
 		_mode->setMode(Hix::Features::MBEditMode::Rotation);
+		_mode->_widget.setVisible(true);
 		});
 }
 

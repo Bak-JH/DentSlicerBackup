@@ -33,9 +33,12 @@ void Hix::Application::PartManager::addPart(std::unique_ptr<GLModel>&& model)
 
 std::unique_ptr<GLModel> Hix::Application::PartManager::removePart(GLModel* model)
 {
-	_partList->unlistModel(model);
-	auto node = _models.extract(model);
-	return std::unique_ptr<GLModel>(std::move(node.mapped()));
+	if (_partList->unlistModel(model))
+	{
+		auto node = _models.extract(model);
+		return std::unique_ptr<GLModel>(std::move(node.mapped()));
+	}
+	return nullptr;
 }
 
 bool Hix::Application::PartManager::isTopLevel(GLModel* model) const
