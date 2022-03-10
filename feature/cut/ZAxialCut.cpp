@@ -3,8 +3,11 @@
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"
 #include "../cdt/HixCDT.h"
+#include "application/ApplicationManager.h"
+#include "application/PartManager.h"
 
 using namespace Hix;
+using namespace Hix::Application;
 using namespace Hix::Features::Cut;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -41,8 +44,8 @@ namespace Hix
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName) : FeatureContainerFlushSupport(subject),
-	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep), _keepName(keepName)
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName, bool seperate) : FeatureContainerFlushSupport(subject),
+	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep), _keepName(keepName), _seperate(seperate)
 {
 
 
@@ -71,14 +74,20 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 		if (childTopMesh != nullptr && !childTopMesh->getFaces().empty())
 		{
 			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_top";
-			auto addTopModel = new ListModel(childTopMesh, modelName, &subject->transform());
+			auto modelRoot = ApplicationManager::getInstance().partManager().modelRoot();
+			auto addTopModel = _seperate ? new ListModel(childTopMesh, modelName, &subject->transform()) : 
+								           new AddModel(subject->parentEntity(), childTopMesh, modelName, &subject->transform());
+
 			addFeature(addTopModel);
 
 		}
 		if (childBotMesh != nullptr && !childBotMesh->getFaces().empty())
 		{
 			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_bot";
-			auto addBotModel = new ListModel(childBotMesh, modelName, &subject->transform());
+			auto modelRoot = ApplicationManager::getInstance().partManager().modelRoot();
+			auto addBotModel = _seperate ? new ListModel(childBotMesh, modelName, &subject->transform()) :
+										   new AddModel(subject->parentEntity(), childBotMesh, modelName, &subject->transform());
+
 			addFeature(addBotModel);
 		}
 		

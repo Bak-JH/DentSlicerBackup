@@ -36,7 +36,7 @@ using namespace Hix::Input;
 using namespace Hix::Render;
 using namespace Hix::Application;
 
-GLModel::GLModel(Qt3DCore::QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::QTransform* transform)
+GLModel::GLModel(Qt3DCore::QEntity* parent, Mesh* loadMesh, QString fname, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
     , _name(fname)
 {
@@ -188,7 +188,7 @@ void GLModel::changeColor(const QVector4D& color)
 bool GLModel::isPrintable()const
 {
 	const auto& bedBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
-	return bedBound.contains(_aabb);
+	return bedBound.containsAabb(_aabb);
 }
 
 void GLModel::updatePrintable() {
@@ -227,7 +227,19 @@ void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)cons
 		}
 	}
 	callRecursive(this, &GLModel::getChildrenModels, results);
+}
 
+void GLModel::getChildrenModelsModd(std::unordered_set<GLModel*>& results)const
+{
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(child);
+		if (model)
+		{
+			results.insert(model);
+		}
+	}
+	callRecursive(this, &GLModel::getChildrenModelsModd, results);
 }
 
 void GLModel::initHitTest()

@@ -286,7 +286,7 @@ std::array<float, 6> Hix::Engine3D::Bounds3D::calculateMaxDisplacement(const Bou
 	
 }
 
-bool Hix::Engine3D::Bounds3D::contains(const Hix::Engine3D::Bounds3D& other)const
+bool Hix::Engine3D::Bounds3D::containsAabb(const Hix::Engine3D::Bounds3D& other)const
 {
 	if (other.xMin() >= xMin() &&
 		other.xMax() <= xMax() &&
@@ -294,6 +294,21 @@ bool Hix::Engine3D::Bounds3D::contains(const Hix::Engine3D::Bounds3D& other)cons
 		other.yMax() <= yMax() &&
 		other.zMin() >= zMin() &&
 		other.zMax() <= zMax())
+	{
+		return true;
+	}
+	return false;
+}
+
+bool Hix::Engine3D::Bounds3D::containsPoint(const QVector3D point) const
+{
+	float EPS = 0.0001f;
+	if (point.x() >= xMin() - EPS&&
+		point.x() <= xMax() + EPS&&
+		point.y() >= yMin() - EPS&&
+		point.y() <= yMax() + EPS&&
+		point.z() >= zMin() - EPS&&
+		point.z() <= zMax() + EPS)
 	{
 		return true;
 	}

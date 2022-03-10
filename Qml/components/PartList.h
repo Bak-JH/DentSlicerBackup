@@ -24,7 +24,7 @@ namespace Hix
 			PartList(QQuickItem* parent = nullptr);
 			virtual ~PartList();
 			void listModel(GLModel* model);
-			void unlistModel(GLModel* model);
+			bool unlistModel(GLModel* model); // return false = there is something wrong
 			bool isListed(GLModel* model)const;
 			bool isSelected(GLModel* model)const;
 			void unselectAll();

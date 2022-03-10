@@ -39,6 +39,7 @@ public:
 
 	void copyChildrenRecursive(GLModel* newParent)const;
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
+	void getChildrenModelsModd(std::unordered_set<GLModel*>& results)const;
 
 
 

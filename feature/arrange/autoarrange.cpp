@@ -136,7 +136,7 @@ void Hix::Features::AutoArrangeAppend::runImpl()
 	bound.setZMin(0.0f);
 	_to = -origBound.centre();
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
-	if (printBound.contains(bound))
+	if (printBound.containsAabb(bound))
 	{
 		_to->setZ(0.0f);
 		auto maxDisp = printBound.calculateMaxDisplacement(bound);

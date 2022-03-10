@@ -61,7 +61,7 @@ Item{
 
 	Rectangle {
 		id:campopupshell
-		visible: false
+		visible: true
 		anchors.top: cambuttonshell.bottom
 		anchors.topMargin: 12 //cambuttonshell.width * 0.1
 		anchors.right: cambuttonshell.right

@@ -84,7 +84,8 @@ void Hix::Features::ModelCut::applyButtonClicked()
 	{
 		for (auto each : _models)
 		{
-			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ZAxialCut(each, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth, false));
+			auto cut = new ZAxialCut(each, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth);
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(cut);
 		}
 		break;
 	}

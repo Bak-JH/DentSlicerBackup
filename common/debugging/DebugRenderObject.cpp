@@ -97,7 +97,28 @@ void Hix::Debug::DebugRenderObject::showGLModelAabb(SceneEntityWithMaterial* tar
 	addLinePaths(paths);
 }
 
-void Hix::Debug::DebugRenderObject::showAabb(Bounds3D& aabb)
+void Hix::Debug::DebugRenderObject::showGLModelFaces(SceneEntityWithMaterial* target)
+{
+	std::vector<std::vector<QVector3D>> paths;
+	auto aabb = target->aabb();
+	aabb.localBoundUpdate(*target->getMesh());
+	qDebug() << aabb.zMin() << aabb.zMax() << aabb.lengthZ();
+
+	for (auto face = target->getMesh()->getFaces().begin(); face != target->getMesh()->getFaces().end(); ++face)
+	{
+		auto v1 = face.meshVertices().at(0).localPosition();
+		auto v2 = face.meshVertices().at(1).localPosition();
+		auto v3 = face.meshVertices().at(2).localPosition();
+
+		paths.push_back({ v1, v2 });
+		paths.push_back({ v2, v3 });
+		paths.push_back({ v3, v1 });
+	}
+
+	addLinePaths(paths);
+}
+
+void Hix::Debug::DebugRenderObject::showAabb(const Bounds3D& aabb)
 {
 	auto minX = aabb.xMin();
 	auto minY = aabb.yMin();
