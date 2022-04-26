@@ -2,6 +2,5 @@
     "printerPresetPath": "HixC10.json",
     "enableErrorReport": true,
     "importFilePath": "",
-    "exportFilePath": "",
-    "snapshotSize": 10
+    "exportFilePath": ""
 }

@@ -12,6 +12,7 @@ namespace Hix
 		public:
 			FeatureHistoryManager();
 			void addFeature(Hix::Features::Feature* feature);
+			void historySizeChanged(int newSize);
 			//gets the latest feature
 			const Hix::Features::Feature& peek()const;
 			bool empty()const;
