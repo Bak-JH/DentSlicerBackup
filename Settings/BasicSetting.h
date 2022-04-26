@@ -17,7 +17,7 @@ namespace Hix
 			std::string printerPresetPath;
 			std::string importFilePath;
 			std::string exportFilePath;
-			int snapshotSize;
+			int historySize = 10;
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;

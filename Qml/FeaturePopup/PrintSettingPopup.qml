@@ -19,7 +19,7 @@ FeaturePopup {
 	}
 
 	CtrSpinBoxInteger {
-		id: snaphotSize
+		id: historySize
 		width: 224
 		fromNum:1
 		toNum:100
@@ -36,7 +36,7 @@ FeaturePopup {
 		radius: 16
 		// color: "transparent"
 		// border.color: "#b2c4c6"
-		anchors.top: snaphotSize.bottom
+		anchors.top: historySize.bottom
 		anchors.topMargin: 30
 		anchors.horizontalCenter: parent.horizontalCenter
 		buttonText: "View Profile"

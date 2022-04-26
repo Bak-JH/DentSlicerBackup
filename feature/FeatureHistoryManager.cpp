@@ -25,13 +25,19 @@ void Hix::Features::FeatureHistoryManager::addFeature(Hix::Features::Feature* fe
 	}
 	   
 	// max size
-	if (_history.size() >= Hix::Application::ApplicationManager::getInstance().settings().basicSetting.snapshotSize)
+	if (_history.size() >= Hix::Application::ApplicationManager::getInstance().settings().basicSetting.historySize)
 	{
 		_history.pop_front();
 	}
 
 	_history.emplace_back(std::unique_ptr<Feature>(feature));
 	_itr = _history.end();
+}
+
+void Hix::Features::FeatureHistoryManager::historySizeChanged(int newSize)
+{
+	while (_history.size() > newSize)
+		_history.pop_front();
 }
 
 const Hix::Features::Feature& Hix::Features::FeatureHistoryManager::peek()const

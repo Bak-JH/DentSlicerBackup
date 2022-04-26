@@ -98,7 +98,8 @@ void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
 	}
 	else if (e->matches(QKeySequence::Delete))
 	{
-		Hix::Application::ApplicationManager::getInstance().partManager().deleteSelectedModels();
+		if(!Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+			Hix::Application::ApplicationManager::getInstance().partManager().deleteSelectedModels();
 	}
 }
 
