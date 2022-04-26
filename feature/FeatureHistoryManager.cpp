@@ -1,5 +1,6 @@
 #include "FeatureHistoryManager.h"
 #include <QDebug>
+#include "application/ApplicationManager.h"
 
 Hix::Features::FeatureHistoryManager::FeatureHistoryManager()
 {
@@ -24,7 +25,7 @@ void Hix::Features::FeatureHistoryManager::addFeature(Hix::Features::Feature* fe
 	}
 	   
 	// max size
-	if (_history.size() >= 100)
+	if (_history.size() >= Hix::Application::ApplicationManager::getInstance().settings().basicSetting.snapshotSize)
 	{
 		_history.pop_front();
 	}

@@ -287,6 +287,8 @@ RaftModel* Hix::Support::SupportRaftManager::generateRaft()
 
 RaftModel* Hix::Support::SupportRaftManager::addRaft(std::unique_ptr<RaftModel> raft)
 {
+	if (raft == nullptr)
+		return generateRaft();
 	_raft = std::move(raft);
 	_raft->setParent(&rootEntity());
 	return _raft.get();

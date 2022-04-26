@@ -7,7 +7,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Settings")
-	height: 260
+	height: 300
 	CtrDropdownBox {
 		id: printerPreset
 		label.text: "Printer Preset"
@@ -17,6 +17,18 @@ FeaturePopup {
 		anchors.top: parent.top
 		anchors.topMargin: 55
 	}
+
+	CtrSpinBoxInteger {
+		id: snaphotSize
+		width: 224
+		fromNum:1
+		toNum:100
+		label.text: "Undo/Redo\nRestore Size"
+		anchors.left: printerPreset.left
+		anchors.top: printerPreset.bottom
+		anchors.topMargin: 40
+	}
+
 	CtrTextButton {
 		id: profileButton
 		width: 224
@@ -24,7 +36,7 @@ FeaturePopup {
 		radius: 16
 		// color: "transparent"
 		// border.color: "#b2c4c6"
-		anchors.top: printerPreset.bottom
+		anchors.top: snaphotSize.bottom
 		anchors.topMargin: 30
 		anchors.horizontalCenter: parent.horizontalCenter
 		buttonText: "View Profile"

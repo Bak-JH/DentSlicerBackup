@@ -19,6 +19,7 @@ Hix::Features::SettingMode::SettingMode()
 {
 	auto& co = controlOwner();
 	co.getControl(_printerPresets, "printerPreset");
+	co.getControl(_snapshotSize, "snaphotSize");
 	co.getControl(_profileBttn, "profileButton");
 	co.getControl(_updateBttn, "updateButton");
 	co.getControl(_resetBttn, "resetSettings");
@@ -40,6 +41,9 @@ Hix::Features::SettingMode::SettingMode()
 	_oldIndex = presets.indexOf(oldPresetStr);
 	_printerPresets->setList(presets);
 	_printerPresets->setIndex(_oldIndex);
+
+	int snapshotSize = Hix::Application::ApplicationManager::getInstance().settings().basicSetting.snapshotSize;
+	_snapshotSize->setValue(snapshotSize);
 
 	QObject::connect(_profileBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 		auto& auth = Hix::Application::ApplicationManager::getInstance().auth();
@@ -68,6 +72,7 @@ void Hix::Features::SettingMode::applyButtonClicked()
 		auto path = _presetPaths[_printerPresets->getIndex()];
 		auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
 		moddableSetting.basicSetting.printerPresetPath = path.filename().string();
+		moddableSetting.basicSetting.snapshotSize = _snapshotSize->getValue();
 		//save settings
 		moddableSetting.basicSetting.writeJSON();
 	}
@@ -75,6 +80,7 @@ void Hix::Features::SettingMode::applyButtonClicked()
 
 bool Hix::Features::SettingMode::isDirty() const
 {
-	return _printerPresets->getIndex() != _oldIndex;
+	auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+	return _printerPresets->getIndex() != _oldIndex || moddableSetting.basicSetting.snapshotSize != _snapshotSize->getValue();
 }
 
