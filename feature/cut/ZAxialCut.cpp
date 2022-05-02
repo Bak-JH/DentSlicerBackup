@@ -23,7 +23,7 @@ namespace Hix
 			{
 
 			public:
-				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, Hix::Features::Cut::KeepType keep);
+				ZAxialCutImp(GLModel* target, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, Hix::Features::Cut::KeepType keep);
 			private:
 				void divideTriangles();
 				void generateCutContour();
@@ -44,22 +44,21 @@ namespace Hix
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(std::unordered_set<GLModel*>& subjects, float cuttingPlane, KeepType keep, bool keepName) : FeatureContainerFlushSupport(subjects),
-	_cuttingPlane(cuttingPlane), _subjects(subjects), _keep(keep), _keepName(keepName), _seperate(true)
-{
 
-
-}
-
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName, bool seperate): FeatureContainerFlushSupport(subject),
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* target, float cuttingPlane, KeepType keep, bool keepName, bool seperate): FeatureContainerFlushSupport(target),
 	_cuttingPlane(cuttingPlane), _keep(keep), _keepName(keepName), _seperate(seperate)
 {
-	_subjects.insert(subject);
+	_targets.insert(target);
+}
+
+Hix::Features::Cut::ZAxialCut::ZAxialCut(std::unordered_set<GLModel*>& targets, float cuttingPlane, KeepType keep, bool keepName) : FeatureContainerFlushSupport(targets),
+_cuttingPlane(cuttingPlane), _targets(targets), _keep(keep), _keepName(keepName), _seperate(true)
+{
 }
 
 void Hix::Features::Cut::ZAxialCut::runImpl()
 {
-	for (auto each : _subjects)
+	for (auto each : _targets)
 	{
 		if (_cuttingPlane >= each->recursiveAabb().zMax() || _cuttingPlane <= each->recursiveAabb().zMin())
 		{
@@ -71,37 +70,37 @@ void Hix::Features::Cut::ZAxialCut::runImpl()
 	Hix::Features::FeatureContainerFlushSupport::runImpl();
 }
 
-void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane)
+void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* target, float cuttingPlane)
 {
 	Mesh* childTopMesh = nullptr;
 	Mesh* childBotMesh = nullptr;
-	ZAxialCutImp(subject, cuttingPlane, childTopMesh, childBotMesh, _keep);
-	if(subject->getMesh()->getFaces().empty())
+	ZAxialCutImp(target, cuttingPlane, childTopMesh, childBotMesh, _keep);
+	if(target->getMesh()->getFaces().empty())
 	{ }
 	else
 	{
 		if (childTopMesh != nullptr && !childTopMesh->getFaces().empty())
 		{
-			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_top";
+			auto modelName = _keepName ? target->modelName() : target->modelName() + "_top";
 			auto modelRoot = ApplicationManager::getInstance().partManager().modelRoot();
-			auto addTopModel = _seperate ? new ListModel(childTopMesh, modelName, &subject->transform()) : 
-								           new AddModel(subject->parentEntity(), childTopMesh, modelName, &subject->transform());
+			auto addTopModel = _seperate ? new ListModel(childTopMesh, modelName, &target->transform()) : 
+								           new AddModel(target->parentEntity(), childTopMesh, modelName, &target->transform());
 
 			addFeature(addTopModel);
 
 		}
 		if (childBotMesh != nullptr && !childBotMesh->getFaces().empty())
 		{
-			auto modelName = _keepName ? subject->modelName() : subject->modelName() + "_bot";
+			auto modelName = _keepName ? target->modelName() : target->modelName() + "_bot";
 			auto modelRoot = ApplicationManager::getInstance().partManager().modelRoot();
-			auto addBotModel = _seperate ? new ListModel(childBotMesh, modelName, &subject->transform()) :
-										   new AddModel(subject->parentEntity(), childBotMesh, modelName, &subject->transform());
+			auto addBotModel = _seperate ? new ListModel(childBotMesh, modelName, &target->transform()) :
+										   new AddModel(target->parentEntity(), childBotMesh, modelName, &target->transform());
 
 			addFeature(addBotModel);
 		}
 		
 	}
-	for (auto childNode : subject->childNodes())
+	for (auto childNode : target->childNodes())
 	{
 		auto model = dynamic_cast<GLModel*>(childNode);
 		if (model)
@@ -111,8 +110,8 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	}
 }
 
-Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, Hix::Features::Cut::KeepType keepType) :
-	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh()), _keepType(keepType)
+Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* target, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, Hix::Features::Cut::KeepType keepType) :
+	_cuttingPlane(cuttingPlane), _origMesh(target->getMesh()), _keepType(keepType)
 {
 	if(_keepType != KeepBottom)
 		_topMesh.reset( new Mesh());
@@ -131,12 +130,12 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 	
 	if (_bottomMesh && _bottomMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
-		botMesh = subject->getMeshModd();
+		botMesh = target->getMeshModd();
 		return;
 	}
 	else if (_topMesh && _topMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
-		topMesh = subject->getMeshModd();
+		topMesh = target->getMeshModd();
 		return;
 	}
 	generateCutContour();
