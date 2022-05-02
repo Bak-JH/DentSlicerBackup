@@ -82,11 +82,8 @@ void Hix::Features::ModelCut::applyButtonClicked()
 	{
 	case Hix::Features::ModelCut::ZAxial:
 	{
-		for (auto each : _models)
-		{
-			auto cut = new ZAxialCut(each, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth);
-			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(cut);
-		}
+		auto cut = new ZAxialCut(_models, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth);
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(cut);
 		break;
 	}
 	case Hix::Features::ModelCut::Polyline:

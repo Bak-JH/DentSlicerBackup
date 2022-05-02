@@ -7,6 +7,7 @@ Rectangle {
     //color: "#000000"
 
 	property string featureName;
+    FontLoader{ id: openRegular; source: "qrc:/Resource/font/OpenSans-Regular.ttf" }
 
 	Text {
         id: item

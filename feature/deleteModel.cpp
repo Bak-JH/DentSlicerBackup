@@ -45,7 +45,7 @@ void Hix::Features::DeleteModel::redoImpl()
 	{
 		auto& partManager = ApplicationManager::getInstance().partManager();
 
-		std::function < std::unique_ptr<GLModel>()>  unlist = [&raw, &partManager]()->std::unique_ptr<GLModel> { return partManager.removePart(raw); };
+		std::function <std::unique_ptr<GLModel>()>  unlist = [&raw, &partManager]()->std::unique_ptr<GLModel> { return partManager.removePart(raw); };
 		_model = RedoInfo{ postUIthread(std::move(unlist)), parent, isListed };
 	}
 	else
@@ -91,6 +91,7 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 			{
 				container->addFeature(new DeleteModel(model));
 			}
+			Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 			Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
 			scheduleForDelete();

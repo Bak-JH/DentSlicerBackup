@@ -44,21 +44,30 @@ namespace Hix
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName, bool seperate) : FeatureContainerFlushSupport(subject),
-	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep), _keepName(keepName), _seperate(seperate)
+Hix::Features::Cut::ZAxialCut::ZAxialCut(std::unordered_set<GLModel*>& subjects, float cuttingPlane, KeepType keep, bool keepName) : FeatureContainerFlushSupport(subjects),
+	_cuttingPlane(cuttingPlane), _subjects(subjects), _keep(keep), _keepName(keepName), _seperate(true)
 {
 
 
 }
 
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName, bool seperate): FeatureContainerFlushSupport(subject),
+	_cuttingPlane(cuttingPlane), _keep(keep), _keepName(keepName), _seperate(seperate)
+{
+	_subjects.insert(subject);
+}
+
 void Hix::Features::Cut::ZAxialCut::runImpl()
 {
-	if (_cuttingPlane >= _subject->recursiveAabb().zMax() || _cuttingPlane <= _subject->recursiveAabb().zMin())
+	for (auto each : _subjects)
 	{
-		throw std::runtime_error("Z Axial Cut cutting plane on the z limit of the model");
-	}//do listed part first
-	doChildrenRecursive(_subject, _cuttingPlane);
-	addFeature(new DeleteModel(_subject));
+		if (_cuttingPlane >= each->recursiveAabb().zMax() || _cuttingPlane <= each->recursiveAabb().zMin())
+		{
+			throw std::runtime_error("Z Axial Cut cutting plane on the z limit of the model");
+		}//do listed part first
+		doChildrenRecursive(each, _cuttingPlane);
+		addFeature(new DeleteModel(each));
+	}
 	Hix::Features::FeatureContainerFlushSupport::runImpl();
 }
 

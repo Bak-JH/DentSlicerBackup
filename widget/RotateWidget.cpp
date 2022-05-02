@@ -90,7 +90,6 @@ double Hix::UI::RotateWidget::calculateRot()
 	{
 		degreeangle = -1.0 * degreeangle;
 	}
-    qDebug() << "deg angle" << degreeangle;
 	return degreeangle;
 }
 
