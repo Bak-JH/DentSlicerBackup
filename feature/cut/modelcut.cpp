@@ -82,8 +82,8 @@ void Hix::Features::ModelCut::applyButtonClicked()
 	{
 	case Hix::Features::ModelCut::ZAxial:
 	{
-		auto cut = new ZAxialCut(_models, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth);
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(cut);
+		auto axialCut = new ZAxialCut(_models, _cuttingPlane->transform().translation().z(), Hix::Features::Cut::KeepBoth);
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(axialCut);
 		break;
 	}
 	case Hix::Features::ModelCut::Polyline:
@@ -91,10 +91,9 @@ void Hix::Features::ModelCut::applyButtonClicked()
 		auto cuttingPts = _cuttingPlane->contour();
 		if (!cuttingPts.empty())
 		{
-			for (auto each : _models)
-			{
-				Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new PolylineCut(each, cuttingPts));
-			}
+			auto polyLineCut = new PolylineCut(_models, cuttingPts);
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(polyLineCut);
+
 		}
 		break;
 	}

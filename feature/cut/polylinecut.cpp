@@ -31,20 +31,30 @@ using namespace Hix::Features::CSG;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> cuttingPoints): FeatureContainerFlushSupport(origModel), _target(origModel), _cuttingPoints(cuttingPoints)
+Hix::Features::Cut::PolylineCut::PolylineCut(GLModel* target, std::vector<QVector3D> cuttingPoints)
+	: FeatureContainerFlushSupport(target), _cuttingPoints(cuttingPoints)
+{
+	_targets.insert(target);
+}
+
+Hix::Features::Cut::PolylineCut::PolylineCut(std::unordered_set<GLModel*> targets, std::vector<QVector3D> cuttingPoints)
+	: FeatureContainerFlushSupport(targets), _targets(targets), _cuttingPoints(cuttingPoints)
 {
 }
 
 void Hix::Features::Cut::PolylineCut::runImpl()
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
-	Hix::Engine3D::Mesh polylineWall;
+	for (auto each : _targets)
+	{
+		Hix::Engine3D::Mesh polylineWall;
 
-	generateCuttingWalls(_cuttingPoints, _target->recursiveAabb(), polylineWall);
-	//convert all meshes to cork meshes
-	auto cylinderWallCork = toCorkMesh(polylineWall);
-	cutCSG(_target->modelName(), _target, cylinderWallCork);
-	freeCorkTriMesh(&cylinderWallCork);
+		generateCuttingWalls(_cuttingPoints, each->recursiveAabb(), polylineWall);
+		//convert all meshes to cork meshes
+		auto cylinderWallCork = toCorkMesh(polylineWall);
+		cutCSG(each->modelName(), each, cylinderWallCork);
+		freeCorkTriMesh(&cylinderWallCork);
+	}
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)
@@ -81,28 +91,28 @@ void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVe
 	}
 }
 
-void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Render::SceneEntity* subject, const CorkTriMesh& subtract)
+void Hix::Features::Cut::PolylineCut::cutCSG(const QString& targetName, Hix::Render::SceneEntity* target, const CorkTriMesh& subtract)
 {
 	size_t childIdx = 0;
-	for (auto childNode : subject->childNodes())
+	for (auto childNode : target->childNodes())
 	{
 		auto entity = dynamic_cast<Hix::Render::SceneEntity*>(childNode);
 		if (entity)
 		{
-			auto childName = subjectName + "_child" + QString::number(childIdx);
+			auto childName = targetName + "_child" + QString::number(childIdx);
 			cutCSG(childName, entity, subtract);
 			++childIdx;
 		}
 	}
 
-	auto subjectCork = toCorkMesh(*subject->getMesh());
+	auto targetCork = toCorkMesh(*target->getMesh());
 	CorkTriMesh output;
-	computeDifference(subjectCork, subtract, &output);
+	computeDifference(targetCork, subtract, &output);
 
 	//convert the result back to hix mesh
 	auto result = toHixMesh(output);
 	//manual free cork memory, TODO RAII
-	freeCorkTriMesh(&subjectCork);
+	freeCorkTriMesh(&targetCork);
 	freeCorkTriMesh(&output);
 
 	//seperate disconnected meshes
@@ -112,18 +122,18 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		if (seperateParts[i]->getFaces().size() < 3)
 			continue;
 
-		float filter = float(seperateParts[i]->getFaces().size()) / float(subject->getMesh()->getFaces().size());
+		float filter = float(seperateParts[i]->getFaces().size()) / float(target->getMesh()->getFaces().size());
 		if (filter < 0.0001f)
 		{
 			continue;
 		}
 
-		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
+		auto addModel = new Hix::Features::ListModel(seperateParts[i], targetName + "_cut" + QString::number(i), nullptr);
 		tryRunFeature(*addModel);
 		addModel->get()->setZToBed();
 		addFeature(addModel);
 	}
-	auto model = dynamic_cast<GLModel*>(subject);
+	auto model = dynamic_cast<GLModel*>(target);
 	if (model)
 	{
 		auto deleteModel = new DeleteModel(model);
@@ -132,7 +142,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	}
 	else
 	{
-		delete subject;
+		delete target;
 	}
 }
 

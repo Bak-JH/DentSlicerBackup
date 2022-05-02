@@ -23,13 +23,14 @@ namespace Hix
 			class PolylineCut : public FeatureContainerFlushSupport
 			{
 			public:
-				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints);
+				PolylineCut(GLModel* target, std::vector<QVector3D> cuttingPoints);
+				PolylineCut(std::unordered_set<GLModel*> targets, std::vector<QVector3D> cuttingPoints);
 			protected:
 				void runImpl()override;
 			private:
 				void generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out);
 				void cutCSG(const QString& subjectName, Hix::Render::SceneEntity* subject, const CorkTriMesh& subtract);
-				GLModel* _target;
+				std::unordered_set<GLModel*> _targets;
 				std::vector<QVector3D> _cuttingPoints;
 			};
 

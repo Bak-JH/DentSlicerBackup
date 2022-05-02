@@ -26,17 +26,17 @@ namespace Hix
 				
 			public:
 
-				ZAxialCut(std::unordered_set<GLModel*>& subject, float cuttingPlane, KeepType keep, bool keepName = false);
-				ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep, bool keepName = false, bool seperate = true);
+				ZAxialCut(std::unordered_set<GLModel*>& targets, float cuttingPlane, KeepType keep, bool keepName = false);
+				ZAxialCut(GLModel* target, float cuttingPlane, KeepType keep, bool keepName = false, bool seperate = true);
 
-				void doChildrenRecursive(GLModel* subject, float cuttingPlane);
+				void doChildrenRecursive(GLModel* target, float cuttingPlane);
 				std::unordered_set<GLModel*>& upperModels();
 				std::unordered_set<GLModel*>& lowerModels();
 			protected:
 				void runImpl()override;
 			private:
 				//top, bottom pair
-				std::unordered_set<GLModel*> _subjects;
+				std::unordered_set<GLModel*> _targets;
 				KeepType _keep;
 				float _cuttingPlane;
 				bool _keepName;
