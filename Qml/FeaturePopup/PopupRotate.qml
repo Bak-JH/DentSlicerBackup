@@ -6,7 +6,7 @@ import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Rotate")
-	height: 284
+	height: 255
 
 	CtrSpinBox {
 		id: rotateX
@@ -29,7 +29,7 @@ FeaturePopup {
 		anchors.left: parent.left
 		anchors.leftMargin: 16
 		anchors.top: rotateX.bottom
-		anchors.topMargin: 56
+		anchors.topMargin: 50
 	}
 
 	CtrSpinBox {
@@ -41,6 +41,6 @@ FeaturePopup {
 		anchors.left: parent.left
 		anchors.leftMargin: 16
 		anchors.top: rotateY.bottom
-		anchors.topMargin: 56
+		anchors.topMargin: 50
 	}
 }

@@ -92,7 +92,6 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 	_mouseCurrent = e.position;
 	auto currProj = calculateMove();
 	auto diff = currProj - _pastProj;
-	qDebug() << diff;
 	_pastProj = currProj;
 	auto mode = dynamic_cast<Features::MoveMode*>(_parent->mode());
 	mode->modelMoveWithAxis(_axis, diff * TRANSLATE_MULT);

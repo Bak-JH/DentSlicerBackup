@@ -49,8 +49,10 @@ void Hix::Features::MoveMode::featureStarted()
 {
 	_widget.setManipulated(true);
 	_moveContainer = new FeatureContainerFlushSupport(_targetModels);
+
 	for (auto& target : _targetModels)
 		_moveContainer->addFeature(new Move(target));
+
 	if (!_moveContainer->empty())
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_moveContainer);
 }
@@ -116,12 +118,12 @@ void Hix::Features::MoveMode::modelMove(QVector3D displacement)
 }
 
 
-Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), _to(to)
+Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), _to(to), _prevMatrix(target->transform().matrix()), _prevAabb(target->aabb())
 {
 	_progress.setDisplayText("Move Model");
 }
 
-Hix::Features::Move::Move(GLModel* target) : _model(target)
+Hix::Features::Move::Move(GLModel* target) : _model(target), _prevMatrix(target->transform().matrix()), _prevAabb(target->aabb())
 {
 	_progress.setDisplayText("Move Model");
 }
@@ -156,17 +158,12 @@ void Hix::Features::Move::redoImpl()
 void Hix::Features::Move::runImpl()
 {
 	postUIthread([this]() {
-		_prevMatrix = _model->transform().matrix();
-		_prevAabb = _model->aabb();
 		if (_to)
 		{
 			_model->moveModel(_to.value());
 			UpdateWidgetModePos();
 		}
 	});
-
-
-
 }
 
 Hix::Features::Move::ZToBed::ZToBed(GLModel* target): Move(target)

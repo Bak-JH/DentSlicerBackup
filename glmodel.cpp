@@ -356,8 +356,8 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	//}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
-	Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(CursorType::ClosedHand);
 
+	Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(CursorType::ClosedHand);
 }
 
 void GLModel::doDrag(Hix::Input::MouseEventData& v)
