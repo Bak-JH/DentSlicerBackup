@@ -82,6 +82,10 @@ void Hix::Features::RotateMode::applyButtonClicked()
 #endif
 
 	auto rotation = QQuaternion::fromEulerAngles(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+
+	if (rotation.vector() == QVector3D(0, 0, 0))
+		return;
+
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Rotate(target, rotation));
@@ -89,12 +93,12 @@ void Hix::Features::RotateMode::applyButtonClicked()
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
+Hix::Features::Rotate::Rotate(GLModel* target) : _model(target), _prevMatrix(target->transform().matrix()), _prevAabb(target->aabb())
 {
 	_progress.setDisplayText("Rotate Model");
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot)
+Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot), _prevMatrix(target->transform().matrix()), _prevAabb(target->aabb())
 {
 	_progress.setDisplayText("Rotate Model");
 }
@@ -132,8 +136,6 @@ void Hix::Features::Rotate::redoImpl()
 void Hix::Features::Rotate::runImpl()
 {
 	postUIthread([this]() {
-		_prevMatrix = _model->transform().matrix();
-		_prevAabb = _model->aabb();
 		if (_rot)
 		{
 			_model->rotateModel(_rot.value());
