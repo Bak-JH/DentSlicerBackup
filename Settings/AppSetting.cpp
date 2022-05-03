@@ -24,9 +24,11 @@ void Hix::Settings::AppSetting::parse()
 	basicSetting.setWritePath(basicSetting.jsonPath());
 	sliceSetting.setWritePath(sliceSetting.jsonPath());
 	supportSetting.setWritePath(supportSetting.jsonPath());
+	labelSetting.setWritePath(labelSetting.jsonPath());
 	basicSetting.parseJSON();
 	sliceSetting.parseJSON();
 	supportSetting.parseJSON();
+	labelSetting.parseJSON();
 }
 
 void Hix::Settings::AppSetting::toDefault()
@@ -34,9 +36,11 @@ void Hix::Settings::AppSetting::toDefault()
 	basicSetting.toDefault();
 	sliceSetting.toDefault();
 	supportSetting.toDefault();
+	labelSetting.toDefault();
 	basicSetting.writeJSON();
 	sliceSetting.writeJSON();
 	supportSetting.writeJSON();
+	labelSetting.writeJSON();
 
 }
 
