@@ -229,6 +229,14 @@ Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 	co.getControl(_labelDepth, "labelDepth");
 	co.getControl(_isEmboss, "labeltype");
 
+	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().labelSetting;
+
+	if(!settings.labelFontFamily.empty())
+		_fontStyle->setIndex(_fontStyle->list().indexOf(settings.labelFontFamily.c_str()));
+	_fontSize->setValue(settings.labelFontSize);
+	_labelDepth->setValue(settings.labelDepth);
+	_isEmboss->setChecked(settings.isEmboss);
+	
 	_fontSize->setRange(0, 256);
 	_labelDepth->setRange(0.05, 10);
 }
@@ -287,6 +295,21 @@ void Hix::Features::LabellingMode::applyButtonClicked()
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new LabellingEngrave(_targetModel, _previewModel.release()));
 
 	}
+
+#ifdef _DEBUG
+	qDebug() << _inputText->getInputText().c_str();
+	qDebug() << _fontStyle->getSelectedItem();
+	qDebug() << _fontSize->getValue();
+	qDebug() << _labelDepth->getValue();
+	qDebug() << _isEmboss->isChecked();
+#endif
+
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).labelSetting;
+	modSettings.labelFontFamily = _fontStyle->getSelectedItem().toStdString();
+	modSettings.labelFontSize = _fontSize->getValue();
+	modSettings.labelDepth = _labelDepth->getValue();
+	modSettings.isEmboss = _isEmboss->isChecked();
+	modSettings.writeJSON();
 }
 
 

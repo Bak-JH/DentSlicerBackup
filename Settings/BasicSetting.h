@@ -1,4 +1,5 @@
 #pragma once
+#include "JSONParsedSetting.h"
 #include "JSONWriteSetting.h"
 
 
@@ -8,7 +9,7 @@ namespace Hix
 	{
 
 
-		class BasicSetting:public JSONParsedSetting, public JSONWriteSetting
+		class BasicSetting :public JSONParsedSetting, public JSONWriteSetting
 		{
 		public:
 			BasicSetting();

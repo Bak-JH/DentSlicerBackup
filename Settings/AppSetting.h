@@ -5,6 +5,7 @@
 #include "JSONWriteSetting.h"
 #include "SliceSetting.h"
 #include "SupportSetting.h"
+#include "LabelSetting.h"
 
 namespace Hix
 {
@@ -26,6 +27,7 @@ namespace Hix
 			SliceSetting sliceSetting;
 			SupportSetting supportSetting;
 			PrinterSetting printerSetting;
+			LabelSetting labelSetting;
 
 			std::string version;
 			Liscense liscense = NONE;

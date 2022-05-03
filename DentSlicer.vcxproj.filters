@@ -320,6 +320,9 @@
     <ClCompile Include="feature\CombineModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Settings\LabelSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1193,6 +1196,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\CombineModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\LabelSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
