@@ -3,6 +3,7 @@
 
 Hix::Features::Undo::Undo()
 {
+	_progress.setDisplayText("Undo");
 }
 
 void Hix::Features::Undo::run()
@@ -24,6 +25,7 @@ Hix::Features::Undo::~Undo()
 
 Hix::Features::Redo::Redo()
 {
+	_progress.setDisplayText("Redo");
 }
 
 void Hix::Features::Redo::run()

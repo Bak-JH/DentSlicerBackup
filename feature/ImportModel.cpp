@@ -134,7 +134,7 @@ void Hix::Features::ImportModel::importSingle(const QString& name, const std::fi
 void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QString& name)
 {
 	mesh->centerMesh();
-	auto listModel = new ListModel(mesh,name, nullptr);
+	auto listModel = new ListModel(mesh, name, nullptr);
 	tryRunFeature(*listModel);
 	addFeature(listModel);
 	//repair mode
