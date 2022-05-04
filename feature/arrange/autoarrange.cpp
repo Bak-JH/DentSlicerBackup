@@ -44,6 +44,10 @@ Hix::Features::Move* translateFromBottLeft(GLModel* model, float xTranslate, flo
 	auto bound = model->recursiveAabb();
 	auto currTranslation = model->transform().translation();
 	QVector3D translation(-bound.xMin() + xTranslate, -bound.yMin() + yTranslate,0);
+
+	if (translation == QVector3D(0, 0, 0))
+		return nullptr;
+
 	return new Move(model, translation);
 }
 Hix::Features::AutoArrange::AutoArrange(const std::unordered_set<GLModel*>& selected): _selected(selected)
@@ -117,7 +121,10 @@ void Hix::Features::AutoArrange::runImpl()
 		}
 		float xTranslate = double(each.x - xCenter) / Hix::Polyclipping::INT_PT_RESOLUTION;
 		float yTranslate = double(each.y - yCenter) / Hix::Polyclipping::INT_PT_RESOLUTION;
-		addFeature(translateFromBottLeft(model, xTranslate, yTranslate));
+
+		auto move = translateFromBottLeft(model, xTranslate, yTranslate);
+		if (move) { addFeature(move); }
+
 		modelRectMap.erase(equalRange.first);
 	}
 	FeatureContainer::runImpl();

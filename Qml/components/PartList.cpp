@@ -66,6 +66,7 @@ void Hix::QML::PartList::listModel(GLModel* model)
 
 bool Hix::QML::PartList::unlistModel(GLModel* model)
 {
+	setModelSelected(model, false);
 	_selectedModels.erase(model);
 	if (isListed(model))
 	{

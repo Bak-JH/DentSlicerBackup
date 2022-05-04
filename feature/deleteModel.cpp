@@ -7,7 +7,6 @@ using namespace Qt3DCore;
 Hix::Features::DeleteModel::DeleteModel(GLModel* target):FlushSupport(target), _model(target)
 {
 	_progress.setDisplayText("Delete Model");
-	Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 }
 
 Hix::Features::DeleteModel::~DeleteModel()
