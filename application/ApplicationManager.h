@@ -4,14 +4,13 @@
 #include "PartManager.h"
 #include "ModalDialogManager.h"
 #include "SceneManager.h"
-#include "I18nManager.h"
 #include "FeatureManager.h"
 #include "../input/raycastcontroller.h"
 #include "../Settings/AppSetting.h"
 #include "../Tasking/TaskManager.h"
 #include "../support/SupportRaftManager.h"
 #include "MouseCursorManager.h"
-#include "../auth/AuthManager.h"
+#include "AuthManager.h"
 #include "utils/updatechecker.h"
 #include "../utils/updatechecker.h"
 class QQuickItem;
@@ -66,7 +65,6 @@ namespace Hix
 			SceneManager& sceneManager();
 			FeatureManager& featureManager();
 			MouseCursorManager& cursorManager();
-			I18nManager& i18n();
 			Hix::Input::RayCastController& getRayCaster();
 			const Hix::Settings::AppSetting& settings()const;
 			Hix::Tasking::TaskManager& taskManager();
@@ -83,7 +81,6 @@ namespace Hix
 			SceneManager _sceneManager;
 			FeatureManager _featureManager;
 			MouseCursorManager _cursorManager;
-			I18nManager _i18nManager;
 			Hix::Utils::UpdateChecker _updateChecker;
 			Hix::Input::RayCastController _rayCastController;
 			Hix::Tasking::TaskManager _taskManager;

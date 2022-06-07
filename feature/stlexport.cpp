@@ -1,7 +1,7 @@
 #include "stlexport.h"
 #include <qfiledialog.h>
 #include "application/ApplicationManager.h"
-#include "../support/RaftModel.h"
+#include "support/RaftModel.h"
 #include "glmodel.h"
 #include "STL/stlio.hpp"
 #include "../common/rapidjson/writer.h"

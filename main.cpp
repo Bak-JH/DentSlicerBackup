@@ -19,7 +19,7 @@
 #include "QtConcurrent/QtConcurrent"
 #include "QFuture"
 #include <QSplashScreen>
-#include "utils/gridmesh.h"
+#include "widget/gridmesh.h"
 #include "qml/components/HixQML.h"
 #include "qml/util/QMLUtil.h"
 #include "application/ApplicationManager.h"
