@@ -25,6 +25,8 @@
 #include "application/ApplicationManager.h"
 #include "utils/httpreq.h"
 
+#include "utils/CrashReporter/CrashHandler/QBreakpadHandler.h"
+
 using namespace Qt3DCore;
 
 const auto GOOGLE_CLIENT_ID = QString("89839571658-lte1h99n2hq3h44922g3ojj04hhtnr56.apps.googleusercontent.com");
@@ -40,9 +42,6 @@ const auto GOOGLE_TOKEN = QUrl("https://accounts.google.com/o/oauth2/token");
 #include <QApplication>
 #include <QStringList>
 #include <QDebug>
-
-
-
 
 int main(int argc, char** argv)
 {
@@ -82,6 +81,11 @@ int main(int argc, char** argv)
 	auto& engine = appManager.engine();
 	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 	appManager.init();
+
+	auto logDir = appManager.settings().deployInfo.defaultsDir / "logs";
+	logDir.make_preferred();
+	QBreakpadInstance.setDumpPath(logDir.string().c_str());
+	printf(NULL);
 
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");

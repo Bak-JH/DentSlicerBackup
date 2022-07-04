@@ -1,3 +1,6 @@
 [submodule "cork"]
 	path = cork
 	url = https://github.com/legokangpalla/cork.git
+[submodule "utils/CrashReport"]
+	path = utils/CrashReport
+	url = https://github.com/Bak-JH/CrashReporter.git

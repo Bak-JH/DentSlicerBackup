@@ -320,6 +320,9 @@
     <ClCompile Include="application\AuthManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="utils\CrashReporter\CrashHandler\QBreakpadHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -1195,6 +1198,15 @@
     <ClInclude Include="Settings\LabelSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utils\CrashReporter\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\CrashReporter\CrashHandler\singletone\call_once.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\CrashReporter\CrashHandler\singletone\singleton.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1336,6 +1348,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="common\exploreBonjour\bonjourserviceresolver.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="utils\CrashReporter\CrashHandler\QBreakpadHandler.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1586,6 +1601,7 @@
     <None Include="Qml\Controls\CtrRectButton.qml" />
     <None Include="Qml\FeaturePopup\PopupPrinter.qml" />
     <None Include="Qml\Controls\CtrSpinBoxInteger.qml" />
+    <None Include="utils\CrashReporter-Qt-Breakpad\CrashReporter\CrashReporter.vcxproj" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -1597,6 +1613,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
       <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files\..%255ccrashreporter-qt-breakpad%255ccrashhandler">
+      <UniqueIdentifier>{d1dcf4cb-c6af-4569-8299-9e25c556ef15}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
