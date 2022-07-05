@@ -11,7 +11,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DentSlicer", "DentSlicer.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wincorkDLL", "cork\win\wincork\wincorkDLL.vcxproj", "{239D1648-B3DC-437E-830C-F2106C01B30C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CrashReporter", "utils\CrashReporter\CrashReporter\CrashReporter.vcxproj", "{DD2CEF13-331E-3997-A174-CD4B5E6028B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CrashReporter", "utils\CrashReport\CrashReporter\CrashReporter.vcxproj", "{DD2CEF13-331E-3997-A174-CD4B5E6028B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

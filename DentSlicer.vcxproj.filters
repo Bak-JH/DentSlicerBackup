@@ -320,7 +320,7 @@
     <ClCompile Include="application\AuthManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="utils\CrashReporter\CrashHandler\QBreakpadHandler.cpp">
+    <ClCompile Include="utils\CrashReport\CrashHandler\QBreakpadHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1198,13 +1198,13 @@
     <ClInclude Include="Settings\LabelSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\CrashReporter\version.h">
+    <ClInclude Include="utils\CrashReport\version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\CrashReporter\CrashHandler\singletone\call_once.h">
+    <ClInclude Include="utils\CrashReport\CrashHandler\singletone\call_once.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils\CrashReporter\CrashHandler\singletone\singleton.h">
+    <ClInclude Include="utils\CrashReport\CrashHandler\singletone\singleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1350,7 +1350,7 @@
     <QtMoc Include="common\exploreBonjour\bonjourserviceresolver.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="utils\CrashReporter\CrashHandler\QBreakpadHandler.h">
+    <QtMoc Include="utils\CrashReport\CrashHandler\QBreakpadHandler.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1601,7 +1601,6 @@
     <None Include="Qml\Controls\CtrRectButton.qml" />
     <None Include="Qml\FeaturePopup\PopupPrinter.qml" />
     <None Include="Qml\Controls\CtrSpinBoxInteger.qml" />
-    <None Include="utils\CrashReporter-Qt-Breakpad\CrashReporter\CrashReporter.vcxproj" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

@@ -25,7 +25,7 @@
 #include "application/ApplicationManager.h"
 #include "utils/httpreq.h"
 
-#include "utils/CrashReporter/CrashHandler/QBreakpadHandler.h"
+#include "utils/CrashReport/CrashHandler/QBreakpadHandler.h"
 
 using namespace Qt3DCore;
 
@@ -82,10 +82,9 @@ int main(int argc, char** argv)
 	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 	appManager.init();
 
-	auto logDir = appManager.settings().deployInfo.defaultsDir / "logs";
+	auto logDir = appManager.settings().deployInfo.settingsDir / "logs";
 	logDir.make_preferred();
 	QBreakpadInstance.setDumpPath(logDir.string().c_str());
-	printf(NULL);
 
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");

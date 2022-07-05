@@ -20,6 +20,8 @@ xcopy /s/Y ..\release\DentSlicer.exe setup
 xcopy /s/Y ..\release\wincorkDLL.dll setup
 xcopy /s/Y ..\release\glfw3.dll setup
 
+ECHO copy CrashReporter.exe
+xcopy /s/Y ..\release\CrashReporter.exe setup
 
 ECHO DSP: create NSI build script
 start /WAIT /B  DSNSISBuilder.exe config.json
