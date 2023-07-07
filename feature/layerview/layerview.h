@@ -1,6 +1,6 @@
 #pragma once
 #include "../interfaces/Mode.h"
-#include "../interfaces/SliderMode.h"
+#include "../interfaces/RangeSliderMode.h"
 #include "../../render/Bounds3D.h"
 #include "CrossSectionPlane.h"
 namespace Hix
@@ -11,7 +11,7 @@ namespace Hix
 	}
 	namespace Features
 	{
-		class LayerView: public SliderMode
+		class LayerView: public RangeSliderMode
 		{
 		public:
 			LayerView();
@@ -19,7 +19,8 @@ namespace Hix
 			void onExit()override;
 		private:
 			std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D> _modelColorMap;
-			Hix::Features::CrossSectionPlane _crossSectionPlane;
+			Hix::Features::CrossSectionPlane _topCrossSectionPlane;
+			Hix::Features::CrossSectionPlane _botCrossSectionPlane;
 			std::unordered_set<GLModel*> _models;
 		};
 
@@ -27,13 +28,13 @@ namespace Hix
 		class LayerviewPrep : public Hix::Tasking::Task
 		{
 		public:
-			LayerviewPrep(const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& selected, Hix::Features::CrossSectionPlane& crossSec);
+			LayerviewPrep(const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& selected, Hix::Features::CrossSectionPlane& crossSec, bool isTop);
 			virtual ~LayerviewPrep();
 			void run()override;
 		private:
 			const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& _modelColorMap;
 			Hix::Features::CrossSectionPlane& _crossSec;
-
+			bool _isTop;
 		};
 	}
 }
