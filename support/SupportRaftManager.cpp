@@ -395,6 +395,36 @@ std::vector<const Hix::Render::SceneEntity*> Hix::Support::SupportRaftManager::s
 	return entities;
 }
 
+Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::attachedOverhangs(GLModel* model) const
+{
+	Hix::OverhangDetect::Overhangs overhangs;
+	std::unordered_set<const GLModel*> childs;
+	model->getChildrenModels(childs);
+	childs.insert(model);
+
+	for (auto curr = _supports.cbegin(); curr != _supports.cend(); ++curr)
+	{
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->first);
+		if (attachedSupport)
+		{
+			auto ptr = &attachedSupport->getAttachedModel();
+			if (childs.find(ptr) != childs.end())
+			{
+				overhangs.push_back(attachedSupport->getOverhang());
+			}
+		}
+	}
+
+	return overhangs;
+}
+
+std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSupports(GLModel* model) const
+{
+	std::unordered_set<GLModel*> temp;
+	temp.insert(model);
+	return modelAttachedSupports(temp);
+}
+
 std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSupports(const std::unordered_set<GLModel*>& models)const
 {
 	std::vector<SupportModel*> supps;
