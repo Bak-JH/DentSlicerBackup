@@ -16,6 +16,12 @@ namespace Hix
 
 	namespace Features
 	{
+		namespace Export
+		{
+			void writeModelData(const std::unordered_set<const Hix::Render::SceneEntity*>& entities, std::ostream& content);
+			void writeModelData(const Hix::Render::SceneEntity* entity, std::ostream& content);
+		}
+
 		constexpr auto STL_EXPORT_JSON = "export.json";
 		class STLExportMode : public Hix::Features::InstantMode
 		{
@@ -30,6 +36,7 @@ namespace Hix
 			STLExport(const std::unordered_set<GLModel*>& selected, QString path);
 			virtual ~STLExport();
 			void run()override;
+
 		private:
 			void exportModels();
 			void exportSTLBin(const std::unordered_set<const Hix::Render::SceneEntity*>& childs, size_t idx);

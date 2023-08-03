@@ -48,6 +48,8 @@ namespace Hix
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<const Hix::Render::SceneEntity*> supportModels()const;
+			OverhangDetect::Overhangs attachedOverhangs(GLModel* model) const;
+			std::vector<SupportModel*> modelAttachedSupports(GLModel* model)const;
 			std::vector<SupportModel*> modelAttachedSupports(const std::unordered_set<GLModel*>& models)const;
 			std::vector<SupportModel*> interconnects()const;
 

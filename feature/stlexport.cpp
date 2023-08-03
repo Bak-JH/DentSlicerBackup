@@ -63,7 +63,6 @@ Hix::Features::STLExport::~STLExport()
 
 void Hix::Features::STLExport::run()
 {
-
 	_tmpPath = std::filesystem::temp_directory_path().append(STL_TEMP_PATH);
 	try {
 		std::filesystem::remove(_tmpPath);
@@ -101,14 +100,10 @@ void Hix::Features::STLExport::exportModels()
 	{
 		//insert to map
 		_modelsMap[_currIdx] = m;
-		std::unordered_set<const GLModel*> children;
-		m->getChildrenModels(children);
-		children.insert(m);
 		std::unordered_set<const SceneEntity*> entities;
-		for (auto& e : children)
-		{
-			entities.insert(e);
-		}
+
+		entities.insert(m);
+		m->getChildEntities(entities);
 
 #ifdef SAVE_ASCII
 		//if (_models.size() == 1)
@@ -149,8 +144,47 @@ void Hix::Features::STLExport::exportModels()
 			rapidjson::Value k(getNthModelName(i), doc.GetAllocator());
 			if (_modelsMap.find(i) != _modelsMap.cend())
 			{
-				rapidjson::Value v(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
-				doc.AddMember(k, v, doc.GetAllocator());
+				rapidjson::Value infoArr(rapidjson::kArrayType);
+				infoArr.Clear();
+
+				//model name
+				auto modelname = rapidjson::Value(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
+				infoArr.PushBack(modelname, doc.GetAllocator());
+
+				//model position
+				rapidjson::Value posArr(rapidjson::kArrayType);
+				posArr.Clear();
+				auto position = _modelsMap[i]->transform().translation();
+				posArr.PushBack(rapidjson::Value(position.x()), doc.GetAllocator())
+					  .PushBack(rapidjson::Value(position.y()), doc.GetAllocator())
+					  .PushBack(rapidjson::Value(position.z()), doc.GetAllocator());
+				infoArr.PushBack(posArr.Move(), doc.GetAllocator());
+
+				//model overhangs
+				Hix::OverhangDetect::Overhangs overhangs;
+				postUIthread([this, &overhangs, i] {
+					auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+					overhangs = srMan.attachedOverhangs(_modelsMap[i]);
+				});
+
+				if (!overhangs.empty())
+				{
+					rapidjson::Value overhangArr(rapidjson::kArrayType);
+					overhangArr.Clear();
+
+					for (Hix::OverhangDetect::Overhang overhang : overhangs)
+					{
+						rapidjson::Value pointArr(rapidjson::kArrayType);
+						pointArr.Clear();
+						pointArr.PushBack(overhang.coord().x(), doc.GetAllocator());
+						pointArr.PushBack(overhang.coord().y(), doc.GetAllocator());
+						pointArr.PushBack(overhang.coord().z(), doc.GetAllocator());
+						overhangArr.PushBack(pointArr.Move(), doc.GetAllocator());
+					}
+					infoArr.PushBack(overhangArr, doc.GetAllocator());
+				}
+
+				doc.AddMember(k, infoArr, doc.GetAllocator());
 			}
 			//add to zip archive
 			auto modelPath = _tmpPath;
@@ -187,36 +221,8 @@ void Hix::Features::STLExport::exportSTLBin(const std::unordered_set<const Scene
 	path /= getNthModelName(idx);
 	std::ofstream ofs(path, std::ios_base::trunc|std::ios::binary);
 
-	tyti::stl::basic_solid<float> exportSolid;
-	size_t faceCnt = 0;
-	for (auto& c : childs)
-	{
-		faceCnt += c->getMesh()->getFaces().size();
-	}
-	exportSolid.normals.reserve(faceCnt);
-	exportSolid.vertices.reserve(faceCnt * 3);
-	for (auto& c : childs)
-	{
-		auto mesh = c->getMesh();
-		if (mesh)
-		{
-			auto& faces = mesh->getFaces();
-			auto faceCend = faces.cend();
-			for (auto mf = faces.cbegin(); mf != faceCend; ++mf)
-			{
-				auto normal = mf.worldFn();
-				auto meshVertices = mf.meshVertices();
-				auto& mv1 = meshVertices[0];
-				auto& mv2 = meshVertices[1];
-				auto& mv3 = meshVertices[2];
-				exportSolid.normals.emplace_back(toExportVec(normal));
-				exportSolid.vertices.emplace_back(toExportVec(mv1.worldPosition()));
-				exportSolid.vertices.emplace_back(toExportVec(mv2.worldPosition()));
-				exportSolid.vertices.emplace_back(toExportVec(mv3.worldPosition()));
-			}
-		}
-	}
-	tyti::stl::write_binary(ofs, exportSolid);
+	Export::writeModelData(childs, ofs);
+
 	ofs.close();
 	return;
 }
@@ -242,6 +248,44 @@ void STLExport::exportSTLAscii(const std::unordered_set<const SceneEntity*>& chi
     writeFooter(ofs);
 	ofs.close();
     return;
+}
+
+void Hix::Features::Export::writeModelData(const std::unordered_set<const SceneEntity*>& entities, std::ostream& content)
+{
+	for (auto entity : entities)
+	{
+		writeModelData(entity, content);
+	}
+}
+
+void Hix::Features::Export::writeModelData(const Hix::Render::SceneEntity* entity, std::ostream& content)
+{
+	tyti::stl::basic_solid<float> exportSolid;
+	size_t faceCnt = 0;
+	faceCnt += entity->getMesh()->getFaces().size();
+
+	exportSolid.normals.reserve(faceCnt);
+	exportSolid.vertices.reserve(faceCnt * 3);
+
+	auto mesh = entity->getMesh();
+	if (mesh)
+	{
+		auto& faces = mesh->getFaces();
+		auto faceCend = faces.cend();
+		for (auto mf = faces.cbegin(); mf != faceCend; ++mf)
+		{
+			auto normal = mf.worldFn();
+			auto meshVertices = mf.meshVertices();
+			auto& mv1 = meshVertices[0];
+			auto& mv2 = meshVertices[1];
+			auto& mv3 = meshVertices[2];
+			exportSolid.normals.emplace_back(toExportVec(normal));
+			exportSolid.vertices.emplace_back(toExportVec(mv1.worldPosition()));
+			exportSolid.vertices.emplace_back(toExportVec(mv2.worldPosition()));
+			exportSolid.vertices.emplace_back(toExportVec(mv3.worldPosition()));
+		}
+	}
+	tyti::stl::write_binary(content, exportSolid);
 }
 
 void STLExport::writeFace(const Mesh* mesh, const Hix::Engine3D::FaceConstItr& mf, std::ostream& content){
