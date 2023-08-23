@@ -24,7 +24,7 @@ namespace Hix
 		private:
 			QUrl _fileUrl;
 			void importSingle(const QString& name, const std::filesystem::path& path);
-			void createModel(Hix::Engine3D::Mesh* mesh, const QString& name);
+			GLModel* createModel(Hix::Engine3D::Mesh* mesh, const QString& name, const Qt3DCore::QTransform* transform = nullptr);
 		};
 		class ImportModelMode : public Hix::Features::InstantMode
 		{
