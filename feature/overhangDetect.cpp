@@ -77,6 +77,9 @@ bool Hix::OverhangDetect::Overhang::operator==(const Overhang& o) const
 
 const Hix::Engine3D::Mesh* Hix::OverhangDetect::Overhang::owner() const
 {
+	if (_parent)
+		return _parent->getMesh();
+
 	if (_primitive.index() == 0)
 	{
 		return std::get<0>(_primitive).owner();

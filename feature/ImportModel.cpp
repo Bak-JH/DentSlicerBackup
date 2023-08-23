@@ -12,6 +12,7 @@
 #include "stlexport.h"
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include "feature/SupportFeature.h"
 
 namespace fs = std::filesystem;
 using namespace Hix::Settings;
@@ -80,10 +81,70 @@ void Hix::Features::ImportModel::runImpl()
 		auto jsonStr = zf.read(Hix::Features::STL_EXPORT_JSON);
 		rapidjson::Document document;
 		document.Parse(jsonStr);
-		std::unordered_map<std::string, std::string> modelNameMap;
+
+		std::unordered_map<std::string, LoadModelInfo> modelNameMap;
+		Hix::Settings::SupportSetting tempSetting;
 		for (auto& m : document.GetObject())
 		{
-			modelNameMap[m.name.GetString()] = m.value.GetString();
+			//settings
+			if (m.name == "settings")
+			{
+				auto settings = m.value.GetArray();
+				tempSetting.supportRadiusMax = settings[0].GetDouble();
+				tempSetting.supportRadiusMin = settings[1].GetDouble();
+				tempSetting.supportDensity = settings[2].GetDouble();
+				tempSetting.supportBaseHeight = settings[3].GetDouble();
+				tempSetting.thickenFeet = settings[4].GetBool();
+
+				tempSetting.raftThickness = settings[5].GetDouble();
+				tempSetting.raftRadiusMult = settings[6].GetDouble();
+				tempSetting.raftMinMaxRatio = settings[7].GetDouble();
+
+				tempSetting.interconnectType = Hix::Settings::SupportSetting::InterconnectType(settings[8].GetInt());
+				tempSetting.maxConnectDistance = settings[9].GetDouble();
+
+				continue;
+			}
+			auto arr = m.value.GetArray();
+
+			//model name
+			auto modelname = arr[0].GetString();
+
+			//position
+			auto posArr = arr[1].GetArray();
+			QVector3D pos(posArr[0].GetFloat(), posArr[1].GetFloat(), posArr[2].GetFloat());
+
+			//supports
+			std::vector<LoadSupportInfo> supports;
+			for (auto idx = 2; idx < arr.Size(); ++idx)
+			{
+				Hix::Features::Extrusion::Contour contour;
+				std::vector<QVector3D> jointDir;
+				std::vector<float> scales;
+				auto supportArr = arr[idx].GetArray();
+
+				auto contourArr = supportArr[0].GetArray();
+				auto jointDirArr = supportArr[1].GetArray();
+				auto scalesArr = supportArr[2].GetArray();
+
+				for (auto& pt : contourArr)
+				{
+					contour.push_back(QVector3D(pt[0].GetFloat(), pt[1].GetFloat(), pt[2].GetFloat()));
+				}
+
+				for (auto& pt : jointDirArr)
+				{
+					jointDir.push_back(QVector3D(pt[0].GetFloat(), pt[1].GetFloat(), pt[2].GetFloat()));
+				}
+
+				for (auto& scale : scalesArr)
+				{
+					scales.push_back(scale.GetFloat());
+				}
+
+				supports.push_back({ contour, jointDir, scales });
+			}
+			modelNameMap[m.name.GetString()] = { modelname, pos, supports };
 		}
 
 		//read each models
@@ -97,7 +158,32 @@ void Hix::Features::ImportModel::runImpl()
 				std::stringstream strStrmBin(modelStr, std::ios_base::in | std::ios_base::binary);
 				FileLoader::loadMeshSTL_binary(mesh, strStrmBin);
 			}
-			createModel(mesh, QString::fromStdString(p.second));
+
+			Qt3DCore::QTransform* testtransform = new Qt3DCore::QTransform();
+			testtransform->setTranslation(p.second.pos);
+			auto model = createModel(mesh, QString::fromStdString(p.second.name), testtransform);
+			model->setHitTestable(true);
+			model->setHoverable(true);
+			qDebug() << model->modelName();
+
+			auto move = new Move(model, QVector3D(0, 0, tempSetting.raftThickness + tempSetting.supportBaseHeight));
+			tryRunFeature(*move);
+			addFeature(move);
+
+			for (auto supportInfo : p.second.supports)
+			{
+				std::unique_ptr<SupportModel> supportModel;
+
+				postUIthread([&] {
+					auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+					supportModel = srMan.createSupportWithContour(model, supportInfo, tempSetting);
+					});
+
+
+				auto supportFeature = new Hix::Features::AddSupport(std::move(supportModel));
+				tryRunFeature(*supportFeature);
+				addFeature(supportFeature);
+			}
 		}
 	}
 	else
@@ -131,10 +217,10 @@ void Hix::Features::ImportModel::importSingle(const QString& name, const std::fi
 	createModel(mesh, name);
 }
 
-void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QString& name)
+GLModel* Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QString& name, const Qt3DCore::QTransform* transform)
 {
 	mesh->centerMesh();
-	auto listModel = new ListModel(mesh, name, nullptr);
+	auto listModel = new ListModel(mesh, name, transform);
 	tryRunFeature(*listModel);
 	addFeature(listModel);
 	//repair mode
@@ -146,8 +232,13 @@ void Hix::Features::ImportModel::createModel(Hix::Engine3D::Mesh* mesh, const QS
 		addFeature(repair);
 	}
 
-	auto bound = listModel->get()->recursiveAabb().centred();
-	auto arrange = new AutoArrangeAppend(listModel->get());
-	tryRunFeature(*arrange);
-	addFeature(arrange);
+	if (transform == nullptr)
+	{
+		auto bound = listModel->get()->recursiveAabb().centred();
+		auto arrange = new AutoArrangeAppend(listModel->get());
+		tryRunFeature(*arrange);
+		addFeature(arrange);
+	}
+
+	return listModel->get();
 }

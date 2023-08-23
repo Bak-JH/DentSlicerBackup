@@ -32,7 +32,8 @@ void Hix::Features::AddSupport::undoImpl()
 void Hix::Features::AddSupport::redoImpl()
 {
 	postUIthread([this]() {
-		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+		if(std::get<std::unique_ptr<SupportModel>>(_model) != nullptr)
+			_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
 	});
 }
 
@@ -111,9 +112,12 @@ void Hix::Features::AutoSupport::runImpl()
 		postUIthread([&]() {
 			model = srMan.createSupport(overhang);
 		});
-		auto supportFeature = new AddSupport(std::move(model));
-		tryRunFeature(*supportFeature);
-		addFeature(supportFeature);
+		if (model)
+		{
+			auto supportFeature = new AddSupport(std::move(model));
+			tryRunFeature(*supportFeature);
+			addFeature(supportFeature);
+		}
 	}
 }
 

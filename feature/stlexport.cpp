@@ -27,16 +27,8 @@ Hix::Features::STLExportMode::STLExportMode()
 	QString latestUrl(modSettings.exportFilePath.c_str());
 
 	QString fileName;
-	if (models.size() == 1)
-	{
-		fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL file", latestUrl, "3D Model file (*.stl)");
+	fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL Zip file", latestUrl, "3D Model Collection(*.zip)");
 
-	}
-	else if (models.size() > 1)
-	{
-		fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL Zip file", latestUrl, "3D Model Collection(*.zip)");
-
-	}
     if (fileName.isEmpty())
     {
         return;
@@ -124,90 +116,129 @@ void Hix::Features::STLExport::exportModels()
 		++_currIdx;
 	}
 
-	//zip files if there are multiple models in the scene
-	if (_modelsMap.size() > 1)
+	//write json
+	auto jsonPath = _tmpPath;
+	jsonPath /= STL_EXPORT_JSON;
+	rapidjson::Document doc;
+	doc.SetObject();
+
+	postUIthread([&doc] {
+		auto& suppSettings = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+		rapidjson::Value settingArr(rapidjson::kArrayType);
+		settingArr.Clear();
+
+		settingArr.PushBack(suppSettings.supportRadiusMax, doc.GetAllocator());
+		settingArr.PushBack(suppSettings.supportRadiusMin, doc.GetAllocator());
+		settingArr.PushBack(suppSettings.supportDensity, doc.GetAllocator());
+		settingArr.PushBack(suppSettings.supportBaseHeight, doc.GetAllocator());
+		settingArr.PushBack(suppSettings.thickenFeet, doc.GetAllocator());
+
+		settingArr.PushBack(suppSettings.raftThickness, doc.GetAllocator());
+		settingArr.PushBack(suppSettings.raftRadiusMult, doc.GetAllocator());
+		settingArr.PushBack(suppSettings.raftMinMaxRatio, doc.GetAllocator());
+
+		settingArr.PushBack(int(suppSettings.interconnectType), doc.GetAllocator());
+		settingArr.PushBack(suppSettings.maxConnectDistance, doc.GetAllocator());
+
+		doc.AddMember("settings", settingArr.Move(), doc.GetAllocator());
+	});
+
+	//compress files
+	miniz_cpp::zip_file file;
+	for (size_t i = 0; i != _currIdx; ++i)
 	{
-		//support 
-		//auto supp = getSuppRaft();
-		//exportSTLBin(supp, ++_currIdx);
-
-		//write json
-		auto jsonPath = _tmpPath;
-		jsonPath /= STL_EXPORT_JSON;
-		rapidjson::Document doc;
-		doc.SetObject();
-
-		//compress files
-		miniz_cpp::zip_file file;
-		for (size_t i = 0; i != _currIdx; ++i)
+		rapidjson::Value k(getNthModelName(i), doc.GetAllocator());
+		if (_modelsMap.find(i) != _modelsMap.cend())
 		{
-			rapidjson::Value k(getNthModelName(i), doc.GetAllocator());
-			if (_modelsMap.find(i) != _modelsMap.cend())
+			rapidjson::Value infoArr(rapidjson::kArrayType);
+			infoArr.Clear();
+
+			//model name
+			auto modelname = rapidjson::Value(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
+			infoArr.PushBack(modelname, doc.GetAllocator());
+
+			//model position
+			rapidjson::Value posArr(rapidjson::kArrayType);
+			posArr.Clear();
+			auto position = _modelsMap[i]->transform().translation();
+			posArr.PushBack(rapidjson::Value(position.x()), doc.GetAllocator())
+					.PushBack(rapidjson::Value(position.y()), doc.GetAllocator())
+					.PushBack(rapidjson::Value(position.z()), doc.GetAllocator());
+			infoArr.PushBack(posArr.Move(), doc.GetAllocator());
+
+			//supports
+			std::vector<Hix::Support::SupportModel*> supports;
+			postUIthread([this, &supports, i] {
+				auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+				supports = srMan.modelAttachedSupports(_modelsMap[i]);
+			});
+
+			for (auto support : supports)
 			{
-				rapidjson::Value infoArr(rapidjson::kArrayType);
-				infoArr.Clear();
+				rapidjson::Value supportArr(rapidjson::kArrayType);
+				supportArr.Clear();
 
-				//model name
-				auto modelname = rapidjson::Value(_modelsMap[i]->modelName().toStdString(), doc.GetAllocator());
-				infoArr.PushBack(modelname, doc.GetAllocator());
+				auto contour = static_cast<Hix::Support::VerticalSupportModel*>(support)->getContour();
+				auto jointDir = static_cast<Hix::Support::VerticalSupportModel*>(support)->getJointDir();
+				auto scales = static_cast<Hix::Support::VerticalSupportModel*>(support)->getScales();
 
-				//model position
-				rapidjson::Value posArr(rapidjson::kArrayType);
-				posArr.Clear();
-				auto position = _modelsMap[i]->transform().translation();
-				posArr.PushBack(rapidjson::Value(position.x()), doc.GetAllocator())
-					  .PushBack(rapidjson::Value(position.y()), doc.GetAllocator())
-					  .PushBack(rapidjson::Value(position.z()), doc.GetAllocator());
-				infoArr.PushBack(posArr.Move(), doc.GetAllocator());
-
-				//model overhangs
-				Hix::OverhangDetect::Overhangs overhangs;
-				postUIthread([this, &overhangs, i] {
-					auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
-					overhangs = srMan.attachedOverhangs(_modelsMap[i]);
-				});
-
-				if (!overhangs.empty())
+				if (!contour.empty())
 				{
-					rapidjson::Value overhangArr(rapidjson::kArrayType);
-					overhangArr.Clear();
-
-					for (Hix::OverhangDetect::Overhang overhang : overhangs)
+					rapidjson::Value contourArr(rapidjson::kArrayType);
+					contourArr.Clear();
+					for (auto pt : contour)
 					{
 						rapidjson::Value pointArr(rapidjson::kArrayType);
 						pointArr.Clear();
-						pointArr.PushBack(overhang.coord().x(), doc.GetAllocator());
-						pointArr.PushBack(overhang.coord().y(), doc.GetAllocator());
-						pointArr.PushBack(overhang.coord().z(), doc.GetAllocator());
-						overhangArr.PushBack(pointArr.Move(), doc.GetAllocator());
+						pointArr.PushBack(pt.x(), doc.GetAllocator());
+						pointArr.PushBack(pt.y(), doc.GetAllocator());
+						pointArr.PushBack(pt.z(), doc.GetAllocator());
+						contourArr.PushBack(pointArr.Move(), doc.GetAllocator());
 					}
-					infoArr.PushBack(overhangArr, doc.GetAllocator());
+					supportArr.PushBack(contourArr.Move(), doc.GetAllocator());
+
+					rapidjson::Value jointArr(rapidjson::kArrayType);
+					jointArr.Clear();
+					for (auto pt : jointDir)
+					{
+						rapidjson::Value pointArr(rapidjson::kArrayType);
+						pointArr.Clear();
+						pointArr.PushBack(pt.x(), doc.GetAllocator());
+						pointArr.PushBack(pt.y(), doc.GetAllocator());
+						pointArr.PushBack(pt.z(), doc.GetAllocator());
+						jointArr.PushBack(pointArr.Move(), doc.GetAllocator());
+					}
+					supportArr.PushBack(jointArr.Move(), doc.GetAllocator());
+
+					rapidjson::Value scalesArr(rapidjson::kArrayType);
+					scalesArr.Clear();
+					for (auto scale : scales)
+					{
+						scalesArr.PushBack(scale, doc.GetAllocator());
+					}
+					supportArr.PushBack(scalesArr.Move(), doc.GetAllocator());
+
+					infoArr.PushBack(supportArr.Move(), doc.GetAllocator());
 				}
-
-				doc.AddMember(k, infoArr, doc.GetAllocator());
 			}
-			//add to zip archive
-			auto modelPath = _tmpPath;
-			modelPath /= getNthModelName(i);
-			file.write(modelPath.string(), modelPath.filename().string());
+
+			doc.AddMember(k, infoArr.Move(), doc.GetAllocator());
 		}
-		std::ofstream of(jsonPath, std::ios_base::trunc);
-		rapidjson::OStreamWrapper osw{ of };
-		rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
-		doc.Accept(writer);
-		file.write(jsonPath.string(), jsonPath.filename().string());
-		file.comment = "hix scene file";
-		std::ofstream zipOut(_path, std::ios_base::trunc | std::ios::binary);
-		file.save(zipOut);
 
-	}
-	else
-	{
-		auto tmpFile = _tmpPath;
-		_tmpPath /= getNthModelName(0);
-		std::filesystem::copy_file(_tmpPath, _path);
+		//add to zip archive
+		auto modelPath = _tmpPath;
+		modelPath /= getNthModelName(i);
+		file.write(modelPath.string(), modelPath.filename().string());
 	}
 
+	std::ofstream of(jsonPath, std::ios_base::trunc);
+	rapidjson::OStreamWrapper osw{ of };
+	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
+	doc.Accept(writer);
+	file.write(jsonPath.string(), jsonPath.filename().string());
+	file.comment = "hix scene file";
+	std::ofstream zipOut(_path, std::ios_base::trunc | std::ios::binary);
+	file.save(zipOut);
 }
 
 tyti::stl::vec3 toExportVec(const QVector3D& vec)
