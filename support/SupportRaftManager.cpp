@@ -178,6 +178,30 @@ std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::createSupport(co
 	case Hix::Settings::SupportSetting::SupportType::Vertical:
 	{
 		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
+		if (newModel->getMesh()->getFaces().empty())
+		{
+			return nullptr;
+		}
+	}
+	break;
+	}
+	return std::unique_ptr<SupportModel>(newModel);
+}
+
+std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::createSupportWithContour(Hix::Render::SceneEntity* parent, LoadSupportInfo& info, Hix::Settings::SupportSetting& setting)
+{
+	SupportModel* newModel = nullptr;
+	switch (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType)
+	{
+		//case Hix::Settings::SupportSetting::SupportType::None:
+		//	break;
+	case Hix::Settings::SupportSetting::SupportType::Vertical:
+	{
+		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(parent, this, info, setting.supportRadiusMax));
+		if (newModel->getMesh()->getFaces().empty())
+		{
+			return nullptr;
+		}
 	}
 	break;
 	}
