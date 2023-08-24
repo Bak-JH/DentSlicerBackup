@@ -140,6 +140,9 @@ void Hix::Features::STLExport::exportModels()
 		settingArr.PushBack(int(suppSettings.interconnectType), doc.GetAllocator());
 		settingArr.PushBack(suppSettings.maxConnectDistance, doc.GetAllocator());
 
+		auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
+		settingArr.PushBack(srMan.raftActive(), doc.GetAllocator());
+
 		doc.AddMember("settings", settingArr.Move(), doc.GetAllocator());
 	});
 
@@ -168,7 +171,7 @@ void Hix::Features::STLExport::exportModels()
 
 			//supports
 			std::vector<Hix::Support::SupportModel*> supports;
-			postUIthread([this, &supports, i] {
+			postUIthread([&] {
 				auto& srMan = Hix::Application::ApplicationManager::getInstance().supportRaftManager();
 				supports = srMan.modelAttachedSupports(_modelsMap[i]);
 			});
