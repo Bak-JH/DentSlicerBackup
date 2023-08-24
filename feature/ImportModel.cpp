@@ -84,6 +84,7 @@ void Hix::Features::ImportModel::runImpl()
 
 		std::unordered_map<std::string, LoadModelInfo> modelNameMap;
 		Hix::Settings::SupportSetting tempSetting;
+		bool raftActive = false;
 		for (auto& m : document.GetObject())
 		{
 			//settings
@@ -103,8 +104,11 @@ void Hix::Features::ImportModel::runImpl()
 				tempSetting.interconnectType = Hix::Settings::SupportSetting::InterconnectType(settings[8].GetInt());
 				tempSetting.maxConnectDistance = settings[9].GetDouble();
 
+				raftActive = settings[10].GetBool();
 				continue;
 			}
+
+			//info array
 			auto arr = m.value.GetArray();
 
 			//model name
@@ -183,6 +187,13 @@ void Hix::Features::ImportModel::runImpl()
 				auto supportFeature = new Hix::Features::AddSupport(std::move(supportModel));
 				tryRunFeature(*supportFeature);
 				addFeature(supportFeature);
+
+				if (raftActive)
+				{
+					auto addRaft = new AddRaft();
+					tryRunFeature(*addRaft);
+					addFeature(addRaft);
+				}
 			}
 		}
 	}
