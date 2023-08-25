@@ -6,6 +6,10 @@
 #include "../application/ApplicationManager.h"
 #include "../Qml/util/QMLUtil.h"
 #include "../feature/CopyPaste.h"
+#include "feature/stlexport.h"
+#include "feature/move.h"
+#include "feature/rotate.h"
+#include "feature/scale.h"
 using namespace Hix::Input;
 using namespace Hix::Features;
 using namespace Hix::Application;
@@ -52,6 +56,21 @@ void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
 		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(false);
 		break;
 	}
+	case Qt::Key_W:
+	{
+		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new MoveMode());
+		break;
+	}
+	case Qt::Key_E:
+	{
+		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new RotateMode());
+		break;
+	}
+	case Qt::Key_R:
+	{
+		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new ScaleMode());
+		break;
+	}
 	default:
 		break;
 	}
@@ -95,11 +114,17 @@ void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
 	else if (e->matches(QKeySequence::Cancel))
 	{
 		//doesn't work in current focus system ie) key ignored when mode is active
+		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
 	}
 	else if (e->matches(QKeySequence::Delete))
 	{
 		if(!Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 			Hix::Application::ApplicationManager::getInstance().partManager().deleteSelectedModels();
+	}
+	else if (e->matches(QKeySequence::Save))
+	{
+		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new Hix::Features::STLExportMode());
 	}
 }
 
