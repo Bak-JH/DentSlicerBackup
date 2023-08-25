@@ -71,7 +71,7 @@ void Hix::Features::ImportModel::runImpl()
 	auto filename = _fileUrl.fileName();
 	fs::path filePath(_fileUrl.toLocalFile().toStdU16String());
 
-	if (boost::iequals(filePath.extension().string(), ".zip"))
+	if (boost::iequals(filePath.extension().string(), ".save"))
 	{
 		std::ifstream zipStrm(filePath, std::ios_base::binary);
 		miniz_cpp::zip_file zf(zipStrm);
