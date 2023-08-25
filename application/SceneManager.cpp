@@ -79,7 +79,8 @@ void Hix::Application::SceneManager::fileDropped(QUrl fileUrl)
 	auto filename = fileUrl.fileName();
 	if (filename.contains(".stl", Qt::CaseSensitivity::CaseInsensitive) ||
 		filename.contains(".obj", Qt::CaseSensitivity::CaseInsensitive) ||
-		filename.contains(".zip", Qt::CaseSensitivity::CaseInsensitive)) {
+		filename.contains(".zip", Qt::CaseSensitivity::CaseInsensitive) ||
+		filename.contains(".save", Qt::CaseSensitivity::CaseInsensitive)) {
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::ImportModel(fileUrl));
 	}
 }

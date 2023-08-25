@@ -27,7 +27,7 @@ Hix::Features::STLExportMode::STLExportMode()
 	QString latestUrl(modSettings.exportFilePath.c_str());
 
 	QString fileName;
-	fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL Zip file", latestUrl, "3D Model Collection(*.zip)");
+	fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL Zip file", latestUrl, "3D Model Collection(*.save)");
 
     if (fileName.isEmpty())
     {
