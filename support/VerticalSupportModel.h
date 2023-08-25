@@ -41,7 +41,6 @@ namespace Hix
 			bool _hasBasePt = false;
 			std::vector<float> _scales;
 			std::vector<QVector3D> _jointDir;
-			std::vector<Hix::Features::Extrusion::Contour> _jointContours;
 			void generateMesh();
 			void generateSupportPath(float bottom, std::vector<float>& scales);
 
