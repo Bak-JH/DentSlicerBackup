@@ -188,6 +188,10 @@ void Hix::Features::RemoveSupport::runImpl()
 Hix::Features::AddRaft::AddRaft()
 {}
 
+Hix::Features::AddRaft::AddRaft(Hix::Settings::SupportSetting& setting) : _setting(&setting)
+{
+}
+
 Hix::Features::AddRaft::~AddRaft()
 {}
 
@@ -208,7 +212,10 @@ void Hix::Features::AddRaft::redoImpl()
 void Hix::Features::AddRaft::runImpl()
 {
 	postUIthread([this]() {
-		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().generateRaft();
+		if(_setting)
+			_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().generateRaft(*_setting);
+		else
+			_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().generateRaft();
 	});
 
 }

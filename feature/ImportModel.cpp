@@ -170,9 +170,12 @@ void Hix::Features::ImportModel::runImpl()
 			model->setHoverable(true);
 			qDebug() << model->modelName();
 
-			auto move = new Move(model, QVector3D(0, 0, tempSetting.raftThickness + tempSetting.supportBaseHeight));
-			tryRunFeature(*move);
-			addFeature(move);
+			if (!p.second.supports.empty())
+			{
+				auto move = new Move(model, QVector3D(0, 0, tempSetting.raftThickness + tempSetting.supportBaseHeight));
+				tryRunFeature(*move);
+				addFeature(move);
+			}
 
 			for (auto supportInfo : p.second.supports)
 			{
@@ -190,7 +193,7 @@ void Hix::Features::ImportModel::runImpl()
 
 				if (raftActive)
 				{
-					auto addRaft = new AddRaft();
+					auto addRaft = new AddRaft(tempSetting);
 					tryRunFeature(*addRaft);
 					addFeature(addRaft);
 				}

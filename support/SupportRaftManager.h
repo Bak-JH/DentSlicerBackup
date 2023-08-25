@@ -45,6 +45,7 @@ namespace Hix
 			bool modelHasSupport(const GLModel* model)const;
 			
 			RaftModel* generateRaft();
+			RaftModel* generateRaft(Hix::Settings::SupportSetting& setting);
 			std::unique_ptr<RaftModel> removeRaft();
 			RaftModel* addRaft(std::unique_ptr<RaftModel> raft);
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
@@ -67,6 +68,7 @@ namespace Hix
 			Hix::Engine3D::RayCaster& supportRaycaster();
 			std::vector<std::array<SupportModel*, 2>> interconnectPairs()const;
 			void prepareRaycasterSelected();
+			void prepareRaycasterAll();
 
 		private:
 

@@ -95,6 +95,7 @@ namespace Hix
 		{
 		public: 
 			AddRaft();
+			AddRaft(Hix::Settings::SupportSetting& setting);
 			virtual ~AddRaft();
 		protected:
 			void undoImpl()override;
@@ -103,6 +104,7 @@ namespace Hix
 
 		private:
 			std::variant<RaftModel*, std::unique_ptr<RaftModel>> _model;
+			Hix::Settings::SupportSetting* _setting = nullptr;
 		};
 		
 		class RemoveRaft : public Feature

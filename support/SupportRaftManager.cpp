@@ -307,7 +307,14 @@ RaftModel* Hix::Support::SupportRaftManager::generateRaft()
 	auto basePts = getSupportBasePts();
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
 	return _raft.get();
-} 
+}
+RaftModel* Hix::Support::SupportRaftManager::generateRaft(Hix::Settings::SupportSetting& setting)
+{
+	auto basePts = getSupportBasePts();
+	_raft = std::make_unique<CylindricalRaft>(this, basePts, setting);
+	return _raft.get();
+}
+
 
 RaftModel* Hix::Support::SupportRaftManager::addRaft(std::unique_ptr<RaftModel> raft)
 {
@@ -380,6 +387,20 @@ void Hix::Support::SupportRaftManager::prepareRaycasterSelected()
 	std::unordered_set<const GLModel*> models;
 
 	for (auto& e : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	{
+		e->getChildrenModels(models);
+		models.emplace(e);
+	}
+	_rayCaster.reset(new MTRayCaster());
+	_rayAccel.reset(new Hix::Engine3D::BVH(models));
+	_rayCaster->addAccelerator(_rayAccel.get());
+}
+
+void Hix::Support::SupportRaftManager::prepareRaycasterAll()
+{
+	std::unordered_set<const GLModel*> models;
+
+	for (auto& e : Hix::Application::ApplicationManager::getInstance().partManager().allModels())
 	{
 		e->getChildrenModels(models);
 		models.emplace(e);

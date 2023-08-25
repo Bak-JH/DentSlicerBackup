@@ -56,6 +56,10 @@ Hix::Support::VerticalSupportModel::VerticalSupportModel(Hix::Render::SceneEntit
 		circleToTri(mesh, jointContours.front(), info.contour.front(), true);
 		circleToTri(mesh, jointContours.back(), info.contour.back(), false);
 
+		_contour = info.contour;
+		_jointDir = info.jointDir;
+		_scales = info.scales;
+
 		//set base point
 		_hasBasePt = true;
 		_basePt = info.contour.front();
