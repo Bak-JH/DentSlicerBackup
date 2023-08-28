@@ -124,6 +124,8 @@ void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
 	}
 	else if (e->matches(QKeySequence::Save))
 	{
+		_ctrlPressed = false;
+		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(false);
 		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new Hix::Features::STLExportMode());
 	}
 }

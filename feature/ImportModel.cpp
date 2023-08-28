@@ -24,7 +24,7 @@ Hix::Features::ImportModelMode::ImportModelMode()
 	modSettings.parseJSON();
 	QUrl latestUrl(QString(modSettings.importFilePath.c_str()));
 
-	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or zipped export", latestUrl, "3D files(*.stl *.obj, *.zip)");
+	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models or project file", latestUrl, "3D files(*.stl *.obj, *.dent)");
 
 	for (auto& u : fileUrls)
 	{
@@ -71,7 +71,7 @@ void Hix::Features::ImportModel::runImpl()
 	auto filename = _fileUrl.fileName();
 	fs::path filePath(_fileUrl.toLocalFile().toStdU16String());
 
-	if (boost::iequals(filePath.extension().string(), ".save"))
+	if (boost::iequals(filePath.extension().string(), ".dent"))
 	{
 		std::ifstream zipStrm(filePath, std::ios_base::binary);
 		miniz_cpp::zip_file zf(zipStrm);
