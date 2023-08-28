@@ -17,9 +17,10 @@ using namespace ClipperLib;
 
 
 Hix::Features::LayerView::LayerView():
-	SliderMode(0, Hix::Application::ApplicationManager::getInstance().partManager().selectedBound().zMax()),
+	RangeSliderMode(0, Hix::Application::ApplicationManager::getInstance().partManager().selectedBound().zMax()),
 	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()),
-	_crossSectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total())
+	_topCrossSectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
+	_botCrossSectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total())
 {
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
@@ -27,7 +28,7 @@ Hix::Features::LayerView::LayerView():
 		return;
 	}
 
-	slider().setValue(slider().getMax());
+	slider().setUpperValue(slider().getMax());
 	slider().setVisible(true);
 
 	//change shader, change support, raft to same color as model
@@ -36,7 +37,8 @@ Hix::Features::LayerView::LayerView():
 		model->setMaterialMode(Hix::Render::ShaderMode::LayerMode);
 		model->updateMesh();
 		model->setMaterialParamter("fuckingStuipidWorldMatrix", QVariant::fromValue(model->toRootMatrix()));
-		model->setMaterialParamter("height", QVariant::fromValue((float)slider().getMax()));
+		model->setMaterialParamter("minHeight", QVariant::fromValue((float)slider().lowerValue()));
+		model->setMaterialParamter("maxHeight", QVariant::fromValue((float)slider().upperValue()));
 		_modelColorMap[model] = Hix::Render::Colors::Selected;
 	}
 	auto supports = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(_models);
@@ -46,7 +48,8 @@ Hix::Features::LayerView::LayerView():
 		s->setMaterialMode(Hix::Render::ShaderMode::LayerMode);
 		s->updateMesh();
 		s->setMaterialParamter("fuckingStuipidWorldMatrix", QVariant::fromValue(s->toRootMatrix()));
-		s->setMaterialParamter("height", QVariant::fromValue((float)slider().getMax()));
+		s->setMaterialParamter("minHeight", QVariant::fromValue((float)slider().lowerValue()));
+		s->setMaterialParamter("maxHeight", QVariant::fromValue((float)slider().upperValue()));
 		_modelColorMap[s] = Hix::Render::Colors::Support;
 
 	}
@@ -57,23 +60,32 @@ Hix::Features::LayerView::LayerView():
 		raft->setMaterialMode(Hix::Render::ShaderMode::LayerMode);
 		raft->updateMesh();
 		raft->setMaterialParamter("fuckingStuipidWorldMatrix", QVariant::fromValue(raft->toRootMatrix()));
-		raft->setMaterialParamter("height", QVariant::fromValue((float)slider().getMax()));
+		raft->setMaterialParamter("minHeight", QVariant::fromValue((float)slider().lowerValue()));
+		raft->setMaterialParamter("maxHeight", QVariant::fromValue((float)slider().upperValue()));
 		_modelColorMap[raft] = Hix::Render::Colors::Raft;
 	}
 
-	QObject::connect(&slider(), &Hix::QML::SlideBarShell::valueChanged, [this]() {
-		_crossSectionPlane.showLayer(slider().getValue());
-		float h = slider().getValue();
+	QObject::connect(&slider(), &Hix::QML::RangeSlideBarShell::upperValueChanged, [this]() {
+		_topCrossSectionPlane.showLayer(slider().upperValue(), true);
+		float h = slider().upperValue();
 		for (auto& pair : _modelColorMap)
 		{
-			pair.first->setMaterialParamter("height", QVariant::fromValue(h));
+			pair.first->setMaterialParamter("maxHeight", QVariant::fromValue(h));
 		}
 		});
 	
+	QObject::connect(&slider(), &Hix::QML::RangeSlideBarShell::lowerValueChanged, [this]() {
+		_botCrossSectionPlane.showLayer(slider().lowerValue(), false);
+		float h = slider().lowerValue();
+		for (auto& pair : _modelColorMap)
+		{
+			pair.first->setMaterialParamter("minHeight", QVariant::fromValue(h));
+		}
+		});
+
 	//prepare layers
-	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<LayerviewPrep>(_modelColorMap, _crossSectionPlane));
-
-
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<LayerviewPrep>(_modelColorMap, _topCrossSectionPlane, true));
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<LayerviewPrep>(_modelColorMap, _botCrossSectionPlane, false));
 }
 
 Hix::Features::LayerView::~LayerView()
@@ -96,7 +108,7 @@ void Hix::Features::LayerView::onExit()
 
 
 Hix::Features::LayerviewPrep::LayerviewPrep(const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& selected,
-	Hix::Features::CrossSectionPlane& crossSec): _crossSec(crossSec), _modelColorMap(selected)
+	Hix::Features::CrossSectionPlane& crossSec, bool isTop): _crossSec(crossSec), _modelColorMap(selected), _isTop(isTop)
 {
 }
 
@@ -113,7 +125,8 @@ void Hix::Features::LayerviewPrep::run()
 		entities.insert(pair.first);
 	}
 	postUIthread([this, &entities]() {
-		float h = Hix::Engine3D::combineBounds(entities).zMax();
-		_crossSec.showLayer(h);
-		});
+		Bounds3D bound = Hix::Engine3D::combineBounds(entities);
+		float h = _isTop ? bound.zMax() : bound.zMin();
+		_crossSec.showLayer(h, _isTop);
+	});
 }

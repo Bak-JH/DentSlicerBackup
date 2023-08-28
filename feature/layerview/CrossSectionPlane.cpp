@@ -15,7 +15,7 @@ using namespace Hix::Engine3D;
 
 Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): SceneEntityWithMaterial(owner)
 {
-	setMaterialColor(Hix::Render::Colors::Selected);
+	setMaterialColor(Hix::Render::Colors::SelectedFace);
 
 }
 
@@ -72,16 +72,19 @@ Hix::Features::CrossSectionPlane::~CrossSectionPlane()
 	setMesh(nullptr);
 }
 
-void Hix::Features::CrossSectionPlane::showLayer(double zHeight)
+void Hix::Features::CrossSectionPlane::showLayer(double zHeight, bool isTop)
 {
 	size_t layer = zHeight / (Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight / 1000.0f);
 	layer = std::min(_layerMeshes.size() - 1, layer);
-	setMesh(&_layerMeshes[layer]);
+	Mesh* layerMesh = new Mesh(_layerMeshes[layer]);
+	if (!isTop) layerMesh->reverseFaces();
+	setMesh(layerMesh);
+	const float adjust = isTop ? 0.01f : -0.01f;
 	//set z
 	//set to identity
 	qDebug() << "layer:" << layer;
 	transform().setMatrix(QMatrix4x4());
-	transform().setTranslation(QVector3D(0, 0, zHeight));
+	transform().setTranslation(QVector3D(0, 0, zHeight + adjust));
 }
 
 
