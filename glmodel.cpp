@@ -13,6 +13,7 @@
 #include <QFuture>
 #include <QFileDialog>
 #include <iostream>
+#include <fstream>
 #include <QDir>
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
@@ -240,6 +241,32 @@ void GLModel::getChildrenModelsModd(std::unordered_set<GLModel*>& results)const
 		}
 	}
 	callRecursive(this, &GLModel::getChildrenModelsModd, results);
+}
+
+void GLModel::getChildEntities(std::unordered_set<const SceneEntity*>& results) const
+{
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<SceneEntity*>(child);
+		if (model)
+		{
+			results.insert(model);
+		}
+	}
+	callRecursive(this, &GLModel::getChildEntities, results);
+}
+
+void GLModel::getChildEntitiesModd(std::unordered_set<SceneEntity*>& results) const
+{
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<SceneEntity*>(child);
+		if (model)
+		{
+			results.insert(model);
+		}
+	}
+	callRecursive(this, &GLModel::getChildEntitiesModd, results);
 }
 
 void GLModel::initHitTest()

@@ -29,6 +29,11 @@ Hix::Support::CylindricalRaft::CylindricalRaft(SupportRaftManager* manager, cons
 	generateMesh(basePt);
 }
 
+Hix::Support::CylindricalRaft::CylindricalRaft(SupportRaftManager* manager, std::vector<QVector3D> basePt, Hix::Settings::SupportSetting& setting) : RaftModel(manager)
+{
+	generateMesh(basePt, setting);
+}
+
 Hix::Support::CylindricalRaft::~CylindricalRaft()
 {
 }
@@ -86,6 +91,48 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 }
 
+void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std::vector<QVector3D>& contour, Hix::Settings::SupportSetting& setting)
+{
+	//need to form a contour that contains all overhangs
+	std::vector<QVector3D> path;
+	std::vector<float> scales;
+
+
+	//path length is long, tips on both ends, one mid joint, 
+	scales.reserve(RAFT_JOINT_CNT);
+	path.reserve(RAFT_JOINT_CNT);
+
+	//cylinder is of uniform shape, except it narrows a bit in the middle-z
+
+	scales.emplace_back(1.0f);
+	//scales.emplace_back(scale);
+	scales.emplace_back(setting.raftMinMaxRatio);
+
+	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
+	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
+	path.emplace_back(QVector3D(0, 0, setting.raftThickness));
+
+	//create cylinder walls
+	Hix::Features::Extrusion::VtxNormalScaler scaler(scales);
+	auto jointDir = Hix::Features::Extrusion::interpolatedJointNormals(path);
+	auto jointContours = Hix::Features::Extrusion::extrudeAlongPath(
+		mesh, QVector3D(0, 0, 1), contour, path, jointDir, &scaler);
+	//generate caps
+	if (jointContours.front().size() > 1)
+	{
+		Hix::CDT::MeshCDT cdt(mesh, true);
+		cdt.insertSolidContourZAxis(jointContours.front());
+		cdt.triangulateAndAppend();
+	}
+
+	if (jointContours.back().size() > 1)
+	{
+		Hix::CDT::MeshCDT cdt(mesh, false);
+		cdt.insertSolidContourZAxis(jointContours.back());
+		cdt.triangulateAndAppend();
+	}
+}
+
 
 void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& overhangs)
 {
@@ -140,4 +187,58 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	setMesh(mesh);
 	////generate hexagon contour for each overhang
 
+}
+
+void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& overhangs, Hix::Settings::SupportSetting& setting)
+{
+	auto mesh = new Mesh();
+	//generate square for each overhang
+	//std::vector<std::vector<QVector3D>> cylinders;
+	auto square = Hix::Shapes2D::generateSquare(setting.supportRadiusMax * setting.raftRadiusMult);
+
+	std::vector<QVector3D> contourPoints;
+	contourPoints.reserve(4 * overhangs.size());
+	//smaller bottom raft
+	for (auto& overhang : overhangs)
+	{
+		auto curr = square;
+		Hix::Shapes2D::moveContour(curr, overhang);
+		std::move(std::begin(curr), std::end(curr), std::back_inserter(contourPoints));
+		curr.clear();//remove zombies
+	}
+
+	//run concave hull algorithm on remaining points
+	//set minimum voronoid distance to avoid crazy concave shapes
+	//constexpr float minVorDist = 4.0f;
+	pcl::PointCloud<pcl::PointXYZ>::Ptr concaveOut(new pcl::PointCloud<pcl::PointXYZ>);
+	pcl::PointCloud<pcl::PointXYZ>::Ptr interiorPts(new pcl::PointCloud<pcl::PointXYZ>);
+	std::vector< pcl::Vertices > polygons;
+	interiorPts->reserve(contourPoints.size());
+	for (const auto& each : contourPoints)
+	{
+		interiorPts->push_back({ each.x(), each.y(), 0 });
+	}
+	//pcl::ConcaveHull<pcl::PointXYZ> cHull;
+	pcl::ConvexHull<pcl::PointXYZ> cHull;
+	//cHull.setAlpha(minVorDist);
+	cHull.setInputCloud(interiorPts);
+	auto test = cHull.getDimension();
+	cHull.reconstruct(*concaveOut, polygons);
+	for (auto& polygon : polygons)
+	{
+		std::vector<QVector3D> polygonVts;
+		polygonVts.reserve(polygon.vertices.size());
+		for (auto vtxIdx = polygon.vertices.cbegin(); vtxIdx != polygon.vertices.cend(); ++vtxIdx)
+		{
+			auto& vtx = (*concaveOut)[*vtxIdx];
+			polygonVts.emplace_back(QVector3D(vtx.x, vtx.y, 0));
+		}
+		Hix::Shapes2D::ensureOrientation(false, polygonVts);
+		generateMeshForContour(mesh, polygonVts, setting);
+
+	}
+
+
+	setMesh(mesh);
+	////generate hexagon contour for each overhang
 }

@@ -10,5 +10,5 @@
     "supportType": "Vertical",
     "raftType": "General",
     "maxConnectDistance": 5.0,
-    "thickenFeet": true
+    "thickenFeet": false
 }
