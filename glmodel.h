@@ -10,14 +10,8 @@
 #include "input/Draggable.h"
 #include "input/Clickable.h"
 #include "input/HitTestAble.h"
-
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
-
-
-class GLModel;
-class OverhangPoint;
-
 
 class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable, public Hix::Input::HitTestAble
 {
@@ -41,8 +35,8 @@ public:
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
 	void getChildrenModelsModd(std::unordered_set<GLModel*>& results)const;
 
-
-
+	void getChildEntities(std::unordered_set<const SceneEntity*>& results)const;
+	void getChildEntitiesModd(std::unordered_set<SceneEntity*>& results)const;
 
     void changeColor(const QVector4D& color);
 	bool isPrintable()const;

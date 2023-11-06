@@ -178,6 +178,30 @@ std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::createSupport(co
 	case Hix::Settings::SupportSetting::SupportType::Vertical:
 	{
 		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
+		if (newModel->getMesh()->getFaces().empty())
+		{
+			return nullptr;
+		}
+	}
+	break;
+	}
+	return std::unique_ptr<SupportModel>(newModel);
+}
+
+std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::createSupportWithContour(Hix::Render::SceneEntity* parent, LoadSupportInfo& info, Hix::Settings::SupportSetting& setting)
+{
+	SupportModel* newModel = nullptr;
+	switch (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType)
+	{
+		//case Hix::Settings::SupportSetting::SupportType::None:
+		//	break;
+	case Hix::Settings::SupportSetting::SupportType::Vertical:
+	{
+		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(parent, this, info, setting.supportRadiusMax));
+		if (newModel->getMesh()->getFaces().empty())
+		{
+			return nullptr;
+		}
 	}
 	break;
 	}
@@ -283,7 +307,14 @@ RaftModel* Hix::Support::SupportRaftManager::generateRaft()
 	auto basePts = getSupportBasePts();
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
 	return _raft.get();
-} 
+}
+RaftModel* Hix::Support::SupportRaftManager::generateRaft(Hix::Settings::SupportSetting& setting)
+{
+	auto basePts = getSupportBasePts();
+	_raft = std::make_unique<CylindricalRaft>(this, basePts, setting);
+	return _raft.get();
+}
+
 
 RaftModel* Hix::Support::SupportRaftManager::addRaft(std::unique_ptr<RaftModel> raft)
 {
@@ -365,6 +396,20 @@ void Hix::Support::SupportRaftManager::prepareRaycasterSelected()
 	_rayCaster->addAccelerator(_rayAccel.get());
 }
 
+void Hix::Support::SupportRaftManager::prepareRaycasterAll()
+{
+	std::unordered_set<const GLModel*> models;
+
+	for (auto& e : Hix::Application::ApplicationManager::getInstance().partManager().allModels())
+	{
+		e->getChildrenModels(models);
+		models.emplace(e);
+	}
+	_rayCaster.reset(new MTRayCaster());
+	_rayAccel.reset(new Hix::Engine3D::BVH(models));
+	_rayCaster->addAccelerator(_rayAccel.get());
+}
+
 
 
 void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
@@ -393,6 +438,36 @@ std::vector<const Hix::Render::SceneEntity*> Hix::Support::SupportRaftManager::s
 		entities.emplace_back(each.first);
 	}
 	return entities;
+}
+
+Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::attachedOverhangs(GLModel* model) const
+{
+	Hix::OverhangDetect::Overhangs overhangs;
+	std::unordered_set<const GLModel*> childs;
+	model->getChildrenModels(childs);
+	childs.insert(model);
+
+	for (auto curr = _supports.cbegin(); curr != _supports.cend(); ++curr)
+	{
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->first);
+		if (attachedSupport)
+		{
+			auto ptr = &attachedSupport->getAttachedModel();
+			if (childs.find(ptr) != childs.end())
+			{
+				overhangs.push_back(attachedSupport->getOverhang());
+			}
+		}
+	}
+
+	return overhangs;
+}
+
+std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSupports(GLModel* model) const
+{
+	std::unordered_set<GLModel*> temp;
+	temp.insert(model);
+	return modelAttachedSupports(temp);
 }
 
 std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSupports(const std::unordered_set<GLModel*>& models)const

@@ -13,6 +13,7 @@ namespace Hix
 		class Overhang
 		{
 		public:
+			Overhang(Hix::Render::SceneEntity* parent) : _parent(parent) {}
 			Overhang(const Hix::Engine3D::FaceConstItr& face, const QVector3D& coord);
 			Overhang(const Hix::Engine3D::VertexConstItr& vtx);
 			const QVector3D& coord()const;
@@ -30,6 +31,7 @@ namespace Hix
 			QVector3D _primNormal;
 			QVector3D _normal;
 			Hix::Engine3D::RayHits _rayHit;
+			Hix::Render::SceneEntity* _parent = nullptr;
 		};
 
 	}

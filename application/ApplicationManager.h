@@ -21,6 +21,19 @@ namespace Qt3DCore
 }
 namespace Hix
 {
+	struct LoadSupportInfo
+	{
+		Hix::Features::Extrusion::Contour contour;
+		std::vector<QVector3D> jointDir;
+		std::vector<float> scales;
+	};
+
+	struct LoadModelInfo
+	{
+		std::string name;
+		QVector3D pos;
+		std::vector<LoadSupportInfo> supports;
+	};
 
 
 	namespace Auth

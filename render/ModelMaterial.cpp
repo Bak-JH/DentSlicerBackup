@@ -147,7 +147,7 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 		//if layermode is now disabled
 		if (_mode == ShaderMode::LayerMode)
 		{
-			removeParameterWithKey("height");
+			removeParameterWithKey("maxHeight");
 			removeParameterWithKey("fuckingStuipidWorldMatrix");
 		}
 		else if (_mode == ShaderMode::NoLightsMode)
@@ -166,7 +166,8 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 		case ShaderMode::LayerMode:
 			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(LAYERVIEW_GEOM_URL));
 			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(LAYERVIEW_FRAG_URL));
-			addParameterWithKey("height");
+			addParameterWithKey("minHeight");
+			addParameterWithKey("maxHeight");
 			addParameterWithKey("fuckingStuipidWorldMatrix");
 			break; 
 		case ShaderMode::NoLightsMode:

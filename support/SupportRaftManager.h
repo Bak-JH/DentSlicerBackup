@@ -6,6 +6,7 @@
 class GLModel;
 namespace Hix
 {
+	struct LoadSupportInfo;
 	namespace Support
 	{
 		enum class EditMode : uint8_t
@@ -34,6 +35,7 @@ namespace Hix
 			//coordinate for bottom of support and raft
 			std::vector<std::unique_ptr<SupportModel>> createInterconnects(const std::array<SupportModel*, 2>& models);
 			std::unique_ptr<SupportModel> createSupport(const OverhangDetect::Overhang& overhang);
+			std::unique_ptr<SupportModel> createSupportWithContour(Hix::Render::SceneEntity* parent, LoadSupportInfo& info, Hix::Settings::SupportSetting& setting);
 			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
 			SupportModel* addInterconnect(const std::array<SupportModel*, 2>& pts);
 
@@ -43,11 +45,15 @@ namespace Hix
 			bool modelHasSupport(const GLModel* model)const;
 			
 			RaftModel* generateRaft();
+			RaftModel* generateRaft(Hix::Settings::SupportSetting& setting);
 			std::unique_ptr<RaftModel> removeRaft();
 			RaftModel* addRaft(std::unique_ptr<RaftModel> raft);
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<const Hix::Render::SceneEntity*> supportModels()const;
+			OverhangDetect::Overhangs attachedOverhangs(GLModel* model) const;
+			std::vector<QVector3D> getSupportBasePts()const;
+			std::vector<SupportModel*> modelAttachedSupports(GLModel* model)const;
 			std::vector<SupportModel*> modelAttachedSupports(const std::unordered_set<GLModel*>& models)const;
 			std::vector<SupportModel*> interconnects()const;
 
@@ -62,6 +68,7 @@ namespace Hix
 			Hix::Engine3D::RayCaster& supportRaycaster();
 			std::vector<std::array<SupportModel*, 2>> interconnectPairs()const;
 			void prepareRaycasterSelected();
+			void prepareRaycasterAll();
 
 		private:
 
@@ -78,7 +85,6 @@ namespace Hix
 			void prepareRaycaster(const GLModel& model);
 
 			Qt3DCore::QEntity* _root;
-			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::Manual;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unordered_map<const GLModel*, std::unordered_set<ModelAttachedSupport*>> _modelSupportMap;
