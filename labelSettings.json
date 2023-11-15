@@ -1,2 +1,6 @@
 {
+    "labelFontFamily": "Agency FB",
+    "labelFontSize": 40.0,
+    "labelDepth": 0.2,
+    "isEmboss": false
 }
