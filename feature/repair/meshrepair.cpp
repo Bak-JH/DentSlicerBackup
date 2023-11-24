@@ -766,7 +766,8 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 	else if (seperated.size() == 1)
 	{
 		//do nothing, see seperateDisconnectedMeshes
-		postUIthread([subject]() {
+		postUIthread([subject, seperated]() {
+			subject->setMesh(seperated.at(0));
 			subject->updateMesh(true);
 		});
 
