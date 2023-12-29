@@ -1,7 +1,7 @@
 {
-    "printerPresetPath": "HixL10.json",
+    "printerPresetPath": "HixC10.json",
     "enableErrorReport": true,
-    "importFilePath": "file:///C:/Users/bakjh/Documents/카카오톡 받은 파일/",
+    "importFilePath": "",
     "exportFilePath": "",
     "historySize": 10
 }
